@@ -1,3 +1,8 @@
+---
+layout: default
+title: 数据结构
+---
+
 # 第二阶段：数据结构
 
 > 🎯 目标：掌握面试高频数据结构的实现与应用
@@ -5,7 +10,7 @@
 
 ## 学习模块
 
-### 01. 数组与字符串 `./01_array_string/`
+### 01. 数组与字符串
 **核心知识点：**
 - 数组遍历与原地操作
 - 双指针技巧（对撞指针、快慢指针）
@@ -18,7 +23,7 @@
 
 ---
 
-### 02. 链表 `./02_linked_list/`
+### 02. 链表
 **核心知识点：**
 - 单链表 vs 双链表
 - 虚拟头节点（dummy node）
@@ -33,14 +38,9 @@ class ListNode:
         self.next = next
 ```
 
-**LeetCode 高频题：**
-- [206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/)
-- [141. 环形链表](https://leetcode.cn/problems/linked-list-cycle/)
-- [21. 合并两个有序链表](https://leetcode.cn/problems/merge-two-sorted-lists/)
-
 ---
 
-### 03. 栈与队列 `./03_stack_queue/`
+### 03. 栈与队列
 **核心知识点：**
 - 栈：LIFO（后进先出）
 - 队列：FIFO（先进先出）
@@ -59,22 +59,11 @@ from collections import deque
 queue = deque()
 queue.append(x)    # 入队
 queue.popleft()    # 出队
-
-# 优先队列 - 使用 heapq
-import heapq
-heap = []
-heapq.heappush(heap, x)
-heapq.heappop(heap)
 ```
-
-**LeetCode 高频题：**
-- [20. 有效的括号](https://leetcode.cn/problems/valid-parentheses/)
-- [739. 每日温度](https://leetcode.cn/problems/daily-temperatures/)
-- [155. 最小栈](https://leetcode.cn/problems/min-stack/)
 
 ---
 
-### 04. 哈希表 `./04_hash_table/`
+### 04. 哈希表
 **核心知识点：**
 - O(1) 查找
 - 计数与去重
@@ -82,11 +71,6 @@ heapq.heappop(heap)
 
 **Python 实现：**
 ```python
-# 字典 dict
-hashmap = {}
-hashmap[key] = value
-if key in hashmap: ...
-
 # Counter 快速计数
 from collections import Counter
 count = Counter(arr)
@@ -96,19 +80,9 @@ from collections import defaultdict
 graph = defaultdict(list)
 ```
 
-**LeetCode 高频题：**
-- [1. 两数之和](https://leetcode.cn/problems/two-sum/)
-- [49. 字母异位词分组](https://leetcode.cn/problems/group-anagrams/)
-- [128. 最长连续序列](https://leetcode.cn/problems/longest-consecutive-sequence/)
-
 ---
 
-### 05. 树与二叉树 `./05_tree/`
-**核心知识点：**
-- 二叉树遍历：前序、中序、后序、层序
-- 递归思维
-- 二叉搜索树（BST）
-
+### 05. 树与二叉树
 **Python 节点定义：**
 ```python
 class TreeNode:
@@ -142,24 +116,13 @@ def postorder(root):
     print(root.val)
 ```
 
-**LeetCode 高频题：**
-- [94. 二叉树的中序遍历](https://leetcode.cn/problems/binary-tree-inorder-traversal/)
-- [104. 二叉树的最大深度](https://leetcode.cn/problems/maximum-depth-of-binary-tree/)
-- [102. 二叉树的层序遍历](https://leetcode.cn/problems/binary-tree-level-order-traversal/)
-
 ---
 
-### 06. 堆 `./06_heap/`
-**核心知识点：**
-- 最小堆 / 最大堆
-- TopK 问题
-- 堆排序
-
+### 06. 堆
 **Python 实现（默认最小堆）：**
 ```python
 import heapq
 
-# 最小堆
 min_heap = []
 heapq.heappush(min_heap, 3)
 heapq.heappop(min_heap)
@@ -168,35 +131,7 @@ heapq.heappop(min_heap)
 max_heap = []
 heapq.heappush(max_heap, -3)
 -heapq.heappop(max_heap)
-
-# nlargest / nsmallest
-heapq.nlargest(k, arr)
-heapq.nsmallest(k, arr)
 ```
-
-**LeetCode 高频题：**
-- [215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
-- [347. 前 K 个高频元素](https://leetcode.cn/problems/top-k-frequent-elements/)
-
----
-
-### 07. 图 `./07_graph/`
-**核心知识点：**
-- 图的表示：邻接表、邻接矩阵
-- DFS / BFS 遍历
-- 拓扑排序
-
-**邻接表表示：**
-```python
-from collections import defaultdict
-
-graph = defaultdict(list)
-graph[u].append(v)  # u -> v 的边
-```
-
-**LeetCode 高频题：**
-- [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)
-- [207. 课程表](https://leetcode.cn/problems/course-schedule/)
 
 ---
 
@@ -206,3 +141,7 @@ graph[u].append(v)  # u -> v 的边
 2. **手写实现**：尝试从零实现链表、栈、二叉树等
 3. **刷题巩固**：每个模块配套 3-5 道 LeetCode 题目
 4. **画图辅助**：链表、树的题目一定要画图
+
+---
+
+[← 上一章：Python 基础](/00_python_basics/) | [下一章：核心算法 →](/02_algorithms/)
