@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="从零基础Python到LeetCode中等难度题目的系统性学习平台">
+    <meta name="keywords" content="LeetCode, Python, 算法, 数据结构, 面试, 笔试">
+    <title>Zero2Leetcode | 算法面试通关指南</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="assets/images/logo.svg" alt="Logo" class="logo-icon">
+                <span class="logo-text">Zero2Leetcode</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#roadmap" class="nav-link">学习路线</a></li>
+                <li><a href="#modules" class="nav-link">知识模块</a></li>
+                <li><a href="#problems" class="nav-link">题目清单</a></li>
+                <li><a href="https://leetcode.cn/studyplan/top-100-liked/" target="_blank"
+                        class="nav-link nav-link-external">
+                        LeetCode 练习 ↗
+                    </a></li>
+            </ul>
+            <button class="nav-toggle" aria-label="打开菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 首页横幅 -->
+    <header class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-badge">🎯 面向求职者的算法学习平台</div>
+            <h1 class="hero-title">
+                从 <span class="gradient-text">零基础</span> 到
+                <span class="gradient-text">LeetCode Medium</span>
+            </h1>
+            <p class="hero-subtitle">
+                8-12周系统性学习，掌握Python算法编程，通过企业笔试机试第一关
+            </p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">100+</span>
+                    <span class="stat-label">精选题目</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4</span>
+                    <span class="stat-label">学习阶段</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">核心算法</span>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="#roadmap" class="btn btn-primary">开始学习</a>
+                <a href="https://leetcode.cn/" target="_blank" class="btn btn-secondary">
+                    去 LeetCode 练习 ↗
+                </a>
+            </div>
+        </div>
+        <div class="hero-decoration">
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="filename">solution.py</span>
+                </div>
+                <pre class="code-content"><code><span class="keyword">def</span> <span class="function">two_sum</span>(nums, target):
+    <span class="comment"># 哈希表法 O(n)</span>
+    hashmap = {}
+    <span class="keyword">for</span> i, num <span class="keyword">in</span> <span class="function">enumerate</span>(nums):
+        complement = target - num
+        <span class="keyword">if</span> complement <span class="keyword">in</span> hashmap:
+            <span class="keyword">return</span> [hashmap[complement], i]
+        hashmap[num] = i</code></pre>
+            </div>
+        </div>
+    </header>
+
+    <!-- 学习路线 -->
+    <section id="roadmap" class="section roadmap">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🗺️ 学习路线图</h2>
+                <p class="section-subtitle">循序渐进，从基础到实战</p>
+            </div>
+            <div class="roadmap-timeline">
+                <div class="roadmap-item" data-stage="1">
+                    <div class="roadmap-icon">📚</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-header">
+                            <span class="stage-badge">阶段 1</span>
+                            <span class="duration">1-2 周</span>
+                        </div>
+                        <h3>Python 基础语法</h3>
+                        <p>掌握变量、控制流、函数、集合类型等核心语法</p>
+                        <div class="tags">
+                            <span class="tag">变量类型</span>
+                            <span class="tag">条件循环</span>
+                            <span class="tag">函数</span>
+                            <span class="tag">列表字典</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="roadmap-item" data-stage="2">
+                    <div class="roadmap-icon">🧱</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-header">
+                            <span class="stage-badge">阶段 2</span>
+                            <span class="duration">2-3 周</span>
+                        </div>
+                        <h3>数据结构</h3>
+                        <p>学习数组、链表、栈、队列、哈希表、树、图等核心结构</p>
+                        <div class="tags">
+                            <span class="tag">数组</span>
+                            <span class="tag">链表</span>
+                            <span class="tag">栈/队列</span>
+                            <span class="tag">哈希表</span>
+                            <span class="tag">树</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="roadmap-item" data-stage="3">
+                    <div class="roadmap-icon">⚡</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-header">
+                            <span class="stage-badge">阶段 3</span>
+                            <span class="duration">3-4 周</span>
+                        </div>
+                        <h3>核心算法</h3>
+                        <p>掌握排序、二分、双指针、滑动窗口、递归、动态规划等</p>
+                        <div class="tags">
+                            <span class="tag">二分查找</span>
+                            <span class="tag">双指针</span>
+                            <span class="tag">回溯</span>
+                            <span class="tag">动态规划</span>
+                            <span class="tag">贪心</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="roadmap-item" data-stage="4">
+                    <div class="roadmap-icon">🎯</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-header">
+                            <span class="stage-badge">阶段 4</span>
+                            <span class="duration">2-3 周</span>
+                        </div>
+                        <h3>LeetCode 实战</h3>
+                        <p>刷 Hot 100 高频题，建立解题模板，模拟面试练习</p>
+                        <div class="tags">
+                            <span class="tag">Hot 100</span>
+                            <span class="tag">解题模板</span>
+                            <span class="tag">限时训练</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 知识模块 -->
+    <section id="modules" class="section modules">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">📦 知识模块</h2>
+                <p class="section-subtitle">点击卡片查看详细内容</p>
+            </div>
+            <div class="modules-grid">
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">📊</div>
+                    <h3>数组与字符串</h3>
+                    <p>遍历、双指针、原地操作</p>
+                    <span class="module-count">15+ 题</span>
+                </div>
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">🔗</div>
+                    <h3>链表</h3>
+                    <p>指针操作、虚拟头节点、翻转</p>
+                    <span class="module-count">9 题</span>
+                </div>
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">📚</div>
+                    <h3>栈与队列</h3>
+                    <p>LIFO/FIFO、单调栈、优先队列</p>
+                    <span class="module-count">6 题</span>
+                </div>
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">#️⃣</div>
+                    <h3>哈希表</h3>
+                    <p>O(1) 查找、去重、计数</p>
+                    <span class="module-count">5 题</span>
+                </div>
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">🌲</div>
+                    <h3>二叉树</h3>
+                    <p>遍历、递归、BST</p>
+                    <span class="module-count">15 题</span>
+                </div>
+                <div class="module-card" data-category="data-structure">
+                    <div class="module-icon">🕸️</div>
+                    <h3>图论</h3>
+                    <p>DFS/BFS、拓扑排序、Trie</p>
+                    <span class="module-count">5 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">🔍</div>
+                    <h3>二分查找</h3>
+                    <p>边界处理、旋转数组</p>
+                    <span class="module-count">5 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">👆👆</div>
+                    <h3>双指针</h3>
+                    <p>对撞指针、快慢指针</p>
+                    <span class="module-count">4 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">🪟</div>
+                    <h3>滑动窗口</h3>
+                    <p>动态维护区间</p>
+                    <span class="module-count">4 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">🔄</div>
+                    <h3>回溯</h3>
+                    <p>排列组合、剪枝优化</p>
+                    <span class="module-count">8 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">📈</div>
+                    <h3>动态规划</h3>
+                    <p>状态定义、转移方程</p>
+                    <span class="module-count">15 题</span>
+                </div>
+                <div class="module-card" data-category="algorithm">
+                    <div class="module-icon">💰</div>
+                    <h3>贪心算法</h3>
+                    <p>局部最优 → 全局最优</p>
+                    <span class="module-count">4 题</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 题目清单 -->
+    <section id="problems" class="section problems">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🔥 LeetCode Hot 100</h2>
+                <p class="section-subtitle">点击题目跳转 LeetCode 在线练习</p>
+            </div>
+
+            <!-- 筛选器 -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="easy">🟢 简单</button>
+                    <button class="filter-btn" data-filter="medium">🟡 中等</button>
+                    <button class="filter-btn" data-filter="hard">🔴 困难</button>
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" class="filter-select">
+                        <option value="all">全部分类</option>
+                        <option value="hash">哈希表</option>
+                        <option value="two-pointers">双指针</option>
+                        <option value="sliding-window">滑动窗口</option>
+                        <option value="stack">栈</option>
+                        <option value="linked-list">链表</option>
+                        <option value="tree">二叉树</option>
+                        <option value="graph">图论</option>
+                        <option value="backtrack">回溯</option>
+                        <option value="binary-search">二分查找</option>
+                        <option value="dp">动态规划</option>
+                        <option value="greedy">贪心</option>
+                        <option value="heap">堆</option>
+                        <option value="matrix">矩阵</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="problem-search" placeholder="搜索题目...">
+                </div>
+            </div>
+
+            <!-- 题目表格 -->
+            <div class="problems-table-wrapper">
+                <table class="problems-table" id="problems-table">
+                    <thead>
+                        <tr>
+                            <th>题号</th>
+                            <th>题目</th>
+                            <th>难度</th>
+                            <th>分类</th>
+                            <th>练习</th>
+                        </tr>
+                    </thead>
+                    <tbody id="problems-tbody">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="problems-footer">
+                <p>💡 提示：本地学习后，务必到 LeetCode 验证你的代码是否通过所有测试用例！</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="assets/images/logo.svg" alt="Logo" class="logo-icon">
+                    <span class="logo-text">Zero2Leetcode</span>
+                    <p>从零基础到算法达人</p>
+                </div>
+                <div class="footer-links">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="#roadmap">学习路线</a></li>
+                        <li><a href="#modules">知识模块</a></li>
+                        <li><a href="#problems">题目清单</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>在线练习</h4>
+                    <ul>
+                        <li><a href="https://leetcode.cn/" target="_blank">力扣中国</a></li>
+                        <li><a href="https://leetcode.cn/studyplan/top-100-liked/" target="_blank">Hot 100 题单</a></li>
+                        <li><a href="https://leetcode.cn/studyplan/top-interview-150/" target="_blank">面试 150 题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>学习资源</h4>
+                    <ul>
+                        <li><a href="./docs/study_guide.md">学习指南</a></li>
+                        <li><a href="./docs/complexity_analysis.md">复杂度分析</a></li>
+                        <li><a href="./docs/interview_tips.md">面试技巧</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Zero2Leetcode. Made with ❤️ for coders.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/problems-data.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

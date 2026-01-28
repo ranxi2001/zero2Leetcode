@@ -1,0 +1,18 @@
+# 依赖和缓存
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 本地测试
+*.log

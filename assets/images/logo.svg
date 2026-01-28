@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8"/>
+      <stop offset="100%" style="stop-color:#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <!-- 左大括号 -->
+  <path d="M14 8C14 8 10 8 10 12V20C10 20 10 24 6 24C10 24 10 28 10 28V36C10 40 14 40 14 40" 
+        stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- 右大括号 -->
+  <path d="M34 8C34 8 38 8 38 12V20C38 20 38 24 42 24C38 24 38 28 38 28V36C38 40 34 40 34 40" 
+        stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- 中间 0 -->
+  <ellipse cx="24" cy="24" rx="6" ry="8" stroke="url(#logoGradient)" stroke-width="3" fill="none"/>
+  <!-- 斜线表示从0开始 -->
+  <line x1="20" y1="30" x2="28" y2="18" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
+</svg>
