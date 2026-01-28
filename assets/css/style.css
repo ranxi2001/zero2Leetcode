@@ -478,9 +478,13 @@ img {
 
 .roadmap-item {
     display: flex;
-    gap: var(--spacing-xl);
+    gap: 2rem;
     margin-bottom: var(--spacing-xl);
     position: relative;
+    padding-left: 3rem;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 .roadmap-icon {
