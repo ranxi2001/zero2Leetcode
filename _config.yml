@@ -1,11 +1,17 @@
 title: Zero2Leetcode
 description: 从零基础Python到LeetCode中等难度的系统性学习平台
 markdown: kramdown
+baseurl: /zero2Leetcode
+
+include:
+  - 00_python_basics
+  - 01_data_structures
+  - 02_algorithms
+  - 03_leetcode_practice
+  - docs
 
 exclude:
   - README.md
   - requirements.txt
   - "*.py"
   - __pycache__
-  - .git
-  - .github
