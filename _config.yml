@@ -1,0 +1,10 @@
+title: Zero2Leetcode
+description: 从零基础Python到LeetCode中等难度的系统性学习平台
+theme: jekyll-theme-cayman
+markdown: kramdown
+
+exclude:
+  - README.md
+  - requirements.txt
+  - "*.py"
+  - __pycache__
