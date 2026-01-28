@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} | Zero2Leetcode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ '/assets/css/docs.css' | relative_url }}">
+</head>
+
+<body>
+    <nav class="doc-nav">
+        <div class="nav-inner">
+            <a href="{{ '/' | relative_url }}" class="nav-brand">
+                <img src="{{ '/assets/images/logo.svg' | relative_url }}" alt="Logo" class="nav-logo">
+                <span>Zero2Leetcode</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ '/' | relative_url }}">首页</a>
+                <a href="{{ '/docs/study_guide' | relative_url }}">学习指南</a>
+                <a href="{{ '/docs/complexity_analysis' | relative_url }}">复杂度</a>
+                <a href="{{ '/docs/interview_tips' | relative_url }}">面试技巧</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="doc-main">
+        <article class="doc-article">
+            {{ content }}
+        </article>
+    </main>
+
+    <footer class="doc-footer">
+        <p>© 2026 Zero2Leetcode. Made with ❤️ for coders.</p>
+        <p><a href="https://leetcode.cn/studyplan/top-100-liked/" target="_blank">去 LeetCode 练习 →</a></p>
+    </footer>
+</body>
+
+</html>
