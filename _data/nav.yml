@@ -133,6 +133,8 @@ modules:
             slug: "ant/dev-20260507"
           - title: "AI Coding 8.20"
             slug: "ant/ai-coding-20260820"
+          - title: "AI Coding 8.20 医院排队"
+            slug: "ant/ai-coding-hospital-20260820"
       - name: "美团"
         articles:
           - title: "研发岗 3.28"
