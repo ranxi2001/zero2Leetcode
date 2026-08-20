@@ -131,6 +131,8 @@ modules:
             slug: "ant/dev-20260419"
           - title: "开发岗 5.7"
             slug: "ant/dev-20260507"
+          - title: "AI Coding 8.20"
+            slug: "ant/ai-coding-20260820"
       - name: "美团"
         articles:
           - title: "研发岗 3.28"
