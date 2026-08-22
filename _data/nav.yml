@@ -241,6 +241,8 @@ modules:
             slug: "jd/data-20260808"
           - title: "算法/数据方向 8.15"
             slug: "jd/algo-20260815"
+          - title: "算法岗 8.22"
+            slug: "jd/algo-20260822"
       - name: "网易"
         articles:
           - title: "雷火研发岗 4.2"
