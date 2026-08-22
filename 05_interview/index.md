@@ -27,7 +27,7 @@ eyebrow: Module 06
 | [阿里千问](coding/alibaba-qwen-vibecoding/) | 2026.4 | VibeCoding | 高性能增量数据同步 CLI 工具，含完整范式方法论 |
 | [Hot 100 真实考频](coding/hot100-frequency-202608/) | 2026.8 | 6139 篇独立样本 | 华为/腾讯/字节 Top 50 高频题 + 分章节刷题路线 |
 | [美团](coding/meituan/) | 来源标注 9.8（年份未注明） | 100 篇面经样本 | 高频手撕题 + 7 个部门题单 + 1 个测试岗补充 |
-| [AI Coding 笔试手撕通关指南](coding/ai-coding-assessment-guide/) | 2026.8 | 跨公司工程题 | 需求拆解、接口契约、隐藏用例、自测纠错与限时交付 |
+| [AI Coding 笔试手撕通关指南](coding/ai-coding-assessment-guide/) | 2026.8 | 五类岗位题型 | 工程、算法、数据分析、Agent、游戏开发的题型识别、隐藏用例与限时交付 |
 
 ## 综合测评 {#assessment}
 
