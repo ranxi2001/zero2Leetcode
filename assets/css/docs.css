@@ -102,6 +102,48 @@ code, pre { font-family: var(--font-mono); }
 .doc-nav a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 .doc-nav a.is-active { color: var(--text); }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.github-star-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid rgba(245, 190, 45, 0.42);
+    border-radius: 8px;
+    color: #ffe8a3;
+    background: linear-gradient(135deg, rgba(245, 190, 45, 0.16), rgba(245, 158, 11, 0.09));
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: transform 0.15s, color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.github-star-btn:hover {
+    color: #fff4cd;
+    border-color: rgba(245, 190, 45, 0.72);
+    background: linear-gradient(135deg, rgba(245, 190, 45, 0.24), rgba(245, 158, 11, 0.14));
+    transform: translateY(-1px);
+}
+
+.github-star-btn svg { width: 17px; height: 17px; flex: 0 0 auto; }
+
+.github-star-count {
+    min-width: 24px;
+    padding-left: 6px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
 /* ===== Nav Dropdown (Zero 系列) ===== */
 .nav-dropdown {
     position: relative;
@@ -722,10 +764,13 @@ html[data-theme="light"] .reaction-btn.is-disliked { background: rgba(225, 29, 7
     .doc-sidebar { position: static; max-height: none; overflow-y: visible; padding: 16px 0; border-right: none; }
     .doc-article { border: none; border-top: 1px solid var(--border); padding: 24px 0; }
     .doc-header-inner, .doc-main, .doc-footer-inner { width: calc(100% - 32px); }
+    .doc-nav { display: none; }
+    .doc-header-inner { gap: 12px; }
 }
 
 @media (max-width: 480px) {
-    .doc-header-inner { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .doc-header-inner { flex-direction: row; align-items: center; gap: 10px; }
+    .brand-text { display: none; }
     .doc-article h1 { font-size: 1.4rem; }
 }
 

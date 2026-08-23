@@ -166,6 +166,56 @@ img {
     font-weight: 700;
 }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.github-star-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    border-radius: var(--radius-md);
+    color: #fff4c2;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.18), rgba(250, 160, 20, 0.1));
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.08);
+    transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.github-star-btn:hover {
+    color: #fff;
+    border-color: rgba(255, 211, 77, 0.78);
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.28), rgba(250, 160, 20, 0.16));
+    transform: translateY(-1px);
+}
+
+.github-star-btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
+
+.github-star-count {
+    min-width: 1.8rem;
+    padding-left: 0.45rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+.github-star-btn-hero {
+    min-height: 48px;
+    padding: 0 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+}
+
 .logo-icon {
     width: 32px;
     height: 32px;
