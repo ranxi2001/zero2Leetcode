@@ -94,8 +94,9 @@ code, pre { font-family: var(--font-mono); }
 .doc-nav a {
     color: var(--text-secondary);
     font-size: 0.82rem;
-    padding: 5px 10px;
+    padding: 5px 8px;
     border-radius: 6px;
+    white-space: nowrap;
     transition: color 0.15s, background 0.15s;
 }
 

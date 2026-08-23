@@ -231,7 +231,7 @@ img {
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-lg);
     list-style: none;
 }
 
@@ -240,6 +240,7 @@ img {
     color: var(--text-secondary);
     transition: color var(--transition-fast);
     position: relative;
+    white-space: nowrap;
 }
 
 .nav-link::after {
