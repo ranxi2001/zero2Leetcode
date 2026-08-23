@@ -243,6 +243,10 @@ modules:
             slug: "jd/algo-20260815"
           - title: "算法岗 8.22"
             slug: "jd/algo-20260822"
+      - name: "滴滴"
+        articles:
+          - title: "通用岗 8.23"
+            slug: "didi/general-20260823"
       - name: "网易"
         articles:
           - title: "雷火研发岗 4.2"
