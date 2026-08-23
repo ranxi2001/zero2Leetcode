@@ -1250,6 +1250,23 @@ html[data-theme="light"] .navbar {
     background: rgba(255, 255, 255, 0.92);
 }
 
+html[data-theme="light"] .github-star-btn {
+    color: #713f12;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-color: #d6a514;
+    box-shadow: 0 2px 8px rgba(161, 98, 7, 0.16);
+}
+
+html[data-theme="light"] .github-star-btn:hover {
+    color: #422006;
+    background: linear-gradient(135deg, #fde68a, #fcd34d);
+    border-color: #a16207;
+}
+
+html[data-theme="light"] .github-star-count {
+    border-left-color: rgba(113, 63, 18, 0.28);
+}
+
 /* Dropdown */
 html[data-theme="light"] .nav-dropdown-menu {
     background: #fff;
