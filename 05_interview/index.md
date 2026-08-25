@@ -51,7 +51,7 @@ eyebrow: Module 06
 | [程序员八股文50题](fundamentals/general-backend/) | 通用技术岗 | 数据结构+操作系统+网络+数据库+系统设计，50道高频题全解析 |
 | [2026年3–7月高频后端八股统计](fundamentals/backend-frequency-2026-march-july/) | 高频统计 | 32组真实面经：规范题频次、跨月趋势、复习优先级与算法附录 |
 | [2026年春季后端面经八股](fundamentals/recent-2026-spring/) | 3–5月真题 | 45道题：Java、C++、JVM、数据库、缓存、网络与分布式 |
-| [2026年2–8月后端面经八股](fundamentals/recent-2026-summer/) | 2–8月真题 | 189道题：Java、Python、操作系统、网络、数据库、分布式、前端与AI Infra |
+| [2026年2–8月后端面经八股](fundamentals/recent-2026-summer/) | 2–8月真题 | 218道题：Java、C++、Go、操作系统、网络、数据库、分布式与AI Infra |
 
 ## 备考建议
 

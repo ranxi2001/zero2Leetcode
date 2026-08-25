@@ -2040,6 +2040,296 @@ GIL 不能替代这些同步原语，因为线程可能在 I/O、扩展代码或
 
 ---
 
+### 190. C++ 模板函数在什么时候编译和实例化？为什么实现通常放在头文件？
+
+> 来源：[三星 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/193d7e444bd84daea866a2cfc3e57b83)，2026 年 5 月 1 日
+
+编译器先解析模板定义并检查不依赖模板参数的语法；遇到具体使用时，再用实参完成实例化并检查依赖类型的表达式。隐式实例化要求使用点能够看到完整定义，因此模板实现通常放在头文件。只在 `.cpp` 中定义而没有显式实例化，其他翻译单元往往只能看到声明，最终会出现链接错误。
+
+显式实例化可以在一个翻译单元生成指定类型版本，配合 `extern template` 抑制其他翻译单元重复实例化，降低编译时间和代码膨胀；代价是支持的类型集合需要预先确定。模板的两阶段查找、依赖名、SFINAE/Concepts 会影响重载选择，但“模板在运行时生成代码”是错误说法。
+
+---
+
+### 191. 遍历 STL 容器时如何安全删除元素？
+
+> 来源：[三星 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/193d7e444bd84daea866a2cfc3e57b83)，2026 年 5 月 1 日
+
+不能在 `for (++it)` 循环里调用 `erase(it)` 后继续使用旧迭代器。常见写法是 `it = container.erase(it)`，由 `erase` 返回下一个有效迭代器；不删除时才执行 `++it`。C++20 以后，按谓词批量删除还可以优先使用 `std::erase_if`。
+
+失效范围取决于容器：`list` 通常只使被删元素的迭代器失效；`vector`/`deque` 删除位置及其后的迭代器可能失效；关联容器通常只使被删节点失效。并发修改还需要外部同步，迭代器规则不提供线程安全。
+
+---
+
+### 192. 如何让函数在 `main` 之前执行？有哪些工程风险？
+
+> 来源：[百度 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/9c3b059f51de4b77bbda5c5b0ec33c9e)，2026 年 5 月 2 日
+
+C++ 可通过具有静态存储期的对象构造函数完成初始化，也可以使用编译器扩展的 constructor attribute；C 常见实现依赖启动段或编译器属性。它们最终都由运行时启动代码在进入 `main` 前调用，不是操作系统直接调用普通业务函数。
+
+跨翻译单元的静态初始化顺序通常不应依赖，这就是 static initialization order fiasco。更稳妥的做法是函数内静态对象、显式初始化入口或可控的注册表；初始化逻辑应避免依赖尚未构造的全局对象、启动线程或执行难以恢复的 I/O。
+
+---
+
+### 193. 条件断点、调用栈和内存观察分别适合排查什么问题？
+
+> 来源：[百度 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/9c3b059f51de4b77bbda5c5b0ec33c9e)，2026 年 5 月 2 日
+
+条件断点只在表达式满足时停下，适合循环中特定索引、对象 ID 或错误状态；命中次数断点适合定位第 N 次异常。调用栈展示当前线程从入口到故障点的调用链和栈帧，可逐层查看参数、局部变量和返回地址。Watch/内存窗口用于持续观察表达式、地址和对象布局，硬件 watchpoint 还可以在某段内存被读写时暂停。
+
+优化构建可能内联函数、删除变量或重排指令，导致源码行与现场不一一对应。生产问题要保留符号、构建 ID、核心转储和对应二进制，并结合日志、sanitizer、perf 等证据；不要为了方便调试就长期关闭所有优化后推断线上性能行为。
+
+---
+
+### 194. `std::deque` 的底层结构和迭代器失效规则是什么？
+
+> 来源：[百度 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/9c3b059f51de4b77bbda5c5b0ec33c9e)，2026 年 5 月 2 日
+
+`deque` 通常由一张 map 指向多个固定大小的连续缓冲块，因此支持两端近似常数时间插入删除，也支持随机访问；它不像 `vector` 那样保证全部元素位于一段连续内存，常数开销和缓存局部性通常更差。具体块大小和 map 增长方式属于标准库实现细节。
+
+中间插入删除可能移动元素并广泛使迭代器失效；两端操作对迭代器、指针和引用的影响要按所用标准版本与实现契约确认。需要连续存储和与 C API 互操作时优先 `vector`，需要稳定节点地址时考虑 `list`，不能只凭“大 O 相同”选容器。
+
+---
+
+### 195. `shared_ptr` 是线程安全的吗？
+
+> 来源：[抖音搜推 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/e5f1a15d50414c86a0e64f2dbc13a02f)，2026 年 5 月 1 日
+
+不同 `shared_ptr` 对象即使共享同一控制块，也可以在不同线程并发复制和销毁，因为引用计数更新具备所需同步；这不代表所指对象线程安全，也不代表多个线程可以无锁修改同一个 `shared_ptr` 变量。后两种情况仍可能发生数据竞争。
+
+共享同一个指针变量时使用互斥锁，或使用标准提供的原子 `shared_ptr` 操作。引用计数只管理生命周期，不保护对象内部不变量；同时要用 `weak_ptr` 打破循环引用，并警惕频繁跨核更新控制块造成的缓存争用。
+
+---
+
+### 196. 什么是 Cache 竞争和 False Sharing？如何定位？
+
+> 来源：[摩尔线程 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/50b0cc495d594f51adbf05fd90cd896e)，2026 年 5 月 2 日
+
+多个核心访问同一共享数据会触发一致性流量；即使线程修改的是不同变量，只要变量落在同一 Cache Line，也会让缓存行在核心间反复失效，这就是 False Sharing。它与容量不够导致的 capacity miss、映射冲突导致的 conflict miss、内存带宽饱和不是同一个问题。
+
+先用硬件性能计数器、Profiler 和 CPU 亲和性实验确认 cache miss、HITM/一致性事件和带宽，再检查热点结构布局。常见优化包括按线程分片、局部累加后合并、填充或对齐热点写字段、减少共享写入；盲目 padding 会增大工作集，因此必须用基准验证。
+
+---
+
+### 197. FP16、FP32、FP64 的位宽如何分配？数值范围和精度如何权衡？
+
+> 来源：[飞腾 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/be21cdef5ff446f397e6fde465dae57f)，2026 年 5 月 2 日
+
+IEEE 754 binary16 通常为 1 位符号、5 位指数、10 位显式 fraction；binary32 为 1/8/23；binary64 为 1/11/52。正规数还包含隐含的最高有效位，因此有效精度比 fraction 位数多一位。全零和全一指数分别用于次正规数/零以及无穷/NaN 等特殊值。
+
+指数位决定动态范围，fraction 位决定有效精度。低精度能降低存储、带宽和计算成本，却更容易溢出、下溢和累积误差。AI 训练常使用混合精度、FP32 累加和 Loss Scaling；具体硬件对 FP16、BF16、FP8 的吞吐与舍入支持不同，不能只比较位宽。
+
+---
+
+### 198. `git fetch + checkout`、`git pull` 和远程跟踪分支有什么区别？
+
+> 来源：[飞腾 AI Infra 实习一面](https://www.nowcoder.com/feed/main/detail/be21cdef5ff446f397e6fde465dae57f)，2026 年 5 月 2 日
+
+`git fetch` 只把远端引用和对象更新到本地，不修改当前工作分支；之后可以检查 `origin/x`，再创建或切换本地分支。`git pull` 相当于先 fetch，再按配置 merge 或 rebase 到当前分支，因此会直接改变当前分支历史和工作区状态。
+
+远程跟踪分支如 `origin/main` 是本地记录的远端状态快照，不是能直接在本地提交的远端分支。团队使用前应明确 pull 的 merge/rebase 策略，操作前检查脏工作区和上游绑定；自动化环境更适合拆开 fetch、验证目标 commit，再执行明确的 merge/rebase。
+
+---
+
+### 199. Go 和 Java 的主要差异应从哪些维度比较？
+
+> 来源：[阿里云 Agent Infra 一面](https://www.nowcoder.com/feed/main/detail/d1fd4cd344bc4d928e708c3e69c8f59c)，2026 年 4 月 1 日
+
+不要只回答“Go 快、Java 重”。语言层面，Go 强调较小语法、组合和 goroutine/channel，Java 提供类继承、泛型、注解和成熟的 JVM 生态；运行时层面，Go 通常静态编译并由自身 runtime 调度 goroutine，Java 编译到字节码后由 JVM 解释/JIT，线程与虚拟线程的模型也不同。
+
+两者都有 GC、并发库、逃逸和性能调优问题。选型要看延迟/吞吐目标、启动和内存约束、团队库生态、诊断工具、部署方式以及业务框架。Go 常适合云原生服务和工具，Java 在复杂企业业务与中间件生态中优势明显，但具体结论必须用目标负载验证。
+
+---
+
+### 200. gRPC 为什么常使用 Protobuf 二进制编码？它一定比 JSON 快吗？
+
+> 来源：[阿里云 Agent Infra 一面](https://www.nowcoder.com/feed/main/detail/d1fd4cd344bc4d928e708c3e69c8f59c)，2026 年 4 月 1 日
+
+gRPC 通常以 Protobuf 定义强类型契约，使用字段编号编码，消息一般比包含字段名的 JSON 紧凑，并提供代码生成、双向流和基于 HTTP/2 的多路复用。它适合内部服务间高频 RPC，但可读性、调试门槛、浏览器支持和协议演进纪律也要考虑。
+
+二进制并不保证任何场景都更快：小消息可能被网络、TLS、排队和业务处理主导，压缩也有 CPU 成本。字段演进应保留编号、谨慎修改语义，并传播 Deadline、取消和 Trace。对外开放、浏览器直连或强调可调试性时，JSON/REST 仍可能更合适。
+
+---
+
+### 201. 按时间分表后，跨表查询如何实现全局排序和分页？
+
+> 来源：[虾皮 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/c212ec586b5d4972a27ce68cdc0b2b29)，2026 年 4 月 13 日
+
+先根据时间条件路由到有限分表，在每个分片使用相同排序键执行有界查询，再在聚合层做 k-way merge。排序键必须全局稳定，例如 `(created_at, id)`，否则相同时间戳会导致重复或漏项。深分页不宜对所有分片执行巨大 offset，优先使用基于上一页排序键的 keyset/cursor pagination。
+
+Cursor 应携带各分片推进位置或一个能重新计算路由的全局边界，并绑定查询条件和版本。还要定义跨月写入、迟到数据、迁移和归档期间的一致性语义。若查询长期跨大量分片，应考虑二级索引、汇总表或搜索系统，而不是让在线请求无界 fan-out。
+
+---
+
+### 202. AI 流式请求如何传播超时、取消和背压？
+
+> 来源：[牛客 AI Infra 面试汇总](https://www.nowcoder.com/discuss/891334000239734784)，2026 年 6 月 3 日
+
+Gateway 收到客户端断连或取消后，应沿调用链取消 HTTP/gRPC 请求、模型排队项和正在生成的序列，并释放 KV Cache、CPU buffer 和计费状态。每一层都使用绝对 Deadline 或可比较的剩余预算，避免层层独立超时导致总时长失控；操作已经产生副作用时，取消只代表“不再等待”，不等于副作用回滚。
+
+背压要从最慢消费者向上游传播：限制单连接缓冲，合并过小 Token Chunk，设置写超时和慢消费者策略；跨服务流式透传时保留 request ID、sequence、finish reason 和 usage。断线续传只能从已持久化且有序的边界恢复，不能默认重放模型采样得到相同 Token；重试前还要区分“尚未接收首 Token”和“已向用户展示部分结果”。
+
+---
+
+### 203. 如何用 Shell 安全、确定性地合并目录中的多个文件？
+
+> 来源：[蔚来自动驾驶 Infra 实习面经](https://www.nowcoder.com/feed/main/detail/56a04cec4404407198dc9627a7fa887c)
+
+先明确合并顺序、文件类型和输出格式。不要直接依赖 shell glob 的偶然顺序，也不要用 `for f in $(find ...)`，因为空格、换行和通配符会破坏文件名边界。Linux 下可以用 NUL 分隔传递路径，例如先把输出写到目录外的临时文件，再执行 `find "$dir" -maxdepth 1 -type f -print0 | LC_ALL=C sort -z | xargs -0 cat -- > "$tmp"`，成功后原子移动到目标位置。
+
+还要处理空目录、权限失败、合并过程中源文件变化和输出文件被再次读入。文本文件若要求文件间换行或标头，应显式插入分隔符；二进制文件只能按字节拼接，能否得到有效文件取决于格式本身。生产脚本应启用严格错误处理、检查退出码，并在失败时清理临时文件，不能留下看似成功的半成品。
+
+---
+
+### 204. 虚拟内存如何实现进程隔离？缺页、页面置换、Swap 与 OOM 如何协作？
+
+> 来源：[蔚来自动驾驶 Infra 实习面经](https://www.nowcoder.com/feed/main/detail/56a04cec4404407198dc9627a7fa887c)、[荣耀 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/60ab2e3a45074b7391199acb9b5c6ca3)、[字节 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/2163c739242f4f8d82b35c906f0a69a9)、[AI Infra 应届春招面经](https://www.nowcoder.com/feed/main/detail/9ec1d6e590a04b16b9ea40ade8d180bd)
+
+每个进程看到独立虚拟地址空间，页表把虚拟页映射到物理页并记录读写、执行和用户/内核权限，TLB 缓存近期地址转换。两个进程可以把相同虚拟地址映射到不同物理页，也可以通过共享内存映射同一物理页；隔离来自页表和权限检查，不是“每个进程独占一块物理内存”。Fork 后常以写时复制共享页面，只有写入时才复制。
+
+访问没有有效映射或页面尚未驻留时会触发缺页异常：匿名零页、文件页可按需建立映射，已换出的匿名页或未缓存的文件页可能需要磁盘 I/O。内存压力下内核按近似 LRU 等策略回收干净文件页、回写脏页或把匿名页换到 Swap；若可回收页不足、Swap 不可用或受 cgroup/进程限制，分配可能失败并触发 OOM 处理。排障要结合缺页率、工作集、换入换出、页缓存、RSS、cgroup 限额和 OOM 日志，而不是只看 free memory。
+
+---
+
+### 205. TCP 与 UDP 的差异、适用场景和可靠性边界是什么？
+
+> 来源：[蔚来自动驾驶 Infra 实习面经](https://www.nowcoder.com/feed/main/detail/56a04cec4404407198dc9627a7fa887c)、[腾讯 CDG AI Infra 框架侧面经](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168)
+
+TCP 是面向连接的可靠字节流，通过序列号、确认、重传、流量控制和拥塞控制提供按序、无重复的传输；应用必须自行做消息分帧。UDP 保留报文边界，无连接状态，协议本身不保证送达、顺序或去重，也没有 TCP 式拥塞控制，但头部和连接管理开销更小，允许应用按业务自行选择可靠性策略。
+
+文件传输、数据库连接和多数 HTTP/1.1、HTTP/2 流量通常选择 TCP；DNS 查询、实时音视频和游戏状态同步常使用 UDP，以容忍少量丢包换取更及时的数据。UDP 不等于“不可靠应用”：QUIC 在 UDP 之上实现可靠流、拥塞控制和加密。选型应看消息边界、丢包语义、时延、网络公平性、NAT/防火墙和实现复杂度，不能只回答“TCP 慢、UDP 快”。
+
+---
+
+### 206. 哈希表如何处理冲突和扩容？`std::map` 与 `std::unordered_map` 如何选择？
+
+> 来源：[小鹏汽车 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/a79383aa92f64e8eb4e85959bf2660a0)、[阿里云 AI Infra 一面](https://www.nowcoder.com/discuss/877526070033989632)、[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)
+
+哈希表用哈希函数把 key 映射到桶，冲突可用链地址法、开放寻址等方式处理；负载因子过高时通常扩桶并重新分布元素。理想散列下查找和插入平均为 O(1)，但冲突严重时可能退化，扩容还会产生一次 O(n) 的搬迁成本。`std::unordered_map` 保证平均常数复杂度，但标准不承诺具体桶结构，也不保证迭代顺序；rehash 会使迭代器失效。
+
+`std::map` 是有序关联容器，标准保证查找、插入和删除为 O(log n)，常见实现是红黑树，但具体树型仍属于实现细节。需要有序遍历、范围查询、稳定的最坏复杂度或频繁使用 `lower_bound` 时选 `map`；追求平均查找吞吐且有可靠哈希函数时选 `unordered_map`。还要比较内存开销、缓存局部性、key 分布、迭代器失效和拒绝服务场景，不能只背复杂度表。
+
+---
+
+### 207. C++ 的 `new/delete` 与 `malloc/free` 有什么区别？对象构造和分配器如何衔接？
+
+> 来源：[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)、[太初 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/45c0b82115024f16a88ad9a37f2ab398)、[文远知行 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/cc35269c89d645c3a510c22504355ce0)
+
+`new T(args...)` 是 C++ 表达式：先调用相应的 `operator new` 获得原始存储，再在其中构造对象；`delete` 先调用析构函数，再把存储交给 `operator delete`。普通 `new` 失败默认抛出 `std::bad_alloc`，`new (std::nothrow)` 才返回空指针。`malloc` 只按字节分配原始内存并返回 `void*`，失败返回空指针，不知道类型，也不会调用构造或析构函数。
+
+分配和释放必须成对：`new/delete`、`new[]/delete[]`、`malloc/free` 不能混用，否则行为未定义。Placement new 只在给定地址构造对象，调用方仍负责显式析构和底层存储释放。工程代码优先用值语义、容器和 RAII；确需定制时再使用 allocator、内存池或重载 `operator new`，并用 sanitizer 检查越界、重复释放和 use-after-free。
+
+---
+
+### 208. C++ 智能指针如何管理所有权？控制块、数组和循环引用有哪些边界？
+
+> 来源：[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)、[太初 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/45c0b82115024f16a88ad9a37f2ab398)
+
+`unique_ptr` 表示独占所有权，只能移动，通常只保存指针和删除器；`shared_ptr` 让多个句柄共享对象，其控制块维护强引用、弱引用和删除器等状态；`weak_ptr` 不增加强引用，可用 `lock()` 临时取得有效的 `shared_ptr`，用于打破双向图中的循环引用。`make_shared` 常把对象和控制块一次分配，减少分配次数，但对象内存要等弱引用也释放后才完全归还。
+
+连续数组应使用 `unique_ptr<T[]>`、标准库支持的 `shared_ptr<T[]>` 或更优先的 `std::vector<T>`，不能让普通 `unique_ptr<T>` 用错误的 `delete` 释放 `new T[n]`。管理文件、socket、GPU buffer 等非 `new` 资源时要提供匹配删除器。引用计数的同步只保护控制块生命周期，不自动保护被指对象；多个线程修改对象或同一个智能指针变量仍需同步。
+
+---
+
+### 209. C++ 多态和虚函数通常如何实现？构造、析构期间调用虚函数会怎样？
+
+> 来源：[飞腾 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/90c405df0a0f4dd99298768496b0c942)、[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)、[太初 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/45c0b82115024f16a88ad9a37f2ab398)
+
+C++ 的函数重载、模板和 CRTP 属于编译期多态；通过基类指针或引用调用虚函数属于运行期多态。常见 ABI 为含虚函数的对象保存 vptr，指向记录虚函数入口的 vtable，调用时按动态类型间接分派；但标准只规定可观察行为，不强制虚表的具体内存布局。多态基类若可能通过基类指针删除派生对象，析构函数通常必须是 virtual。
+
+在基类构造期间，派生部分尚未构造；在基类析构期间，派生部分已经销毁，因此虚调用只分派到当前正在构造或析构的类，不会调用更派生类覆盖。依赖派生状态会破坏对象生命周期不变量，调用纯虚函数还可能导致未定义行为或链接/运行时错误。工程上应避免在构造和析构函数中依赖虚分派，改用构造后初始化、工厂函数或非虚私有初始化步骤。
+
+---
+
+### 210. C++ lambda 的捕获、闭包对象和生命周期风险是什么？
+
+> 来源：[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)
+
+lambda 表达式会生成一个匿名闭包类型，对捕获变量形成数据成员，并以 `operator()` 执行函数体。`[=]` 和 `[&]` 分别默认按值和按引用捕获，显式捕获更容易审计；按值捕获默认不能修改副本，加入 `mutable` 后可以修改闭包内部状态。初始化捕获可移动资源，泛型 lambda 的 `auto` 参数则让调用运算符成为模板。
+
+最大风险是生命周期：按引用捕获的局部变量离开作用域后会悬空，异步任务捕获 `this` 也可能在对象销毁后访问无效地址。可以捕获值、`shared_ptr`，或捕获 `weak_ptr` 后在执行时检查存活状态。无捕获 lambda 可转换为函数指针；`std::function` 能类型擦除不同可调用对象，但可能引入间接调用、复制和动态分配开销，热点路径应以基准决定是否使用模板回调。
+
+---
+
+### 211. C++ 四种 Cast 有什么区别？父类向子类转换何时安全？
+
+> 来源：[小鹏汽车 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/e4e725793a3f4c9197c36645bc63cf32)、[蔚来汽车 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/738d29de77ef4675bbac0a7d18ed1371)
+
+`static_cast` 用于编译期可检查的数值转换、上行转换及开发者能证明安全的下行转换；它不验证对象运行时真实类型。`dynamic_cast` 借助 RTTI 在多态继承层次中检查转换，指针失败返回空，引用失败抛 `std::bad_cast`。`const_cast` 只改变 cv 限定，若底层对象本来就是 const，再通过结果写入仍是未定义行为；`reinterpret_cast` 进行低层表示转换，不能凭转换本身建立对象、对齐或别名访问的合法性。
+
+父类指针向子类转换只有在对象真实动态类型确实是目标子类或其派生类时才可安全使用。类型不确定时用 `dynamic_cast` 或重新设计接口；`static_cast` 下行只适合已有外部不变量保证的性能敏感边界。多继承下指针值还可能需要调整，因此不能用 C 风格强转或假设基类子对象总在对象起始地址。
+
+---
+
+### 212. 动态链接库如何解析依赖和符号？依赖顺序为什么可能导致链接或加载失败？
+
+> 来源：[小鹏汽车 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/e4e725793a3f4c9197c36645bc63cf32)
+
+编译器先生成目标文件，其中可以保留未解析符号；链接器再从目标文件、静态库和共享库中解析引用并生成可执行文件。静态归档常按命令行从左到右扫描，只抽取当时能解决未定义符号的成员，因此依赖方通常放在被依赖库之前，循环依赖需要重复列出、使用 group 选项或消除结构问题。`--as-needed` 等选项也会让看似无用的共享库不进入依赖表。
+
+运行时加载器依据记录的动态依赖、SONAME 和受控搜索路径装载共享对象，再完成重定位和符号绑定。常见失败包括库文件找不到、ABI/版本不兼容、符号被隐藏、依赖未声明及同名符号覆盖。排障使用链接器 map、`readelf`、`objdump`、`ldd` 或加载器调试输出；不要把静态库顺序规则笼统套到所有平台，也不要依赖不受控的全局环境搜索路径修复生产部署。
+
+---
+
+### 213. C/C++ 回调有哪些实现方式？如何管理上下文、生命周期和异常边界？
+
+> 来源：[科大讯飞 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/140a45bc0b314798a0d94b512cb7ea90)
+
+C 接口常用函数指针加 `void* context`，由回调把 context 转回业务对象；C++ 还可用成员函数适配器、函数对象、lambda、模板可调用参数和 `std::function`。模板或具体闭包类型有利于内联，`std::function` 便于统一存储不同回调，但类型擦除可能带来间接调用、复制和堆分配。成员函数还需要对象实例，不能直接当作普通 C 函数指针。
+
+异步回调的重点不是语法，而是所有权：注册方与执行方要约定 context 谁持有、何时注销、取消后是否仍可能在途执行。跨线程访问共享状态需要同步，捕获引用或 `this` 必须保证生命周期；跨 C ABI 边界不能让 C++ 异常逃逸，应在边界捕获并转成错误码。还要防止回调重入、注销与执行竞态及在持锁状态下调用未知业务代码。
+
+---
+
+### 214. C/C++ 从预处理到链接经历哪些阶段？每阶段常见错误如何定位？
+
+> 来源：[飞腾 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/90c405df0a0f4dd99298768496b0c942)
+
+预处理阶段展开宏、处理条件编译并包含头文件；编译阶段完成词法语法、类型检查和优化，生成汇编或中间表示；汇编阶段把汇编转成含符号表与重定位信息的目标文件；链接阶段合并目标文件和库、解析符号与重定位，生成可执行文件或共享库。实际工具链可能把多个阶段合并执行，但职责仍可区分。
+
+宏展开、缺头文件通常在预处理阶段暴露；类型和模板实例化问题多为编译错误；非法指令或汇编语法属于汇编阶段；undefined reference、重复定义和 ABI 不兼容属于链接问题。定位时先保留完整命令行和第一处错误，再用 `-E`、`-S`、`-c` 分阶段输出，结合 `nm/readelf/objdump` 检查符号，不要把所有构建失败都归为“编译器报错”。
+
+---
+
+### 215. 单例模式和工厂模式分别解决什么问题？在 C++ 中如何避免生命周期陷阱？
+
+> 来源：[飞腾 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/90c405df0a0f4dd99298768496b0c942)
+
+单例约束某类在指定作用域内只有一个实例并提供访问点，但它会引入全局状态、隐藏依赖和测试隔离困难。C++11 起函数内静态对象的初始化具备线程安全保证，Meyers Singleton 比手写双重检查更稳妥；仍要处理析构顺序、动态库卸载和实例内部状态的并发安全，单例“创建安全”不等于业务方法线程安全。
+
+工厂把“选择并构造具体实现”从调用方抽离：简单工厂集中分支，工厂方法把创建推迟给子类或策略，抽象工厂创建一组相互匹配的对象。它适合实现可替换、构造复杂或需要插件注册的场景，但产品很少时会徒增层次。工程上优先显式依赖注入和 RAII 返回值，例如 `unique_ptr<Interface>`，避免工厂偷偷持有全局单例并制造不清晰的销毁顺序。
+
+---
+
+### 216. CPython 的引用计数、循环垃圾回收和对象生命周期如何工作？
+
+> 来源：[爱奇艺 AI 平台研发 Infra 面经](https://www.nowcoder.com/discuss/918635351327924224)
+
+CPython 主要通过引用计数管理对象：强引用增加计数，引用释放后计数减少，降到零时对象通常立即进入销毁流程。这使多数对象的回收时机较可预测，但彼此强引用的容器可能形成环，即使外部已不可达，计数仍不为零；CPython 因此还使用分代的循环垃圾回收器追踪可形成引用环的容器并识别不可达环。
+
+`del x` 只删除一个名字绑定，不保证对象立即销毁；弱引用不会维持对象存活，适合缓存和观察者关系。带终结逻辑的对象、跨线程引用和 C 扩展会让生命周期更复杂，具体代数和调度策略也可能随 CPython 版本变化。文件、锁、数据库连接等外部资源不应依赖 GC 时机，应使用 `with`、`try/finally` 或显式 `close()` 管理。
+
+---
+
+### 217. Python 为什么通常比编译型语言慢？如何定位并选择优化路径？
+
+> 来源：[爱奇艺 AI 平台研发 Infra 面经](https://www.nowcoder.com/discuss/918635351327924224)
+
+以常见 CPython 执行为例，动态类型需要在运行时解析对象和操作，数值通常是带元数据的对象，字节码解释分派、引用计数和间接访问也增加指令与内存开销；对象布局分散还会影响缓存局部性。GIL 会限制单进程纯 Python CPU 密集线程的并行扩展，但它不是单线程代码慢的唯一原因，也不能据此断言所有 Python 实现或所有负载都慢。
+
+优化先用 profiler 找到真实热点，再依次考虑更好的算法和数据结构、减少 Python 层循环、批量化/向量化、缓存和降低对象分配。仍不足时可把热点交给 NumPy 等原生库、C/C++/Rust 扩展、JIT 或独立计算服务；CPU 并行可评估多进程，I/O 并发可用线程或异步。选择要用目标数据和端到端基准验证，不能为了局部微基准牺牲可维护性和序列化成本。
+
+---
+
+### 218. etcd 与 Redis 的索引和存储结构有什么差异？设计目标为什么不同？
+
+> 来源：[百度 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/436228d68ccb4ec78d08644bc9227dec)
+
+以典型 etcd v3 实现为例，键值更新形成带全局 revision 的 MVCC 版本；内存索引把 key 映射到版本信息，持久化后端保存 revision 对应的数据，写入还要经过 Raft 复制和提交。这套结构服务于线性一致读写、事务比较、按 key 范围查询和从指定 revision 开始的 watch，历史版本会通过 compaction 控制。具体 B-tree 与后端实现属于版本细节，回答时应区分逻辑契约和当前实现。
+
+Redis 的顶层 keyspace 通常使用哈希字典，单 key 的值再按 String、Hash、ZSet、Stream 等类型采用不同编码和数据结构，并通过 RDB/AOF 与复制提供持久化和高可用选项。它优先追求低延迟和丰富数据操作，不默认提供 etcd 的 Raft 线性一致语义；etcd 也不是通用缓存。比较两者不能简化成“B+ 树对哈希表”，应从一致性、版本/watch、查询模型、数据规模、延迟和故障语义选择。
+
+---
+
 ## 算法与手撕题单
 
 以下题目来自同一时间窗口，适合单独放入算法训练计划：
@@ -2047,11 +2337,11 @@ GIL 不能替代这些同步原语，因为线程可能在 I/O、扩展代码或
 | 题目 | 来源 |
 |------|------|
 | 最大子数组和 | 拼多多提前批一面，7 月 30 日 |
-| 无重复字符的最长子串 | 百度秋招后端一面，7 月 30 日；百度 AI Infra 一面 |
-| 二叉树层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面 |
+| 无重复字符的最长子串 | 百度秋招后端一面，7 月 30 日；百度 AI Infra 一面；[腾讯 CDG AI Infra 框架侧一面](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168) |
+| 二叉树层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面；[阿里实习 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/31edaaa47197404a8647601612312786) |
 | 两两交换链表节点 | 拼多多服务端三面，8 月 4 日；百度内容营销与广告一面，8 月 12 日 |
 | 奇偶链表 | 字节后端社招一面，8 月 6 日 |
-| 最长有效括号 | 字节后端社招二面，8 月 6 日 |
+| 最长有效括号 | 字节后端社招二面，8 月 6 日；[虾皮 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/62b9123e4b7f497285e7d6f68844cdd6) |
 | 数组第 K 大元素 | 字节后端社招三面，8 月 6 日 |
 | 删除重复字符并保持字典序最小 | 字节 Agent 开发一面，8 月 9 日 |
 | 有效括号字符串、最长递增子序列 | 小红书数据库智能化面经，8 月 10 日 |
@@ -2060,10 +2350,33 @@ GIL 不能替代这些同步原语，因为线程可能在 I/O、扩展代码或
 | 限制最大并发数为 3，批量调用外部接口 | 快手 Agent 开发一面 |
 | 将扁平 List 转换为树形 JSON | 字节跳动 AI Agent 开发一面 |
 | 合并两个有序数组 | 影石创新 AI Agent 一面 |
-| LRU Cache | 懂车帝 Agent 开发一面 |
+| LRU Cache | 懂车帝 Agent 开发一面；[阶跃星辰 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2)；[快手 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/eccb5cafdfce452c8d56374ef070685d) |
 | 二叉树锯齿形层序遍历 | 字节跳动 AI Agent 开发一面 |
 | 手写多头注意力（MHA） | 小鹏 VLA 大模型算法工程师一面 |
-| 顺时针旋转矩阵 90° | 小鹏 VLA 大模型算法工程师一面 |
+| 顺时针旋转矩阵 90° | 小鹏 VLA 大模型算法工程师一面；[蔚来 AI Infra 一面（Python）](https://www.nowcoder.com/feed/main/detail/7cb7ccbb4a3145cf99dbb05aff767299) |
 | 查找会议静默区间及多人重叠区间 | 字节跳动 AI Agent 一面 |
 | 判断链表是否有环 | 视频 b 二面 |
 | 实现平方根函数 | 文库相关岗位一面 |
+| 单链表去重 | 阿里云 AI Infra 一面，4 月 13 日 |
+| 拓扑排序 / 课程表 II（输出可行顺序）、二叉树中序遍历、满二叉树性质 | 三星 AI Infra 实习一面，5 月 1 日；[字节 Agent 后端终面](https://www.nowcoder.com/feed/main/detail/1dd33c4b7bda453a82f7d645bde7f3ff) |
+| 最长无重复元素子数组 | 百度 AI Infra 提前批一面，4 月 13 日 |
+| 买卖股票的最佳时机 I / II | 抖音搜推 AI Infra 一面，5 月 1 日；[快手 AI Infra 面经（版本未注明）](https://www.nowcoder.com/feed/main/detail/c582fdfbc29d4c93ac9044005ad0a311) |
+| 快速排序、归并排序、堆排序 | 阿里云 Agent Infra 一面，4 月 26 日；AI Infra 春招面经，3 月 25 日；[小马智行 AI Infra 实习面经（归并排序）](https://www.nowcoder.com/feed/main/detail/0e543b8a02b84b05950e55851687450f)；[字节 AI Infra 二面（堆排序）](https://www.nowcoder.com/feed/main/detail/eaea5cf9e9e44c5bb5fecf3f1d8243ce) |
+| 柱状图接雨水 | 百度 AI Infra 暑期一面，5 月 1 日；[阿里校招 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/84dc13404a6048c7b0f8431179d33623) |
+| 两线程交替打印 1 和 2 | 阿里云 Agent Infra 一面，4 月 26 日 |
+| 模拟死锁 | 虾皮 AI Infra 后端一面，4 月 13 日 |
+| 手写 MHA（含 mask 与数值稳定性） | 小鹏 AI Infra 一面，4 月 13 日 |
+| 岛屿数量（LC 200） | [蔚来 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/74ccddd071f448809b56710c9f4e8730) |
+| 按层交替方向旋转矩阵外圈一格 | [多公司 Infra 面经](https://www.nowcoder.com/feed/main/detail/2f0bb2d59bda4642a4ddab56ec1f210f) |
+| 反转链表 II（位置 a 到 b，LC 92） | [多公司 Infra 面经](https://www.nowcoder.com/feed/main/detail/2f0bb2d59bda4642a4ddab56ec1f210f) |
+| 最多可完整观看的电视节目（区间调度） | [阶跃星辰 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2) |
+| K 个一组翻转链表（LC 25） | [美团北斗 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/841452f926a140babb84585de97c04aa) |
+| Pow(x, n)，计算数值的整数次方（LC 50） | [字节 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/b99b6a7c7ff54453a2451d43488ade5a) |
+| 合并 K 个升序链表（LC 23） | [百度 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/4a848f5616cf4f8783020b3143a68fbc)；[美团 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/c94734d67c9f461ab950bf1d800c5643) |
+| 二叉树右视图（LC 199） | [百度 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/4a848f5616cf4f8783020b3143a68fbc) |
+| 阶乘末尾零的个数（LC 172） | [快手 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/c582fdfbc29d4c93ac9044005ad0a311) |
+| 数组中连续相同数字的最大出现次数 | [字节 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/2163c739242f4f8d82b35c906f0a69a9) |
+| 10 点环上走 N 步回到原点的方案数 | [字节 AI Infra 后端面经](https://www.nowcoder.com/feed/main/detail/45814e935b894c4fb13d5a72c81e23a6) |
+| 0-1 背包与完全背包 | [蔚来 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/738d29de77ef4675bbac0a7d18ed1371) |
+| 两数之和（LC 1） | [沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f) |
+| 矩阵第 K 小元素（原帖有序约束未完整记录） | [腾讯 CDG AI Infra 框架侧面经](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168) |
