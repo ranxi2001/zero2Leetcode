@@ -357,6 +357,8 @@ modules:
             slug: "honor/general-20260506"
           - title: "通用 5.7"
             slug: "honor/general-20260507"
+          - title: "数据分析岗 8.25"
+            slug: "honor/data-20260825"
       - name: "DeepSeek"
         articles:
           - title: "Agent开发岗 7.12"

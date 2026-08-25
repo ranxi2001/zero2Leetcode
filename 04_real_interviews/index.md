@@ -248,6 +248,7 @@ eyebrow: Module 05
 |------|------|------|
 | [2026-5-6](honor/general-20260506/) | 通用 | 模拟、数值线性代数(SVD+Jacobi)、多关键字排序 |
 | [2026-5-7](honor/general-20260507/) | 通用 | 数学/大整数、贪心区间调度、DFS回溯 |
+| [2026-8-25](honor/data-20260825/) | 数据分析岗 | 循环字母变换贪心、多表连接、COUNT DISTINCT 人均聚合 |
 
 ### DeepSeek笔试真题 {#deepseek}
 
