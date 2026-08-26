@@ -233,6 +233,8 @@ modules:
             slug: "huawei/dev-20260819"
           - title: "AI岗 8.19"
             slug: "huawei/ai-20260819"
+          - title: "研发岗 8.26"
+            slug: "huawei/dev-20260826"
           - title: "机考备考指南"
             slug: "huawei/exam-guide"
           - title: "AI机考一周速成攻略"
