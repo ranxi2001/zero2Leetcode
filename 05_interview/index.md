@@ -47,6 +47,7 @@ eyebrow: Module 06
 | [美团 - 后台开发](fundamentals/meituan-backend/) | 后台AI开发 | MySQL(原子性/持久性/InnoDB锁/分库分表)、Java并发(线程池/ThreadLocal)、AI工程化(Prompt/RAG) |
 | [百度 - 后端开发](fundamentals/baidu-backend/) | Go/服务端 | Go运行时与并发、MySQL、Redis、API设计、网络、K线行情存储系统设计 |
 | [Go 后端面试八股文](fundamentals/go-backend/) | Go/服务端 | 30道高频题：goroutine、GMP、channel、同步原语、GC、map、defer、panic与性能排查 |
+| [AI Infra 系统面试八股文](fundamentals/infra-systems/) | 云计算/训推/分布式/Agent Runtime | 70道系统题：OS与TCP底座、云计算、训练调度、模型推理、分布式正确性、Agent运行时与Sandbox |
 | [Kubernetes 与 Agent 基础设施](fundamentals/kubernetes-agent-infra/) | 云原生/Agent Infra | 39道前沿题：虚拟机、容器、K8s调度、Volcano、推理、Sandbox与Agentic RL |
 | [程序员八股文50题](fundamentals/general-backend/) | 通用技术岗 | 数据结构+操作系统+网络+数据库+系统设计，50道高频题全解析 |
 | [2026年3–7月高频后端八股统计](fundamentals/backend-frequency-2026-march-july/) | 高频统计 | 32组真实面经：规范题频次、跨月趋势、复习优先级与算法附录 |

@@ -11,6 +11,8 @@ permalink: /05_interview/fundamentals/kubernetes-agent-infra/
 
 > 面试时先给结论，再讲机制、边界和工程取舍。本文涉及 API 字段、默认策略、硬件能力和组件内部实现的内容均有版本边界：应以目标集群、组件、驱动及硬件代际的实际配置为准，不能把某一版本的实现当作永久契约。
 
+> 如果要先建立 OS、云计算、训推、分布式与 Agent Runtime 的完整知识链，先看 [AI Infra 系统面试总纲]({{ site.baseurl }}/05_interview/fundamentals/infra-systems/)。
+
 ---
 
 ## 一、虚拟机与容器
