@@ -1,0 +1,240 @@
+% zero2Leetcode blue book template for Pandoc + XeLaTeX.
+\documentclass[letterpaper,10pt,openany,oneside]{ctexbook}
+
+% ---- Page and typography ----
+\usepackage[margin=2.25cm,headheight=16pt]{geometry}
+\usepackage{setspace}
+\setstretch{1.24}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setlength{\emergencystretch}{3em}
+\raggedbottom
+
+% ---- Fonts ----
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\IfFontExistsTF{Source Han Serif SC}{
+  \setCJKmainfont{Source Han Serif SC}
+  \setCJKsansfont{Source Han Sans SC}
+  \setCJKmonofont{Source Han Sans SC}
+}{
+  \setCJKmainfont{STSong}[BoldFont=STHeiti,ItalicFont=STKaiti]
+  \setCJKsansfont{STHeiti}
+  \setCJKmonofont{STHeiti}
+}
+\IfFontExistsTF{TeX Gyre Pagella}{
+  \setmainfont{TeX Gyre Pagella}
+}{
+  \setmainfont{Times New Roman}
+}
+\IfFontExistsTF{Inter}{
+  \setsansfont{Inter}
+}{
+  \setsansfont{TeX Gyre Heros}
+}
+\IfFontExistsTF{JetBrains Mono}{
+  \setmonofont{JetBrains Mono}[Scale=0.82]
+}{
+  \setmonofont{Menlo}[Scale=0.80]
+}
+
+% ---- Color system ----
+\usepackage[table]{xcolor}
+\definecolor{bluebook}{RGB}{24,96,170}
+\definecolor{bluebookdark}{RGB}{11,43,78}
+\definecolor{bluebooklight}{RGB}{232,242,252}
+\definecolor{bluebookcyan}{RGB}{54,191,201}
+\definecolor{bluebookgold}{RGB}{244,183,64}
+\definecolor{codeframe}{RGB}{154,184,214}
+\definecolor{codetext}{RGB}{25,35,45}
+
+% ---- Math, lists, and symbols ----
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\setlist{itemsep=0.15em,topsep=0.35em,parsep=0pt}
+\usepackage{newunicodechar}
+\newunicodechar{→}{$$\rightarrow$$}
+\newunicodechar{←}{$$\leftarrow$$}
+\newunicodechar{≤}{$$\leq$$}
+\newunicodechar{≥}{$$\geq$$}
+\newunicodechar{×}{$$\times$$}
+\newunicodechar{∈}{$$\in$$}
+\newunicodechar{∅}{$$\varnothing$$}
+\newunicodechar{∞}{$$\infty$$}
+
+% ---- Code blocks ----
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+  fontsize=\footnotesize,
+  breaklines=true,
+  breakanywhere=true,
+  frame=single,
+  framesep=5pt,
+  framerule=0.35pt,
+  rulecolor=\color{codeframe},
+  formatcom=\color{codetext},
+  xleftmargin=6pt,
+  xrightmargin=6pt
+}
+
+% ---- Tables ----
+\usepackage{longtable,booktabs,array,calc,multirow}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.16}
+\setlength{\LTpre}{0.5em}
+\setlength{\LTpost}{0.8em}
+\newcounter{none}
+
+% ---- Images ----
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>0.82\textheight 0.82\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+
+% ---- Links and PDF metadata ----
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=bluebookdark,
+  urlcolor=bluebook,
+  citecolor=bluebook,
+  pdfauthor={$for(author)$$author$$sep$, $endfor$},
+  pdftitle={$title$},
+  pdfsubject={$subtitle$}
+}
+\urlstyle{same}
+\usepackage{bookmark}
+
+% ---- Header and footer ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\textcolor{bluebook}{\leftmark}}
+\fancyhead[R]{\small\sffamily\textcolor{bluebookdark}{$series$}}
+\fancyfoot[C]{\small\sffamily\textcolor{bluebook!70}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{bluebook}\leaders\hrule height \headrulewidth\hfill}}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\small\sffamily\textcolor{bluebook!70}{\thepage}}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% ---- Headings ----
+\ctexset{
+  chapter = {
+    format = \Huge\bfseries\sffamily\color{bluebookdark},
+    nameformat = \Large\sffamily\color{bluebook},
+    numberformat = \Large\sffamily\color{bluebook},
+    beforeskip = 0.5cm,
+    afterskip = 1.1cm
+  },
+  section = {
+    format = \Large\bfseries\sffamily\color{bluebook},
+    beforeskip = 1.0em,
+    afterskip = 0.45em
+  },
+  subsection = {
+    format = \large\bfseries\sffamily\color{bluebookdark},
+    beforeskip = 0.85em,
+    afterskip = 0.35em
+  },
+  subsubsection = {
+    format = \normalsize\bfseries\sffamily\color{bluebook!85!black},
+    beforeskip = 0.7em,
+    afterskip = 0.25em
+  }
+}
+
+% ---- Quotes ----
+\usepackage{mdframed}
+\renewenvironment{quote}{
+  \begin{mdframed}[
+    linecolor=bluebook,
+    linewidth=2.5pt,
+    topline=false,
+    bottomline=false,
+    rightline=false,
+    backgroundcolor=bluebooklight,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=6pt,
+    innerbottommargin=6pt,
+    skipabove=6pt,
+    skipbelow=6pt
+  ]
+  \small
+}{
+  \end{mdframed}
+}
+
+% ---- Pandoc compatibility ----
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\usepackage[normalem]{ulem}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+% ---- Cover ----
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\pagecolor{bluebookdark}
+\begin{tikzpicture}[remember picture,overlay]
+  \node[inner sep=0] at (current page.center) {%
+    \includegraphics[
+      width=\paperwidth,
+      height=1.04\paperheight,
+      keepaspectratio
+    ]{book/assets/zero2Leetcode-bluebook-cover-1086x1448.png}%
+  };
+\end{tikzpicture}
+\null
+\end{titlepage}
+\nopagecolor
+
+% Copyright page
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+\begin{minipage}{0.72\textwidth}
+\centering
+{\Large\sffamily\bfseries\textcolor{bluebookdark}{$series$}}\\[14pt]
+{\large $title$}\\[24pt]
+{\color{bluebook}\rule{0.55\textwidth}{0.5pt}}\\[14pt]
+{\small 版本：$version$ \quad 日期：$date$}\\[8pt]
+{\small 作者：$for(author)$$author$$sep$、$endfor$}\\[8pt]
+{\small 许可：$license$}\\[16pt]
+{\footnotesize 本书内容与网站共用维护来源。转载请注明出处，最新版本请访问项目仓库。}\\[8pt]
+{\footnotesize\url{$repo$}}
+\end{minipage}
+\end{center}
+\vspace*{\fill}
+\clearpage
+
+\frontmatter
+\tableofcontents
+\clearpage
+
+\mainmatter
+$body$
+
+\clearpage
+\thispagestyle{empty}
+\pagecolor{bluebookdark}
+\vspace*{\fill}
+\begin{center}
+{\Huge\sffamily\bfseries\color{white}{$series$}}\\[18pt]
+{\Large\sffamily\color{bluebookcyan}代码能写，思路能讲，追问能接}\\[28pt]
+{\color{bluebookgold}\rule{0.5\textwidth}{1pt}}\\[22pt]
+{\normalsize\sffamily\color{white!70}\url{$repo$}}
+\end{center}
+\vspace*{\fill}
+
+\end{document}
