@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Zero2Leetcode 在线练习场 - 在浏览器中直接编写和运行 Python 代码">
+    <meta name="description" content="Zero2Leetcode 在线练习场 - 使用 Python、Java 17 或 Go 编写并运行 LeetCode 核心代码">
     <title>在线练习场 | Zero2Leetcode</title>
+    <link rel="preconnect" href="https://cjrtnc.leaningtech.com" crossorigin>
     <script>
         (function(){var s=localStorage.getItem('z2l-theme');var t=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);})();
     </script>
@@ -16,7 +17,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css?v=2">
-    <link rel="stylesheet" href="assets/css/playground.css?v=20260818-2">
+    <link rel="stylesheet" href="assets/css/playground.css?v=20260827">
     <!-- CodeMirror 5 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
     <link rel="stylesheet"
@@ -69,9 +70,14 @@
                 <select id="problem-select" class="problem-select">
                     <!-- JS 动态填充 -->
                 </select>
+                <select id="language-select" class="problem-select language-select" aria-label="编程语言" title="编程语言">
+                    <option value="python">Python 3</option>
+                    <option value="java">Java 17</option>
+                    <option value="go">Go</option>
+                </select>
             </div>
             <div class="toolbar-right">
-                <span id="pyodide-status" class="pyodide-status loading">Pyodide 加载中...</span>
+                <span id="runtime-status" class="pyodide-status loading">运行时加载中...</span>
                 <button id="run-btn" class="btn btn-run" disabled>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M4 2l10 6-10 6V2z" />
@@ -103,7 +109,7 @@
                 <div class="panel panel-editor">
                     <div class="panel-header">
                         <span class="panel-title">代码编辑器</span>
-                        <span class="panel-hint">Python 3</span>
+                        <span id="language-hint" class="panel-hint">Python 3 · 核心代码模式</span>
                     </div>
                     <div class="panel-body editor-body">
                         <textarea id="code-editor"></textarea>
@@ -219,13 +225,17 @@
     <!-- CodeMirror JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/clike/clike.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/hint/show-hint.min.js"></script>
+    <!-- Core-mode language templates and compiled runners -->
+    <script src="assets/js/playground-languages.js?v=20260827"></script>
     <!-- Pyodide -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
     <!-- Problem Metadata -->
     <script src="assets/js/problems-data.js"></script>
     <!-- Playground Logic -->
-    <script src="assets/js/playground.js?v=20260803-3"></script>
+    <script src="assets/js/playground.js?v=20260827"></script>
     <script src="assets/js/playground-extra/batch-1.js"></script>
     <script src="assets/js/playground-extra/batch-2.js"></script>
     <script src="assets/js/playground-extra/batch-3.js"></script>
@@ -235,7 +245,7 @@
     <script src="assets/js/playground-extra/batch-7.js"></script>
     <script src="assets/js/playground-extra/batch-8.js"></script>
     <!-- AI Assistant -->
-    <script src="assets/js/ai-assistant.js?v=20260818-2"></script>
+    <script src="assets/js/ai-assistant.js?v=20260827"></script>
     <!-- Theme toggle -->
     <script>
     (function () {

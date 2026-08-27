@@ -22,7 +22,7 @@
 ### ✨ 核心亮点
 
 - 📚 **系统学习路线** — 6 阶段覆盖 Python 基础、算法刷题、ACM 笔试真题、面试手撕与八股文
-- 🖥️ **在线练习场** — 内置 98 道 Hot 100 题目，浏览器直接运行 Python
+- 🖥️ **在线练习场** — 116 道题接入本地测试，支持 Python / Java 17 / Go 核心代码模式
 - 🎯 **ACM 模拟 IDE** — 支持 Python / Go / Java 17（Preview）、stdin/stdout、输出对比和 Python 断点调试
 - 🤖 **AI 编程教练** — 在练习场诊断题目与代码，也能读取 ACM 代码和样例，把 Python 解法快速转换为 Java 17 / Go
 - 📝 **完整题解** — LeetCode Hot 100 全部题解
@@ -57,13 +57,27 @@
 
 ---
 
+## 🖥️ LeetCode 核心代码练习场
+
+在线练习场使用 LeetCode 核心代码模式：只实现题目函数或类，不需要处理标准输入输出。切换语言或题目时，Python、Java 和 Go 草稿会分别自动保存。
+
+| 语言 | 编辑内容 | 执行方式 |
+|------|----------|----------|
+| Python 3 | 题目顶层函数 | Pyodide 浏览器内执行 |
+| Java 17 | `class Solution` 或题目指定类 | 自动附加 `Main` 测试驱动，通过 Java 17 浏览器运行时编译执行 |
+| Go | 题目函数或题目指定类型 | 自动附加 `package main` 与测试驱动，使用 Go Playground 编译执行 |
+
+链表、二叉树、原地修改、集合结果和设计类题目的输入转换与结果校验均由页面测试驱动完成。编辑器中不会出现 ACM 的 stdin/stdout 包装代码。
+
+---
+
 ## 🤖 AI 编程教练
 
 > **默认接入 OpenRouter 免费模型** — 无需登录，也可以在设置中换成支持浏览器 CORS 和流式 `/chat/completions` 的 OpenAI 兼容 API
 
-AI 教练同时用于两个编程页面：在 LeetCode 练习场读取当前题目与 Python 代码，给出提示和诊断；在 ACM 模拟 IDE 读取当前语言、代码、stdin、stdout、期望输出和运行状态，并基于已经写通的 Python 解法生成完整的 Java 17 或 Go ACM 程序。
+AI 教练同时用于两个编程页面：在 LeetCode 练习场读取当前题目、语言、核心代码模板与草稿，给出当前语言的提示、诊断或实现；在 ACM 模拟 IDE 读取当前语言、代码、stdin、stdout、期望输出和运行状态，并生成完整的 Java 17 或 Go ACM 程序。
 
-仓库题解仍以 Python 为主，不逐题人工维护 Java / Go 版本。语言转换结果由 AI 生成，请务必使用页面中的样例运行和输出对比再次验证。
+仓库题解仍以 Python 为主。Java / Go 核心代码签名与测试驱动由题目元数据生成，AI 返回的具体解法仍需使用页面样例验证。
 
 ### 功能预览
 
@@ -85,6 +99,7 @@ AI 教练同时用于两个编程页面：在 LeetCode 练习场读取当前题�
 | 通用 | 检查代码 / 分析报错 | 结合代码、样例和最近输出定位问题 |
 | 通用 | 解释思路 | 说明算法、关键变量和复杂度 |
 | LeetCode | 给个提示 / 解释题目 / 优化代码 | 按当前题目提供教学式帮助 |
+| LeetCode | 给我代码 | 按当前选择的 Python / Java 17 / Go 核心代码模板生成实现 |
 
 ### 使用方式
 
@@ -407,6 +422,7 @@ zero2Leetcode/
 │   │   └── acm-ai-assistant.css # ACM AI 教练抽屉样式
 │   ├── js/
 │   │   ├── playground.js        # 练习场核心逻辑
+│   │   ├── playground-languages.js # Java / Go 核心模板与测试驱动
 │   │   ├── acm-playground.js    # ACM 模拟 IDE 逻辑
 │   │   └── ai-assistant.js      # 练习场 / ACM 共用 AI 教练模块
 │   └── images/                  # 静态资源

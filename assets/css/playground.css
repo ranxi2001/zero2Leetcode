@@ -57,6 +57,11 @@
     border-color: var(--primary);
 }
 
+.language-select {
+    min-width: 118px;
+    width: auto;
+}
+
 /* Pyodide 状态 */
 .pyodide-status {
     font-size: 0.8rem;
@@ -1197,11 +1202,16 @@ body.ai-open .ai-fab {
 
     .toolbar-left {
         width: 100%;
+        flex-wrap: wrap;
     }
 
     .problem-select {
         width: 100%;
         min-width: unset;
+    }
+
+    .language-select {
+        width: 100%;
     }
 
     /* 移动端：AI 面板恢复浮窗行为 */

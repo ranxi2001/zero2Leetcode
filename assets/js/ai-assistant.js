@@ -46,6 +46,26 @@ const LEETCODE_PYTHON_HARNESS = `【运行环境硬约束】
 必须原样沿用下方【原始代码模板】中的函数名、参数列表、下划线命名及 ListNode、TreeNode 等运行环境约定；只替换模板中的 pass 或待实现函数体。不得输出 class Solution，不得把 snake_case 函数名改成 LeetCode 官方 camelCase 方法，也不得改成 ACM 的 stdin/stdout 完整程序。
 即使用户只说“给出代码”“写代码”“给答案”等未指定语言的请求，也必须按上述模板返回兼容 Python 3.6 的实现。`;
 
+const LEETCODE_JAVA_HARNESS = `【运行环境硬约束】
+当前页面是本地力扣模拟，当前语言为 Java 17，使用 LeetCode 核心代码模式。
+如果回答中包含实现代码、修正版、补全代码或可写入编辑器的代码，只能输出 Java 17 代码，并使用 java 代码块。
+必须严格保留下方【原始代码模板】中的类名、方法名、参数类型和返回类型，只补全待实现部分。ListNode、TreeNode 等题目数据结构由运行环境提供。
+不得输出 public class Main、main 方法、stdin/stdout 读取或 ACM 完整程序，也不得改写成 Python、Go 或其他语言。
+即使用户只说“给出代码”“写代码”“给答案”等未指定语言的请求，也必须返回与当前 Java 17 核心代码模板兼容的实现。`;
+
+const LEETCODE_GO_HARNESS = `【运行环境硬约束】
+当前页面是本地力扣模拟，当前语言为 Go，使用 LeetCode 核心代码模式。
+如果回答中包含实现代码、修正版、补全代码或可写入编辑器的代码，只能输出 Go 代码，并使用 go 代码块。
+必须严格保留下方【原始代码模板】中的函数名、参数类型和返回类型，只补全待实现部分。ListNode、TreeNode 等题目数据结构由运行环境提供；需要标准库时可在函数前添加 import 声明。
+不得输出 package main、main 函数、stdin/stdout 读取或 ACM 完整程序，也不得改写成 Python、Java 或其他语言。
+即使用户只说“给出代码”“写代码”“给答案”等未指定语言的请求，也必须返回与当前 Go 核心代码模板兼容的实现。`;
+
+const LEETCODE_HARNESSES = Object.freeze({
+    python: LEETCODE_PYTHON_HARNESS,
+    java: LEETCODE_JAVA_HARNESS,
+    go: LEETCODE_GO_HARNESS,
+});
+
 const QUICK_ACTIONS = Object.freeze({
     'convert-java': {
         label: '转为 Java 17',
@@ -85,7 +105,7 @@ const QUICK_ACTIONS = Object.freeze({
     },
     'give-code': {
         label: '给我代码',
-        prompt: '请直接给出这道题完整、可运行、可写入当前编辑器的 Python 3.6 兼容代码。严格沿用【原始代码模板】中的顶层函数名、参数列表和 snake_case 命名，只补全函数体；不要使用 Optional 等 typing 类型注解、参数类型注解、返回值注解或 class Solution。只输出 python 代码块，再用不超过 3 点说明关键思路。',
+        prompt: '请直接给出这道题完整、可运行、可写入当前编辑器的 {sourceLanguage} 核心代码。严格沿用【原始代码模板】的签名和数据结构约定，只补全待实现部分。只输出 {sourceFence} 代码块，再用不超过 3 点说明关键思路。',
     },
 });
 
@@ -261,7 +281,7 @@ function parseTopLevelFunctionSignature(source) {
     };
 }
 
-function validateAssistantResponse(content, expectedLanguage = '', expectedTemplate = '') {
+function validateAssistantResponse(content, expectedLanguage = '', expectedTemplate = '', expectedSurface = 'acm') {
     const text = String(content || '').trim();
     if (!text) return { valid: false, message: 'AI 服务未返回内容，请重试。' };
     if (/^user\s+safety\s*:\s*(?:safe|unsafe)[.!]?$/i.test(text)) {
@@ -288,11 +308,30 @@ function validateAssistantResponse(content, expectedLanguage = '', expectedTempl
             return { valid: false, message: 'AI 返回的代码不符合本地力扣模拟的 Python 3.6 原始函数模板，请重试。' };
         }
     }
-    if (language === 'java' && !/\bpublic\s+(?:final\s+)?class\s+Main\b/.test(text)) {
-        return { valid: false, message: 'AI 没有返回完整的 Java 17 Main 程序，请重试。' };
+    if (language === 'java') {
+        if (expectedSurface === 'leetcode') {
+            const expectedClass = String(expectedTemplate).match(/^class\s+([A-Za-z_]\w*)\b/m)?.[1] || 'Solution';
+            const hasExpectedClass = new RegExp(`^\\s*class\\s+${expectedClass}\\b`, 'm').test(text);
+            if (!hasExpectedClass || /\bpublic\s+(?:final\s+)?class\s+Main\b/.test(text)) {
+                return { valid: false, message: 'AI 返回的代码不符合当前 Java 17 核心代码模板，请重试。' };
+            }
+        } else if (!/\bpublic\s+(?:final\s+)?class\s+Main\b/.test(text)) {
+            return { valid: false, message: 'AI 没有返回完整的 Java 17 Main 程序，请重试。' };
+        }
     }
-    if (language === 'go' && !/^\s*package\s+main\b/m.test(text)) {
-        return { valid: false, message: 'AI 没有返回完整的 Go main 程序，请重试。' };
+    if (language === 'go') {
+        if (expectedSurface === 'leetcode') {
+            const expectedFunction = String(expectedTemplate).match(/^func\s+([A-Za-z_]\w*)\s*\(/m)?.[1] || '';
+            const expectedType = String(expectedTemplate).match(/^type\s+([A-Za-z_]\w*)\s+struct\b/m)?.[1] || '';
+            const hasExpectedShape = expectedFunction
+                ? new RegExp(`^\\s*func\\s+${expectedFunction}\\s*\\(`, 'm').test(text)
+                : Boolean(expectedType && new RegExp(`^\\s*type\\s+${expectedType}\\s+struct\\b`, 'm').test(text));
+            if (!hasExpectedShape || /^\s*package\s+main\b/m.test(text) || /^\s*func\s+main\s*\(/m.test(text)) {
+                return { valid: false, message: 'AI 返回的代码不符合当前 Go 核心代码模板，请重试。' };
+            }
+        } else if (!/^\s*package\s+main\b/m.test(text)) {
+            return { valid: false, message: 'AI 没有返回完整的 Go main 程序，请重试。' };
+        }
     }
     return { valid: true, message: '' };
 }
@@ -306,7 +345,7 @@ function resolveExpectedResponseLanguage(userMessage, context = {}, explicitLang
     if (rejectsDirectCode) return '';
 
     const requestsCode = /(?:给我|给出|提供|输出|生成|写出|写一份|写一个|补全|完成|改写|重写|修复|修改)[^。！？\n]{0,16}(?:代码|函数|实现|程序)|(?:完整|可运行|可提交|修正后|正确的)[^。！？\n]{0,8}(?:代码|实现|程序)/.test(request);
-    return requestsCode ? 'python' : '';
+    return requestsCode ? normalizeGeneratedCodeLanguage(context.language) || 'python' : '';
 }
 
 function readElementValue(doc, id) {
@@ -384,11 +423,15 @@ function collectAssistantContext() {
     }
 
     const code = readEditorValue(win, doc, false);
-    const template = win?.currentProblem?.template || '';
+    const languageContext = typeof win?.leetcodeGetLanguageContext === 'function'
+        ? win.leetcodeGetLanguageContext()
+        : { language: 'python', languageLabel: 'Python 3', template: win?.currentProblem?.template || '' };
+    const language = AI_LANGUAGE_META[languageContext?.language] ? languageContext.language : 'python';
+    const template = String(languageContext?.template || win?.currentProblem?.template || '');
     return {
         surface: 'leetcode',
-        language: 'python',
-        languageLabel: 'Python 3',
+        language,
+        languageLabel: AI_LANGUAGE_META[language].label,
         problemTitle,
         problem,
         template,
@@ -420,7 +463,7 @@ function buildContextMessage(userMessage, contextOverride = null) {
     if (context.surface === 'acm') {
         parts.push(`【ACM 环境】\n当前语言：${context.languageLabel}\n请保持现有标准输入与标准输出协议。`);
     } else {
-        parts.push(LEETCODE_PYTHON_HARNESS);
+        parts.push(LEETCODE_HARNESSES[context.language] || LEETCODE_PYTHON_HARNESS);
     }
 
     const problem = clipText(context.problem.trim(), AI_CONTEXT_LIMITS.problem);
@@ -431,7 +474,7 @@ function buildContextMessage(userMessage, contextOverride = null) {
     if (context.surface === 'leetcode') {
         const template = clipText(context.template.trim(), AI_CONTEXT_LIMITS.code);
         if (template) {
-            parts.push(`【原始代码模板】\n必须保留以下函数签名，只替换待实现部分：\n${markdownCodeBlock(template, 'python')}`);
+            parts.push(`【原始代码模板】\n必须保留以下签名，只替换待实现部分：\n${markdownCodeBlock(template, AI_LANGUAGE_META[context.language].fence)}`);
         }
     }
 
@@ -490,7 +533,12 @@ function getQuickActionPrompt(action, contextOverride = null) {
     const quickAction = QUICK_ACTIONS[action];
     if (!quickAction) return '';
     const context = normalizeContext(contextOverride || collectAssistantContext());
-    return quickAction.prompt.replaceAll('{sourceLanguage}', context.languageLabel);
+    const sourceLanguage = context.surface === 'leetcode' && context.language === 'python'
+        ? 'Python 3.6'
+        : context.languageLabel;
+    return quickAction.prompt
+        .replaceAll('{sourceLanguage}', sourceLanguage)
+        .replaceAll('{sourceFence}', AI_LANGUAGE_META[context.language].fence);
 }
 
 function parseSseLine(line) {
@@ -674,9 +722,7 @@ function decorateAssistantCodeBlocks(container, options = {}) {
             .find((className) => /^language-/i.test(className)) || '';
         const rawLanguage = languageClass.replace(/^language-/i, '');
         const languageLabel = AI_LANGUAGE_META[language]?.label || rawLanguage || '代码';
-        const supportsLanguage = surface === 'acm'
-            ? Boolean(AI_LANGUAGE_META[language])
-            : language === 'python';
+        const supportsLanguage = Boolean(AI_LANGUAGE_META[language]);
 
         const block = doc.createElement('div');
         block.className = 'ai-code-block';
@@ -1259,7 +1305,12 @@ class AIAssistant {
                 contentElement.textContent = 'AI 服务未返回内容，请重试。';
                 completionAnnouncement = 'AI 服务未返回内容';
             } else if (!this.discardCurrentResponse) {
-                const validation = validateAssistantResponse(fullContent, expectedLanguage, context.template);
+                const validation = validateAssistantResponse(
+                    fullContent,
+                    expectedLanguage,
+                    context.template,
+                    context.surface
+                );
                 if (!validation.valid) {
                     contentElement.innerHTML = '';
                     const invalidElement = getDocument().createElement('div');

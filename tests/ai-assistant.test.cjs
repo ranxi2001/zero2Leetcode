@@ -73,7 +73,7 @@ test('ACM AI DOM and local assets are wired', () => {
     }
 });
 
-test('LeetCode quick actions include a Python code generation button', () => {
+test('LeetCode quick actions include a language-aware code generation button', () => {
     const html = fs.readFileSync(path.join(root, 'playground.html'), 'utf8');
 
     assert.match(html, /assets\/images\/ai-assistant-logo\.svg/);
@@ -81,9 +81,9 @@ test('LeetCode quick actions include a Python code generation button', () => {
 
     assert.match(html, /data-action="give-code"[^>]*>💻 给我代码<\/button>/);
     assert.equal(QUICK_ACTIONS['give-code'].label, '给我代码');
-    assert.match(QUICK_ACTIONS['give-code'].prompt, /Python 3\.6/);
+    assert.match(QUICK_ACTIONS['give-code'].prompt, /\{sourceLanguage\}/);
+    assert.match(QUICK_ACTIONS['give-code'].prompt, /\{sourceFence\}/);
     assert.match(QUICK_ACTIONS['give-code'].prompt, /原始代码模板/);
-    assert.match(QUICK_ACTIONS['give-code'].prompt, /Optional/);
     assert.match(QUICK_ACTIONS['give-code'].prompt, /完整/);
 });
 
@@ -99,7 +99,7 @@ test('AI assistant logo is a transparent scalable SVG used by dynamic messages',
     assert.doesNotMatch(assistantSource, /<rect x="4" y="7" width="16" height="11" rx="4"/);
 });
 
-test('give-code quick action sends its dedicated Python implementation prompt', () => {
+test('give-code quick action follows the active core language', () => {
     const assistant = Object.create(AIAssistant.prototype);
     assistant.inputEl = { value: '', style: {}, scrollHeight: 40 };
     const sent = [];
@@ -109,9 +109,16 @@ test('give-code quick action sends its dedicated Python implementation prompt', 
 
     assert.match(assistant.inputEl.value, /Python 3\.6/);
     assert.match(assistant.inputEl.value, /原始代码模板/);
-    assert.match(assistant.inputEl.value, /Optional/);
     assert.match(assistant.inputEl.value, /完整/);
     assert.deepEqual(sent, [{ visibleMessage: '给我代码', expectedLanguage: '' }]);
+
+    const javaPrompt = getQuickActionPrompt('give-code', {
+        surface: 'leetcode',
+        language: 'java',
+        languageLabel: 'Java 17',
+    });
+    assert.match(javaPrompt, /Java 17/);
+    assert.match(javaPrompt, /java 代码块/);
 });
 
 test('ACM context includes language, code, stdin, stdout, expected output, and status', () => {
@@ -293,12 +300,14 @@ test('LeetCode response validation only applies to explicit code-generation requ
     assert.equal(resolveExpectedResponseLanguage('为什么这里要用列表包一层？', { surface: 'leetcode' }), '');
     assert.equal(resolveExpectedResponseLanguage('请直接给出完整代码', { surface: 'leetcode' }), 'python');
     assert.equal(resolveExpectedResponseLanguage('帮我补全函数实现', { surface: 'leetcode' }), 'python');
+    assert.equal(resolveExpectedResponseLanguage('帮我补全函数实现', { surface: 'leetcode', language: 'java' }), 'java');
+    assert.equal(resolveExpectedResponseLanguage('帮我补全函数实现', { surface: 'leetcode', language: 'go' }), 'go');
     assert.equal(resolveExpectedResponseLanguage('解释这段代码', { surface: 'leetcode' }), '');
     assert.equal(resolveExpectedResponseLanguage('给我提示，不要直接给代码', { surface: 'leetcode' }), '');
     assert.equal(resolveExpectedResponseLanguage('任意问题', { surface: 'acm' }), '');
     assert.equal(resolveExpectedResponseLanguage('任意问题', { surface: 'leetcode' }, 'java'), 'java');
     assert.match(assistantSource, /resolveExpectedResponseLanguage\(userMessage, context\)/);
-    assert.match(assistantSource, /validateAssistantResponse\(fullContent, expectedLanguage, context\.template\)/);
+    assert.match(assistantSource, /context\.surface\n\s*\)/);
 });
 
 test('failed AI requests render a retry button and retry without duplicating the user turn', () => {
@@ -341,6 +350,40 @@ test('shared assistant keeps the LeetCode problem and Python editor context', ()
     });
 });
 
+test('LeetCode assistant follows the active Java core template', () => {
+    const document = {
+        body: { dataset: {} },
+        createElement() {
+            return {
+                textContent: '',
+                set innerHTML(value) { this.textContent = String(value).replace(/<[^>]+>/g, ''); },
+            };
+        },
+        getElementById() { return null; },
+        querySelector() { return null; },
+    };
+    const template = 'class Solution {\n    public int[] twoSum(int[] nums, int target) { return null; }\n}';
+    const window = {
+        currentProblem: { title: '两数之和', description: '<p>返回两个下标</p>' },
+        editor: { getValue: () => template.replace('return null', 'return new int[]{0, 1}') },
+        leetcodeGetLanguageContext: () => ({
+            language: 'java',
+            languageLabel: 'Java 17',
+            template,
+        }),
+    };
+
+    withBrowserGlobals({ document, window }, () => {
+        const context = collectAssistantContext();
+        const message = buildContextMessage('给出代码', context);
+        assert.equal(context.language, 'java');
+        assert.match(message, /当前语言为 Java 17/);
+        assert.match(message, /不得输出 public class Main/);
+        assert.match(message, /```java\nclass Solution/);
+        assert.doesNotMatch(message, /当前页面是本地力扣模拟，执行环境按 Python 3\.6/);
+    });
+});
+
 test('assistant prompt and renderer are language-aware and sanitize Markdown HTML', () => {
     assert.match(SYSTEM_PROMPT, /代码块标注当前语言或目标语言/);
     assert.doesNotMatch(SYSTEM_PROMPT, /代码块使用\s+```python/);
@@ -372,6 +415,42 @@ test('conversion response validation rejects safety classifiers and incomplete p
     assert.equal(
         validateAssistantResponse('```go\npackage main\nfunc main() {}\n```', 'go').valid,
         true
+    );
+    assert.equal(
+        validateAssistantResponse(
+            '```java\nclass Solution { public int[] twoSum(int[] nums, int target) { return null; } }\n```',
+            'java',
+            'class Solution { public int[] twoSum(int[] nums, int target) { return null; } }',
+            'leetcode'
+        ).valid,
+        true
+    );
+    assert.equal(
+        validateAssistantResponse(
+            '```java\npublic class Main {}\n```',
+            'java',
+            'class Solution {}',
+            'leetcode'
+        ).valid,
+        false
+    );
+    assert.equal(
+        validateAssistantResponse(
+            '```go\nfunc twoSum(nums []int, target int) []int { return nil }\n```',
+            'go',
+            'func twoSum(nums []int, target int) []int { return nil }',
+            'leetcode'
+        ).valid,
+        true
+    );
+    assert.equal(
+        validateAssistantResponse(
+            '```go\npackage main\nfunc main() {}\n```',
+            'go',
+            'func twoSum(nums []int, target int) []int { return nil }',
+            'leetcode'
+        ).valid,
+        false
     );
 });
 

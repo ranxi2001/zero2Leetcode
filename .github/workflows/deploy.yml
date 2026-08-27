@@ -24,6 +24,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -35,6 +39,8 @@ jobs:
           node --check assets/js/acm-bridge.js
           node --check assets/js/ai-assistant.js
           node --check assets/js/java-runner-worker.js
+          node --check assets/js/playground-languages.js
+          node --check assets/js/playground.js
       - name: Run Node tests
         run: node --test tests/*.test.cjs
       - name: Build and test Java browser runner
@@ -51,9 +57,11 @@ jobs:
       - name: Verify browser deployment assets
         run: |
           test -s _site/acm-playground.html
+          test -s _site/playground.html
           test -s _site/assets/css/acm-ai-assistant.css
           test -s _site/assets/js/ai-assistant.js
           test -s _site/assets/js/java-runner-worker.js
+          test -s _site/assets/js/playground-languages.js
           test -s _site/assets/vendor/zero2leetcode-java-runner-20260803.jar
           test -s _site/THIRD_PARTY_NOTICES.md
           test -s _site/LICENSE-EPL-2.0.txt

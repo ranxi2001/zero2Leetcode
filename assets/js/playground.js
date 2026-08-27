@@ -1892,22 +1892,33 @@ if (typeof window !== 'undefined') {
 
 // ---------- 本地缓存 ----------
 const STORAGE_KEY = 'z2l_playground_';
+const LANGUAGE_STORAGE_KEY = 'z2l_playground_language';
+const CORE_LANGUAGE_SUPPORT = window.LEETCODE_LANGUAGE_SUPPORT || null;
+const CORE_LANGUAGE_CONFIGS = CORE_LANGUAGE_SUPPORT?.languages || {
+    python: { label: 'Python 3', mode: 'python', indentUnit: 4, indentWithTabs: false },
+};
 
-function saveCode(problemId, code) {
+function getCodeStorageKey(problemId, language = currentLanguage) {
+    return language === 'python'
+        ? STORAGE_KEY + problemId
+        : `${STORAGE_KEY}${language}_${problemId}`;
+}
+
+function saveCode(problemId, code, language = currentLanguage) {
     try {
-        localStorage.setItem(STORAGE_KEY + problemId, code);
+        localStorage.setItem(getCodeStorageKey(problemId, language), code);
         return true;
     } catch (e) {
         return false;
     }
 }
 
-function loadCode(problemId) {
-    try { return localStorage.getItem(STORAGE_KEY + problemId); } catch (e) { return null; }
+function loadCode(problemId, language = currentLanguage) {
+    try { return localStorage.getItem(getCodeStorageKey(problemId, language)); } catch (e) { return null; }
 }
 
-function clearSavedCode(problemId) {
-    try { localStorage.removeItem(STORAGE_KEY + problemId); } catch (e) { /* noop */ }
+function clearSavedCode(problemId, language = currentLanguage) {
+    try { localStorage.removeItem(getCodeStorageKey(problemId, language)); } catch (e) { /* noop */ }
 }
 
 // ---------- Python 自动补全 ----------
@@ -1969,15 +1980,26 @@ function pythonHint(cm) {
 
 // ---------- 全局状态 ----------
 let pyodide = null;
+let pyodideInitPromise = null;
 let editor = null;
 let currentProblem = null;
+let isRunning = false;
+let suppressEditorSave = false;
+
+function getInitialLanguage() {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get('language') || params.get('lang') || localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return CORE_LANGUAGE_SUPPORT?.normalizeLanguage(requested) || 'python';
+}
+
+let currentLanguage = getInitialLanguage();
 
 // ---------- 初始化 ----------
 document.addEventListener('DOMContentLoaded', () => {
     initEditor();
     syncProblemRegistry();
-    initPyodide();
     bindEvents();
+    activateCurrentRuntime();
 });
 
 // Some deploy platforms may delay or reorder non-critical scripts.
@@ -1987,13 +2009,14 @@ window.addEventListener('load', () => {
 });
 
 function initEditor() {
+    const language = CORE_LANGUAGE_CONFIGS[currentLanguage] || CORE_LANGUAGE_CONFIGS.python;
     editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-        mode: 'python',
+        mode: language.mode,
         theme: 'material-darker',
         lineNumbers: true,
-        indentUnit: 4,
+        indentUnit: language.indentUnit,
         tabSize: 4,
-        indentWithTabs: false,
+        indentWithTabs: language.indentWithTabs,
         lineWrapping: true,
         matchBrackets: true,
         autoCloseBrackets: true,
@@ -2009,6 +2032,7 @@ function initEditor() {
 
     // 输入时自动弹出补全
     editor.on('inputRead', (cm, change) => {
+        if (currentLanguage !== 'python') return;
         if (change.origin !== '+input') return;
         const ch = change.text[0];
         // 输入字母/下划线且当前 token 长度 >= 2 时触发
@@ -2023,9 +2047,12 @@ function initEditor() {
     // 自动保存到 localStorage（防抖）
     let saveTimer = null;
     editor.on('change', () => {
+        if (suppressEditorSave || !currentProblem) return;
+        const problemId = currentProblem.id;
+        const language = currentLanguage;
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
-            saveCode(currentProblem.id, editor.getValue());
+            saveCode(problemId, editor.getValue(), language);
         }, 500);
     });
 }
@@ -2060,38 +2087,137 @@ function loadProblem(problem) {
         footer.style.display = 'none';
     }
     // 优先从缓存恢复代码
-    const cached = loadCode(problem.id);
-    editor.setValue(cached || problem.template);
+    const cached = loadCode(problem.id, currentLanguage);
+    const template = getCurrentTemplate(problem);
+    suppressEditorSave = true;
+    editor.setValue(cached || template);
+    suppressEditorSave = false;
     clearOutput();
 }
 
 async function initPyodide() {
-    const status = document.getElementById('pyodide-status');
-    const runBtn = document.getElementById('run-btn');
+    if (pyodide) return pyodide;
+    if (pyodideInitPromise) return pyodideInitPromise;
+    pyodideInitPromise = (async () => {
+        try {
+            const runtime = await loadPyodide();
+            pyodide = runtime;
+            return runtime;
+        } finally {
+            pyodideInitPromise = null;
+        }
+    })();
+    return pyodideInitPromise;
+}
+
+function getCurrentTemplate(problem = currentProblem, language = currentLanguage) {
+    if (CORE_LANGUAGE_SUPPORT) return CORE_LANGUAGE_SUPPORT.getTemplate(problem, language);
+    return problem?.template || '';
+}
+
+function setRuntimeStatus(text, state) {
+    const status = document.getElementById('runtime-status');
+    if (!status) return;
+    status.textContent = text;
+    status.className = `pyodide-status ${state}`;
+}
+
+function setRunButtonReady(ready) {
+    const button = document.getElementById('run-btn');
+    if (button) button.disabled = isRunning || !ready;
+}
+
+async function activateCurrentRuntime() {
+    const languageAtStart = currentLanguage;
+    if (languageAtStart === 'go') {
+        setRuntimeStatus('Go 在线编译就绪', 'ready');
+        setRunButtonReady(true);
+        return;
+    }
+    if (languageAtStart === 'java') {
+        if (!CORE_LANGUAGE_SUPPORT) {
+            setRuntimeStatus('Java 17 运行层缺失', 'error');
+            setRunButtonReady(false);
+            return;
+        }
+        setRunButtonReady(false);
+        try {
+            await CORE_LANGUAGE_SUPPORT.prepareJava((message, state) => {
+                if (currentLanguage === 'java') setRuntimeStatus(message, state);
+            });
+            if (currentLanguage === 'java') {
+                setRuntimeStatus('Java 17 就绪', 'ready');
+                setRunButtonReady(true);
+            }
+        } catch (error) {
+            if (currentLanguage === 'java') {
+                setRuntimeStatus('Java 17 加载失败', 'error');
+                setRunButtonReady(false);
+            }
+            console.error('Java 17 runtime error:', error);
+        }
+        return;
+    }
+
+    setRuntimeStatus('Pyodide 加载中...', 'loading');
+    setRunButtonReady(false);
     try {
-        pyodide = await loadPyodide();
-        status.textContent = 'Pyodide 就绪';
-        status.classList.remove('loading');
-        status.classList.add('ready');
-        runBtn.disabled = false;
-    } catch (e) {
-        status.textContent = '加载失败';
-        status.classList.remove('loading');
-        status.classList.add('error');
-        console.error('Pyodide load error:', e);
+        await initPyodide();
+        if (currentLanguage === 'python') {
+            setRuntimeStatus('Pyodide 就绪', 'ready');
+            setRunButtonReady(true);
+        }
+    } catch (error) {
+        if (currentLanguage === 'python') {
+            setRuntimeStatus('Pyodide 加载失败', 'error');
+            setRunButtonReady(false);
+        }
+        console.error('Pyodide load error:', error);
     }
 }
 
+function updateLanguageUi() {
+    const config = CORE_LANGUAGE_CONFIGS[currentLanguage] || CORE_LANGUAGE_CONFIGS.python;
+    const select = document.getElementById('language-select');
+    if (select) select.value = currentLanguage;
+    const hint = document.getElementById('language-hint');
+    if (hint) hint.textContent = `${config.label} · 核心代码模式`;
+    editor.setOption('mode', config.mode);
+    editor.setOption('indentUnit', config.indentUnit);
+    editor.setOption('indentWithTabs', config.indentWithTabs);
+}
+
+function switchLanguage(nextLanguage) {
+    const next = CORE_LANGUAGE_SUPPORT?.normalizeLanguage(nextLanguage) || 'python';
+    if (next === currentLanguage) return;
+    if (currentProblem && editor) saveCode(currentProblem.id, editor.getValue(), currentLanguage);
+    currentLanguage = next;
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
+    const params = new URLSearchParams(window.location.search);
+    params.set('language', currentLanguage);
+    window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    updateLanguageUi();
+    if (currentProblem) loadProblem(currentProblem);
+    activateCurrentRuntime();
+}
+
 function bindEvents() {
+    updateLanguageUi();
     document.getElementById('problem-select').addEventListener('change', (e) => {
         loadProblem(PROBLEMS[e.target.value]);
+    });
+
+    document.getElementById('language-select').addEventListener('change', (event) => {
+        switchLanguage(event.target.value);
     });
 
     document.getElementById('run-btn').addEventListener('click', runCode);
 
     document.getElementById('reset-btn').addEventListener('click', () => {
-        editor.setValue(currentProblem.template);
-        clearSavedCode(currentProblem.id);
+        suppressEditorSave = true;
+        editor.setValue(getCurrentTemplate());
+        suppressEditorSave = false;
+        clearSavedCode(currentProblem.id, currentLanguage);
         clearOutput();
     });
 
@@ -2107,10 +2233,19 @@ function bindEvents() {
 
 // ---------- 代码执行 ----------
 async function runCode() {
-    if (!pyodide) return;
+    if (isRunning) return;
+    if (currentLanguage === 'python' && !pyodide) {
+        await activateCurrentRuntime();
+        if (!pyodide) return;
+    }
 
     const runBtn = document.getElementById('run-btn');
+    const languageSelect = document.getElementById('language-select');
+    const problemSelect = document.getElementById('problem-select');
+    isRunning = true;
     runBtn.disabled = true;
+    languageSelect.disabled = true;
+    problemSelect.disabled = true;
     runBtn.textContent = '运行中...';
 
     const outputArea = document.getElementById('output-area');
@@ -2129,20 +2264,48 @@ async function runCode() {
     该题已支持按题号跳转，但当前页面还没有配置本地测试用例。<br>
     请使用下方按钮前往 LeetCode 提交，或查看博客详解。
 </div>`;
-        runBtn.disabled = false;
-        runBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> 运行代码`;
+        finishRunControls();
         return;
     }
 
     let passed = 0;
     const total = testCases.length;
     const totalStart = performance.now();
-
-    for (let i = 0; i < total; i++) {
-        const tc = testCases[i];
-        const result = await runTestCase(userCode, problem, tc, i + 1);
-        outputArea.appendChild(result.element);
-        if (result.passed) passed++;
+    try {
+        if (currentLanguage === 'python') {
+            for (let i = 0; i < total; i++) {
+                const result = await runPythonTestCase(userCode, problem, testCases[i], i + 1);
+                outputArea.appendChild(result.element);
+                if (result.passed) passed++;
+            }
+        } else {
+            const compiledResults = await CORE_LANGUAGE_SUPPORT.runCompiledTests(
+                currentLanguage,
+                problem,
+                userCode,
+                (message, state) => {
+                    if (currentLanguage === 'java') setRuntimeStatus(message, state);
+                }
+            );
+            const elapsed = (performance.now() - totalStart).toFixed(1);
+            compiledResults.forEach((compiledResult, index) => {
+                const result = renderTestResult(
+                    problem,
+                    testCases[index],
+                    index + 1,
+                    compiledResult.actual,
+                    compiledResult.error,
+                    index === 0 ? elapsed : ''
+                );
+                outputArea.appendChild(result.element);
+                if (result.passed) passed++;
+            });
+        }
+    } catch (error) {
+        testCases.forEach((testCase, index) => {
+            const result = renderTestResult(problem, testCase, index + 1, undefined, extractError(error), '');
+            outputArea.appendChild(result.element);
+        });
     }
 
     const totalTime = (performance.now() - totalStart).toFixed(1);
@@ -2156,13 +2319,19 @@ async function runCode() {
         summary.className = 'result-summary has-fail';
     }
 
-    runBtn.disabled = false;
-    runBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> 运行代码`;
+    finishRunControls();
 }
 
-async function runTestCase(userCode, problem, testCase, index) {
-    const div = document.createElement('div');
+function finishRunControls() {
+    isRunning = false;
+    const runBtn = document.getElementById('run-btn');
+    runBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> 运行代码`;
+    document.getElementById('language-select').disabled = false;
+    document.getElementById('problem-select').disabled = false;
+    setRunButtonReady(true);
+}
 
+async function runPythonTestCase(userCode, problem, testCase, index) {
     try {
         // 构建 Python 代码：setup + 用户函数 + 调用
         const argsStr = testCase.input.map((arg, i) => {
@@ -2185,25 +2354,15 @@ __result__ = ${resultExpr}
         const elapsed = (performance.now() - t0).toFixed(1);
         const actual = pyodide.globals.get('__result__');
         const actualJS = toJS(actual);
-
-        const pass = compareResults(actualJS, testCase.expected, problem.compareFunc);
-
-        div.className = `test-case ${pass ? 'pass' : 'fail'}`;
-        div.innerHTML = `
-<div class="test-header">
-    <span class="test-icon">${pass ? '&#10004;' : '&#10008;'}</span>
-    <span class="test-label">测试用例 ${index}</span>
-    <span class="test-time">${elapsed} ms</span>
-    <span class="test-status ${pass ? 'pass' : 'fail'}">${pass ? '通过' : '失败'}</span>
-</div>
-<div class="test-detail">
-    <div class="test-row"><span class="test-key">输入：</span><code>${formatInput(problem, testCase.input)}</code></div>
-    <div class="test-row"><span class="test-key">预期：</span><code>${JSON.stringify(testCase.expected)}</code></div>
-    <div class="test-row"><span class="test-key">实际：</span><code>${JSON.stringify(actualJS)}</code></div>
-</div>`;
-
-        return { element: div, passed: pass };
+        return renderTestResult(problem, testCase, index, actualJS, '', elapsed);
     } catch (err) {
+        return renderTestResult(problem, testCase, index, undefined, extractError(err), '');
+    }
+}
+
+function renderTestResult(problem, testCase, index, actual, error = '', elapsed = '') {
+    const div = document.createElement('div');
+    if (error) {
         div.className = 'test-case error';
         div.innerHTML = `
 <div class="test-header">
@@ -2212,11 +2371,28 @@ __result__ = ${resultExpr}
     <span class="test-status fail">错误</span>
 </div>
 <div class="test-detail">
-    <div class="test-row"><span class="test-key">输入：</span><code>${formatInput(problem, testCase.input)}</code></div>
-    <div class="test-row error-msg"><span class="test-key">错误：</span><code>${escapeHtml(extractError(err))}</code></div>
+    <div class="test-row"><span class="test-key">输入：</span><code>${escapeHtml(formatInput(problem, testCase.input))}</code></div>
+    <div class="test-row error-msg"><span class="test-key">错误：</span><code>${escapeHtml(error)}</code></div>
 </div>`;
         return { element: div, passed: false };
     }
+
+    const passed = compareResults(actual, testCase.expected, problem.compareFunc);
+    const time = elapsed ? `<span class="test-time">${elapsed} ms</span>` : '';
+    div.className = `test-case ${passed ? 'pass' : 'fail'}`;
+    div.innerHTML = `
+<div class="test-header">
+    <span class="test-icon">${passed ? '&#10004;' : '&#10008;'}</span>
+    <span class="test-label">测试用例 ${index}</span>
+    ${time}
+    <span class="test-status ${passed ? 'pass' : 'fail'}">${passed ? '通过' : '失败'}</span>
+</div>
+<div class="test-detail">
+    <div class="test-row"><span class="test-key">输入：</span><code>${escapeHtml(formatInput(problem, testCase.input))}</code></div>
+    <div class="test-row"><span class="test-key">预期：</span><code>${escapeHtml(JSON.stringify(testCase.expected))}</code></div>
+    <div class="test-row"><span class="test-key">实际：</span><code>${escapeHtml(JSON.stringify(actual))}</code></div>
+</div>`;
+    return { element: div, passed };
 }
 
 // ---------- 工具函数 ----------
@@ -2257,13 +2433,15 @@ function compareResults(actual, expected, mode) {
 }
 
 function formatInput(problem, inputs) {
-    // 获取函数的参数名（从 template 解析）
-    const match = problem.template.match(/def\s+\w+\(([^)]*)\)/);
-    if (match) {
-        const params = match[1].split(',').map(s => s.trim());
-        return inputs.map((v, i) => `${params[i] || 'arg' + i} = ${JSON.stringify(v)}`).join(', ');
+    const signature = CORE_LANGUAGE_SUPPORT?.parseProblemSignature(problem);
+    if (signature?.kind === 'function' && signature.params.length === inputs.length) {
+        return inputs.map((value, index) => {
+            const rawName = signature.params[index]?.name || `arg${index}`;
+            const name = currentLanguage === 'python' ? rawName : CORE_LANGUAGE_SUPPORT.toCamelCase(rawName);
+            return `${name} = ${JSON.stringify(value)}`;
+        }).join(', ');
     }
-    return inputs.map(v => JSON.stringify(v)).join(', ');
+    return inputs.map((value) => JSON.stringify(value)).join(', ');
 }
 
 function extractError(err) {
@@ -2307,10 +2485,10 @@ function replacePlaygroundEditorContents(value, origin = '+ai') {
 }
 
 function applyGeneratedCodeToPlayground(payload = {}) {
-    const language = String(payload.language || '');
+    const language = String(payload.language || '').trim().toLowerCase();
     const code = payload.code;
-    if (language !== 'python') {
-        return { ok: false, message: '当前练习场只支持写入 Python 代码。' };
+    if (!Object.prototype.hasOwnProperty.call(CORE_LANGUAGE_CONFIGS, language)) {
+        return { ok: false, message: '当前练习场不支持这种编程语言。' };
     }
     if (typeof code !== 'string' || !code.trim()) {
         return { ok: false, message: '代码块为空，无法写入编辑器。' };
@@ -2322,6 +2500,8 @@ function applyGeneratedCodeToPlayground(payload = {}) {
         return { ok: false, message: '编辑器尚未准备好，请稍后重试。' };
     }
 
+    if (language !== currentLanguage) switchLanguage(language);
+
     const previousCode = editor.getValue();
     if (previousCode !== code) {
         try {
@@ -2329,14 +2509,19 @@ function applyGeneratedCodeToPlayground(payload = {}) {
         } catch (error) {
             return { ok: false, message: '写入编辑器失败，请重试。' };
         }
-        if (!saveCode(currentProblem.id, code)) {
+        if (!saveCode(currentProblem.id, code, currentLanguage)) {
             replacePlaygroundEditorContents(previousCode, '+ai-rollback');
             return { ok: false, message: '浏览器无法保存生成的代码，已恢复原草稿。' };
         }
     }
     clearOutput();
     editor.refresh?.();
-    return { ok: true, language: 'python' };
+    return { ok: true, language: currentLanguage };
 }
 
 window.leetcodeApplyGeneratedCode = applyGeneratedCodeToPlayground;
+window.leetcodeGetLanguageContext = () => ({
+    language: currentLanguage,
+    languageLabel: CORE_LANGUAGE_CONFIGS[currentLanguage]?.label || 'Python 3',
+    template: getCurrentTemplate(),
+});
