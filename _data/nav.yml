@@ -379,6 +379,8 @@ modules:
             slug: "baidu/algo-20260806"
           - title: "算法岗 8.13"
             slug: "baidu/algo-20260813"
+          - title: "算法岗 8.27"
+            slug: "baidu/algo-20260827"
           - title: "研发/算法岗备考攻略"
             slug: "baidu/exam-guide"
       - name: "备考技巧"
