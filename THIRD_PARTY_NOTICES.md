@@ -1,5 +1,18 @@
 # Third-Party Notices
 
+## Interview Answer References
+
+The 2026 summer interview answers added on 2026-08-28 were independently written and checked against these primary references:
+
+- [Python language reference: Calls](https://docs.python.org/3/reference/expressions.html#calls) and [Data model](https://docs.python.org/3/reference/datamodel.html) — callable objects, function arguments, closures, and bound methods.
+- [Celery Tasks](https://docs.celeryq.dev/en/stable/userguide/tasks.html) — task retry, acknowledgement, result backends, and idempotency boundaries.
+- [MyBatis Configuration](https://mybatis.org/mybatis-3/configuration) — environments, mappers, type handlers, transactions, and caches.
+- [React `useEffect`](https://react.dev/reference/react/useEffect) — setup, cleanup, reactive dependencies, and development Strict Mode behavior.
+- [MDN Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) and [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) — browser streaming events, framing, cancellation, and incremental consumption.
+- [RFC 9111: HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111.html) — freshness, validation, cache directives, and validators.
+
+No upstream prose or examples are reproduced. Version-specific behavior remains subject to the linked projects' current documentation.
+
 ## CheerpJ 4.3
 
 Java 17 runs in the visitor's browser using CheerpJ Core loaded from the official

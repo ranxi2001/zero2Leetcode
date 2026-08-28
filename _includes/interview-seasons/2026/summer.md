@@ -532,7 +532,7 @@ IPC 包括管道/FIFO、消息队列、共享内存、信号、Socket、内存�
 
 ### 45. HTTP 和 RPC 有什么区别？
 
-> 来源：百度后端一面，7 月 30 日
+> 来源：百度后端一面，7 月 30 日；[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
 
 HTTP 是协议，RPC 是远程调用抽象，两者不在同一分类层级。RPC 框架通常提供 IDL、代码生成、负载均衡、超时、重试和服务发现，并可使用 HTTP/2；HTTP API 更通用、易调试、浏览器生态友好。选型要看跨组织兼容、性能、治理和版本演进。
 
@@ -779,7 +779,7 @@ B+ 树降低磁盘页访问并支持有序范围扫描。常见无法有效利�
 
 ### 64. 两个请求并发更新同一行会怎样？
 
-> 来源：百度后端一面，7 月 30 日
+> 来源：百度后端一面，7 月 30 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)
 
 普通当前写会获取行级排他锁，后到事务等待、超时或遇到死锁回滚。如果没有正确锁定目标行，读改写可能发生丢失更新。可使用条件更新的乐观锁 `WHERE version=?`、原子 SQL、自增/累加表达式或串行化业务 key；应用必须处理冲突重试并设置上限。
 
@@ -840,7 +840,7 @@ InnoDB 聚簇索引叶子存整行，二级索引叶子存主键，因此通过�
 
 ### 70. 两个请求并发更新同一条记录，除了行锁还能怎么处理？
 
-> 来源：百度秋招后端一面，7 月 30 日
+> 来源：百度秋招后端一面，7 月 30 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)
 
 悲观方案是在事务中 `SELECT ... FOR UPDATE`，适合冲突高、操作短的场景。乐观方案增加 `version` 字段，执行 `UPDATE ... WHERE id=? AND version=?`，影响行数为 0 时重读并重试；也可以用唯一约束、幂等键、串行消息队列或按业务键分区降低冲突。
 
@@ -1562,7 +1562,7 @@ JavaScript 主线程执行当前调用栈；异步 API 由宿主环境处理，�
 
 ### 136. `kubectl create pod` 后，Kubernetes 各组件如何协作？
 
-> 来源：字节社招一面，8 月 23 日
+> 来源：[字节社招一面](https://www.nowcoder.com/feed/main/detail/a385d6cc457d47c99c03cb8ea752ab89)，8 月 23 日
 
 `kubectl` 向 API Server 提交对象；API Server 完成认证、授权、准入和 schema 校验后把期望状态写入 etcd。Scheduler 监听未绑定 Pod，经过过滤和打分选择节点并写回绑定结果；目标节点的 kubelet 发现任务后通过 CRI 请求容器运行时拉镜像、创建 sandbox 和容器，通过 CNI 配置网络、CSI 挂载存储。kubelet 持续上报状态，控制器负责副本和故障收敛。API Server 是控制面的入口，不应描述为各组件直接读写 etcd。
 
@@ -2144,7 +2144,7 @@ IEEE 754 binary16 通常为 1 位符号、5 位指数、10 位显式 fraction；
 
 ### 200. gRPC 为什么常使用 Protobuf 二进制编码？它一定比 JSON 快吗？
 
-> 来源：[阿里云 Agent Infra 一面](https://www.nowcoder.com/feed/main/detail/d1fd4cd344bc4d928e708c3e69c8f59c)，2026 年 4 月 1 日
+> 来源：[阿里云 Agent Infra 一面](https://www.nowcoder.com/feed/main/detail/d1fd4cd344bc4d928e708c3e69c8f59c)，2026 年 4 月 1 日；[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
 
 gRPC 通常以 Protobuf 定义强类型契约，使用字段编号编码，消息一般比包含字段名的 JSON 紧凑，并提供代码生成、双向流和基于 HTTP/2 的多路复用。它适合内部服务间高频 RPC，但可读性、调试门槛、浏览器支持和协议演进纪律也要考虑。
 
@@ -2164,7 +2164,7 @@ Cursor 应携带各分片推进位置或一个能重新计算路由的全局边�
 
 ### 202. AI 流式请求如何传播超时、取消和背压？
 
-> 来源：[牛客 AI Infra 面试汇总](https://www.nowcoder.com/discuss/891334000239734784)，2026 年 6 月 3 日
+> 来源：[牛客 AI Infra 面试汇总](https://www.nowcoder.com/discuss/891334000239734784)，2026 年 6 月 3 日；[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
 
 Gateway 收到客户端断连或取消后，应沿调用链取消 HTTP/gRPC 请求、模型排队项和正在生成的序列，并释放 KV Cache、CPU buffer 和计费状态。每一层都使用绝对 Deadline 或可比较的剩余预算，避免层层独立超时导致总时长失控；操作已经产生副作用时，取消只代表“不再等待”，不等于副作用回滚。
 
@@ -2366,7 +2366,7 @@ InnoDB 的聚簇索引叶子节点保存整行数据，一张表只有一个聚�
 
 ### 222. InnoDB 中普通 `SELECT`、锁定读和 `UPDATE` 分别会加什么锁？范围条件为什么影响插入？
 
-> 来源：影石 Java 后端一面，2026 年 8 月 11 日
+> 来源：影石 Java 后端一面，2026 年 8 月 11 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)
 
 普通一致性 `SELECT` 在常见 MVCC 场景下读取快照，通常不加记录锁；`SELECT ... FOR UPDATE/SHARE` 和 `UPDATE/DELETE` 属于当前读。使用唯一索引等值命中时通常锁定目标记录；非唯一索引或范围扫描在可重复读下可能使用 Record、Gap 或 Next-Key Lock，以锁住扫描到的索引范围并抑制幻读。
 
@@ -2426,11 +2426,71 @@ SQL 注入发生在应用把不可信输入拼成 SQL 语义的边界，因此�
 
 ### 228. TCP 已建立连接后，一端突然掉电或断网，另一端的连接状态会怎样变化？
 
-> 来源：字节 AML / 火山方舟 AI Infra 一面，2026 年 8 月 26 日
+> 来源：[字节 AML / 火山方舟 AI Infra 一面](https://www.nowcoder.com/discuss/921927475611869184)，2026 年 8 月 26 日
 
 掉电一端来不及发送 FIN 或 RST，另一端内核不会凭空知道对端消失，连接可能继续保持 `ESTABLISHED`。若应用继续发送数据，TCP 会重传并按系统重试策略最终超时；若连接长期完全空闲且未启用探测，它可能保持很久。对端重启后旧连接状态已经不存在，收到旧连接报文时通常会返回 RST。
 
 生产系统不能依赖默认 TCP 超时及时发现故障。应设置应用请求 Deadline、读写超时和业务心跳，必要时启用并调优 TCP Keepalive；连接池发现超时或 RST 后移除连接并按幂等语义重连。Keepalive 默认周期往往很长，而且只能证明网络路径和对端协议栈存活，不能证明应用线程健康，因此应用层健康语义仍不可少。
+
+---
+
+### 229. Python 高阶函数、闭包与回调中的参数和生命周期如何流转？
+
+> 来源：[大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487)
+
+Python 函数本身是对象，可以作为参数传入、作为返回值返回，实例也可通过 `__call__` 变成可调用对象。调用高阶函数时，传入的是函数对象引用；包装器收集 `*args/**kwargs` 后再次调用它，Python 再按位置参数、关键字参数和默认值把实参绑定到形参。[Python 调用表达式](https://docs.python.org/3/reference/expressions.html#calls)定义了绑定规则，[数据模型](https://docs.python.org/3/reference/datamodel.html)则描述了函数、绑定方法和 callable 对象。
+
+闭包保存的是自由变量所在的 cell，而不是创建闭包那一刻的值副本，因此循环里创建 lambda 容易出现 late binding；可通过默认参数或局部工厂冻结当轮值。绑定方法会持有实例，回调注册表也可能延长对象生命周期，注销不及时会造成资源泄漏。异步回调还要处理异常、取消、超时和调用方已销毁等边界，不能只会把函数当参数传进去。
+
+---
+
+### 230. Celery 在异步任务平台中负责什么？Broker、Worker、Result Backend、Retry 与幂等如何协作？
+
+> 来源：[大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487)
+
+生产者把任务消息发到 Broker，Worker 消费并执行；Result Backend 是可选的状态/结果存储，不等于 Broker。Celery 负责分发、路由、重试和任务状态抽象，但数据库事务、业务幂等和 exactly-once 仍由应用保证。[Celery Tasks 文档](https://docs.celeryq.dev/en/stable/userguide/tasks.html)也将 retry、ack 和 result backend 作为不同机制。
+
+默认早确认降低重复执行概率，但 Worker 确认后宕机会丢失任务；`acks_late` 把确认推迟到执行后，恢复能力更强，却可能重复执行。Celery 还有一个容易漏掉的边界：执行任务的子进程被信号终止或异常退出时，即使开启 `acks_late`，默认仍可能确认消息；只有明确评估并启用 `task_reject_on_worker_lost` 才要求这类消息重投，而它也可能制造持续失败的重投循环。任务应携带稳定业务幂等键，按异常类型决定 retry，设置指数退避、上限和 Dead Letter 路径。结果不需要查询时不要无条件持久化；需要状态时明确过期和清理，否则 Result Backend 会成为隐性存储瓶颈。
+
+---
+
+### 231. MyBatis 接入项目需要配置哪些组件？Mapper、映射、TypeHandler、事务和缓存如何分工？
+
+> 来源：[小公司 AI Agent 开发一面](https://www.nowcoder.com/feed/main/detail/de422815aacc45b48beb150ce44c0197)
+
+MyBatis 的核心入口是 `SqlSessionFactory`，底层环境包含 DataSource 和事务管理；Mapper 接口与 XML/注解中的 statement 定义 SQL 和参数/结果映射，`ResultMap` 解决列到对象的复杂映射，`TypeHandler` 负责 JDBC 类型与 Java 类型转换。插件、别名、数据库厂商选择和 Mapper 注册都属于配置层。[MyBatis 官方配置结构](https://mybatis.org/mybatis-3/configuration)明确列出了这些组件。
+
+一级缓存属于 `SqlSession`，二级缓存绑定 Mapper namespace，不能把它当通用分布式缓存；写操作、事务边界和脏数据风险要一起评估。接入 Spring 后事务通常由 Spring 模块接管，不应再假设 mybatis-config 中的 TransactionManager 决定最终事务语义。排查时区分“Mapper 未注册”“statement ID/namespace 不匹配”“参数映射错误”和“事务未提交”，不要都归为 SQL 写错。
+
+---
+
+### 232. `useEffect` 何时运行和清理？依赖数组、闭包陈旧、竞态与 Strict Mode 重放如何处理？
+
+> 来源：[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
+
+`useEffect` 用来把组件与外部系统同步。组件提交后执行 setup；依赖变化时先用旧值执行 cleanup，再用新值执行 setup；卸载时最后清理一次。省略依赖数组会在每次 commit 后运行，空数组表示不因响应式值变化而重跑，但开发环境的 Strict Mode 会额外执行一次 setup→cleanup→setup，用来暴露清理不完整的问题。这些语义以 [React 官方 `useEffect` 文档](https://react.dev/reference/react/useEffect)为准。
+
+依赖项必须覆盖 effect 使用的所有响应式值，不能为了“只跑一次”故意漏写。函数/对象每次渲染都创建会导致重复执行；异步请求则要在 cleanup 中取消，或用 ignore/generation 标志拒绝晚到结果，防止旧请求覆盖新状态。若逻辑不在同步外部系统，通常不需要 Effect，应在事件处理或渲染计算中完成。
+
+---
+
+### 233. AI 对话流式接口如何约定事件、错误和重放？前端如何增量解析并避免频繁重渲染？
+
+> 来源：[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
+
+协议先定义事件 envelope，例如 `run_id/event_id/seq/type/payload/error/final`，区分 token、Tool 状态、Artifact、错误和结束事件。SSE 原生支持 `event`、`data`、`id` 和重连时间；`id` 可配合持久事件日志做断线续传，[MDN SSE 文档](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)说明了这些字段。需要 POST、自定义 Header 或二进制流时，可用 Fetch 的 [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)，但重连和事件 framing 要自行实现。
+
+网络 chunk 不等于一个完整 JSON。前端用流式 `TextDecoder` 处理 UTF-8 边界，按协议分隔符组帧后再解析，并用 `seq` 去重、检测缺口。渲染层把短时间内的 token 合并后按 animation frame 或固定间隔刷新，Tool/错误/final 事件立即提交，避免每个 token 都触发整棵消息树重渲染。取消要传播到服务端任务；重连只重放尚未确认的事件，不能重新执行已有副作用。
+
+---
+
+### 234. 浏览器强缓存与协商缓存如何工作？`Cache-Control`、`ETag`、`Last-Modified` 与 CDN 如何协作？
+
+> 来源：[拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840)
+
+“强缓存”通常指响应仍新鲜时直接复用本地副本而不联系源站，主要由 `Cache-Control: max-age`/`s-maxage`、`Expires` 和缓存键决定；“协商缓存”实质是过期后发条件请求，用 `ETag + If-None-Match` 或 `Last-Modified + If-Modified-Since` 验证，未变化返回 304 并复用正文。[RFC 9111](https://www.rfc-editor.org/rfc/rfc9111.html)定义了新鲜度、重验证和缓存指令，`ETag` 通常比秒级时间戳更适合精确验证。
+
+带内容哈希的 JS/CSS/图片可设置长 `max-age, immutable`；HTML 或配置入口通常要求重验证；用户私有或敏感响应使用 `private`/`no-store` 并把身份维度纳入缓存键。CDN 属共享缓存，可用 `s-maxage` 独立控制边缘新鲜度，还要正确设置 `Vary`，否则压缩格式、语言或身份响应可能串用。更新策略必须与文件名版本化和失效机制配套，不能只把过期时间设得很长。
 
 ---
 
@@ -2440,20 +2500,20 @@ SQL 注入发生在应用把不可信输入拼成 SQL 语义的边界，因此�
 
 | 题目 | 来源 |
 |------|------|
-| 最大子数组和 | 拼多多提前批一面，7 月 30 日 |
+| 最大子数组和 | 拼多多提前批一面，7 月 30 日；[字节数据平台 Agent 一面](https://www.nowcoder.com/feed/main/detail/f5f840632a19417b91b8987762427a6a) |
 | 无重复字符的最长子串 | 百度秋招后端一面，7 月 30 日；百度 AI Infra 一面；[腾讯 CDG AI Infra 框架侧一面](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168) |
-| 二叉树层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面；[阿里实习 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/31edaaa47197404a8647601612312786) |
+| 二叉树前序遍历、层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面；[阿里实习 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/31edaaa47197404a8647601612312786)；[百度大模型研发一面](https://www.nowcoder.com/discuss/921590204903723008) |
 | 两两交换链表节点 | 拼多多服务端三面，8 月 4 日；百度内容营销与广告一面，8 月 12 日 |
 | 奇偶链表 | 字节后端社招一面，8 月 6 日 |
-| 最长有效括号 | 字节后端社招二面，8 月 6 日；[虾皮 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/62b9123e4b7f497285e7d6f68844cdd6) |
-| 数组第 K 大元素 | 字节后端社招三面，8 月 6 日 |
+| 最长有效括号 | 字节后端社招二面，8 月 6 日；[虾皮 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/62b9123e4b7f497285e7d6f68844cdd6)；[百度 Coding Agent 三面](https://www.nowcoder.com/feed/main/detail/b9521e2b51e04afeac0a3a32e13f4da9)；[美团 Agent 一面](https://www.nowcoder.com/feed/main/detail/58159306df52463ab75d72daa80d66df) |
+| 数组第 K 大元素 | 字节后端社招三面，8 月 6 日；[快手 AI 全栈一面](https://www.nowcoder.com/discuss/921807075905130496) |
 | 删除重复字符并保持字典序最小 | 字节 Agent 开发一面，8 月 9 日 |
-| 有效括号字符串、最长递增子序列 | 小红书数据库智能化面经，8 月 10 日 |
+| 有效括号字符串、最长递增子序列 | 小红书数据库智能化面经，8 月 10 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088) |
 | SQL：查询平均工资最高部门的管理者 | 快手测开一面，8 月 12 日 |
 | 最多 K 个重复元素的最长子数组（LC 2958） | 阿里云 AI 全栈开发一面 |
 | 限制最大并发数为 3，批量调用外部接口 | 快手 Agent 开发一面 |
 | 将扁平 List 转换为树形 JSON | 字节跳动 AI Agent 开发一面 |
-| 合并两个有序数组 | 影石创新 AI Agent 一面 |
+| 合并两个有序数组 | 影石创新 AI Agent 一面；[多益三面](https://www.nowcoder.com/discuss/922801355649974272) |
 | LRU Cache | 懂车帝 Agent 开发一面；[阶跃星辰 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2)；[快手 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/eccb5cafdfce452c8d56374ef070685d) |
 | 二叉树锯齿形层序遍历 | 字节跳动 AI Agent 开发一面 |
 | 手写多头注意力（MHA） | 小鹏 VLA 大模型算法工程师一面 |
@@ -2465,23 +2525,33 @@ SQL 注入发生在应用把不可信输入拼成 SQL 语义的边界，因此�
 | 拓扑排序 / 课程表 II（输出可行顺序）、二叉树中序遍历、满二叉树性质 | 三星 AI Infra 实习一面，5 月 1 日；[字节 Agent 后端终面](https://www.nowcoder.com/feed/main/detail/1dd33c4b7bda453a82f7d645bde7f3ff) |
 | 最长无重复元素子数组 | 百度 AI Infra 提前批一面，4 月 13 日 |
 | 买卖股票的最佳时机 I / II | 抖音搜推 AI Infra 一面，5 月 1 日；[快手 AI Infra 面经（版本未注明）](https://www.nowcoder.com/feed/main/detail/c582fdfbc29d4c93ac9044005ad0a311) |
-| 快速排序、归并排序、堆排序 | 阿里云 Agent Infra 一面，4 月 26 日；AI Infra 春招面经，3 月 25 日；[小马智行 AI Infra 实习面经（归并排序）](https://www.nowcoder.com/feed/main/detail/0e543b8a02b84b05950e55851687450f)；[字节 AI Infra 二面（堆排序）](https://www.nowcoder.com/feed/main/detail/eaea5cf9e9e44c5bb5fecf3f1d8243ce) |
+| 冒泡、快速、归并、堆排序（含与标准 `sort` 对拍） | 阿里云 Agent Infra 一面，4 月 26 日；AI Infra 春招面经，3 月 25 日；[小马智行 AI Infra 实习面经（归并排序）](https://www.nowcoder.com/feed/main/detail/0e543b8a02b84b05950e55851687450f)；[字节 AI Infra 二面（堆排序）](https://www.nowcoder.com/feed/main/detail/eaea5cf9e9e44c5bb5fecf3f1d8243ce)；[百川智能医疗大模型后训练一面（冒泡排序与对拍）](https://www.nowcoder.com/feed/main/detail/d209892dc2cf43c6859a776c5e526eca) |
 | 柱状图接雨水 | 百度 AI Infra 暑期一面，5 月 1 日；[阿里校招 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/84dc13404a6048c7b0f8431179d33623) |
-| 两线程交替打印 1 和 2 | 阿里云 Agent Infra 一面，4 月 26 日 |
+| 多线程交替打印（1/2、A1B2C3，含线程退出协调） | 阿里云 Agent Infra 一面，4 月 26 日；[百度 Coding Agent 三面](https://www.nowcoder.com/feed/main/detail/b9521e2b51e04afeac0a3a32e13f4da9) |
 | 模拟死锁 | 虾皮 AI Infra 后端一面，4 月 13 日 |
-| 手写 MHA（含 mask 与数值稳定性） | 小鹏 AI Infra 一面，4 月 13 日 |
+| 手写 MHA（含 mask 与数值稳定性） | [小鹏 AI Infra 一面](https://www.nowcoder.com/discuss/920776068619829248)，4 月 13 日（付费截断来源，仅保留公开题干） |
 | 岛屿数量（LC 200） | [蔚来 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/74ccddd071f448809b56710c9f4e8730) |
 | 按层交替方向旋转矩阵外圈一格 | [多公司 Infra 面经](https://www.nowcoder.com/feed/main/detail/2f0bb2d59bda4642a4ddab56ec1f210f) |
-| 反转链表 II（位置 a 到 b，LC 92） | [多公司 Infra 面经](https://www.nowcoder.com/feed/main/detail/2f0bb2d59bda4642a4ddab56ec1f210f) |
-| 最多可完整观看的电视节目（区间调度） | [阶跃星辰 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2) |
+| 反转单链表 / 反转链表 II（LC 206/92） | [多公司 Infra 面经（LC 92）](https://www.nowcoder.com/feed/main/detail/2f0bb2d59bda4642a4ddab56ec1f210f)；[快手 AI 应用开发一面](https://www.nowcoder.com/feed/main/detail/631e9b79e433415ca3dea24642f94b4c)；[虾皮 Agent 开发一面](https://www.nowcoder.com/feed/main/detail/79fe3fc8f8cb4c4d9beca478f4279e3a) |
+| 区间排序：合并区间（LC 56）/最多不重叠区间 | [阶跃星辰 AI Infra 实习面经（区间调度）](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2)；[快手大模型应用算法一面（合并区间）](https://www.nowcoder.com/feed/main/detail/026cc0d9002949dbbfd4570575039f9f) |
 | K 个一组翻转链表（LC 25） | [美团北斗 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/841452f926a140babb84585de97c04aa) |
 | Pow(x, n)，计算数值的整数次方（LC 50） | [字节 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/b99b6a7c7ff54453a2451d43488ade5a) |
-| 合并 K 个升序链表（LC 23） | [百度 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/4a848f5616cf4f8783020b3143a68fbc)；[美团 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/c94734d67c9f461ab950bf1d800c5643) |
+| 合并两个或 K 个升序链表（LC 21/23） | [百度 AI Infra 实习面经（LC 23）](https://www.nowcoder.com/feed/main/detail/4a848f5616cf4f8783020b3143a68fbc)；[美团 AI Infra 实习面经（LC 23）](https://www.nowcoder.com/feed/main/detail/c94734d67c9f461ab950bf1d800c5643)；[美团 Agent 一面（LC 21）](https://www.nowcoder.com/feed/main/detail/58159306df52463ab75d72daa80d66df) |
 | 二叉树右视图（LC 199） | [百度 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/4a848f5616cf4f8783020b3143a68fbc) |
 | 阶乘末尾零的个数（LC 172） | [快手 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/c582fdfbc29d4c93ac9044005ad0a311) |
 | 数组中连续相同数字的最大出现次数 | [字节 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/2163c739242f4f8d82b35c906f0a69a9) |
 | 10 点环上走 N 步回到原点的方案数 | [字节 AI Infra 后端面经](https://www.nowcoder.com/feed/main/detail/45814e935b894c4fb13d5a72c81e23a6) |
 | 0-1 背包与完全背包 | [蔚来 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/738d29de77ef4675bbac0a7d18ed1371) |
-| 两数之和（LC 1） | [沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)；字节 AML / 火山方舟 AI Infra 一面（数组可重复、元素不可复用、复杂度与原地排序追问） |
+| 两数之和（LC 1） | [沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)；[字节 AML / 火山方舟 AI Infra 一面](https://www.nowcoder.com/discuss/921927475611869184)（数组可重复、元素不可复用、复杂度与原地排序追问） |
 | 矩阵第 K 小元素（原帖有序约束未完整记录） | [腾讯 CDG AI Infra 框架侧面经](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168) |
 | 爬楼梯（递归、记忆化与动态规划，LC 70） | 字节火山引擎 Managed Agent 一面，2026 年 8 月 13 日 |
+| 最近 T 秒访问日志：按用户最后访问时间降序返回 | [百度 Coding Agent 一面](https://www.nowcoder.com/feed/main/detail/b9521e2b51e04afeac0a3a32e13f4da9) |
+| 统计包含数组全部不同值的连续子数组数量 | [拼多多大模型算法一面](https://www.nowcoder.com/discuss/922592377364041728) |
+| 递归合并嵌套 JSON（dict/list/数值/字符串/布尔规则，且不修改输入） | [字节 Agent 开发一面](https://www.nowcoder.com/feed/main/detail/d2cf5165d1184b59879eff5793b7b453) |
+| 最长回文子串（LC 5） | [字节数据平台 Agent 一面](https://www.nowcoder.com/feed/main/detail/f5f840632a19417b91b8987762427a6a)；[百度 AI 测开一面](https://www.nowcoder.com/feed/main/detail/cd8e446a6ec14edfa53cf4c7b6864c4d) |
+| 最长公共前缀 | [元石科技后端/Agent 一面](https://www.nowcoder.com/discuss/921742843704549376) |
+| 大数乘法 | [腾讯 WXG 微信读书一面](https://www.nowcoder.com/feed/main/detail/3ffc762437274543b6a8f5e2ea6fb535) |
+| URL 查询参数解析为 Map | [大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487) |
+| 两个栈实现队列，并追问线程安全 | [字节 Agent 开发一面](https://www.nowcoder.com/discuss/921444774287003648) |
+| 所有连续数字子串的十进制数值之和 | [京东 8 月 22 日笔试](https://www.nowcoder.com/feed/main/detail/37e060c563034371aba1a42da88822d7) |
+| 手写防抖函数（leading/trailing、取消、参数与异步竞态） | [拼多多 AI 全栈两轮技术面](https://www.nowcoder.com/discuss/921104232256675840) |
