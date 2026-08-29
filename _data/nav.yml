@@ -163,6 +163,8 @@ modules:
             slug: "meituan/algo-20260818"
           - title: "算法岗 8.25"
             slug: "meituan/algo-20260825"
+          - title: "算法岗 8.29"
+            slug: "meituan/algo-20260829"
       - name: "华为"
         articles:
           - title: "研发岗 4.8"
@@ -329,6 +331,8 @@ modules:
             slug: "dewu/general-20260418"
           - title: "暑期实习 4.26"
             slug: "dewu/general-20260426"
+          - title: "算法岗 B 卷 8.29"
+            slug: "dewu/algo-20260829-b"
       - name: "字节跳动"
         articles:
           - title: "通用 4.19"
