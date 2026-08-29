@@ -113,6 +113,8 @@ modules:
             slug: "alibaba/agent-20260815"
           - title: "AI Coding 8.19"
             slug: "alibaba/ai-coding-20260819"
+          - title: "算法岗 8.29"
+            slug: "alibaba/algo-20260829"
       - name: "蚂蚁"
         articles:
           - title: "研发岗 3.26"
@@ -135,6 +137,8 @@ modules:
             slug: "ant/ai-coding-20260820"
           - title: "AI Coding 8.20 医院排队"
             slug: "ant/ai-coding-hospital-20260820"
+          - title: "AI Coding 8.27"
+            slug: "ant/ai-coding-20260827"
       - name: "美团"
         articles:
           - title: "研发岗 3.28"
