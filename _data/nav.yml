@@ -259,6 +259,8 @@ modules:
         articles:
           - title: "通用岗 8.23"
             slug: "didi/general-20260823"
+          - title: "算法方向 8.30"
+            slug: "didi/algo-20260830"
       - name: "网易"
         articles:
           - title: "雷火研发岗 4.2"
@@ -305,6 +307,8 @@ modules:
             slug: "pinduoduo/dev-20260823"
           - title: "秋招-算法岗 8.23"
             slug: "pinduoduo/algo-20260823"
+          - title: "秋招-技术岗 8.30"
+            slug: "pinduoduo/general-20260830"
       - name: "OPPO"
         articles:
           - title: "数据分析岗 8.8"
