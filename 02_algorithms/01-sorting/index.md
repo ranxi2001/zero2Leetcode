@@ -1,7 +1,7 @@
 ---
 layout: default
-title: 排序算法
-description: 快排、归并排序、堆排序的复杂度对比
+title: 排序算法大全
+description: 从冒泡到基数排序，系统掌握常见排序原理、实现、复杂度与选型
 eyebrow: 核心算法 / 01
 ---
 
@@ -24,12 +24,26 @@ eyebrow: 核心算法 / 01
 | 冒泡排序 | O(n²) | O(n²) | O(1) | 稳定 |
 | 选择排序 | O(n²) | O(n²) | O(1) | 不稳定 |
 | 插入排序 | O(n²) | O(n²) | O(1) | 稳定 |
+| 希尔排序 | 依赖增量，常见约 O(n^1.3) | O(n²) | O(1) | 不稳定 |
 | 归并排序 | O(n log n) | O(n log n) | O(n) | 稳定 |
 | 快速排序 | O(n log n) | O(n²) | O(log n) | 不稳定 |
 | 堆排序 | O(n log n) | O(n log n) | O(1) | 不稳定 |
+| 计数排序 | O(n + k) | O(n + k) | O(n + k) | 可稳定 |
+| 桶排序 | 平均 O(n + k) | O(n²) | O(n + k) | 取决于桶内排序 |
+| 基数排序 | O(d(n + k)) | O(d(n + k)) | O(n + k) | 稳定 |
 | Python sorted/sort | O(n log n) | O(n log n) | O(n) | 稳定 |
 
-**怎么记？** 简单排序（冒泡、选择、插入）都是 O(n²)；高级排序（归并、快排、堆排）都是 O(n log n)。稳定性记住"快选堆不稳定"。
+其中 `n` 是元素数量，`k` 是值域或桶数量，`d` 是数字位数。
+
+**怎么记？** 简单排序（冒泡、选择、插入）都是 O(n²)；比较排序中的归并、快排、堆排通常是 O(n log n)；计数、桶、基数排序利用值域信息，可以突破比较排序的 O(n log n) 下界。稳定性常用口诀是“快选堆希不稳定”。
+
+### 先理解三个评价维度
+
+- **稳定**：相等元素排序后仍保持原相对顺序。多字段分步排序时很重要。
+- **原地**：除少量变量或递归栈外，不申请与 n 同规模的辅助数组。
+- **自适应**：数据已有序或部分有序时能更快，例如插入排序和 Timsort。
+
+没有“任何场景都最好”的排序。数据规模、值域、稳定性和内存限制共同决定选择。
 
 ---
 
@@ -100,6 +114,37 @@ def insertion_sort(arr):
 
 - 时间 O(n²)，最好情况（已有序）O(n)；空间 O(1)；**稳定**。
 - 小技巧：数据量很小或基本有序时，插入排序性能反而比快排好。Python 内置的 Timsort 就在小段数据上使用插入排序。
+
+---
+
+## 希尔排序
+
+希尔排序是“分组插入排序”。普通插入排序每次只能移动一位；希尔排序先用较大间隔让元素快速接近正确位置，再逐步缩小间隔，最后执行一次间隔为 1 的插入排序。
+
+```python
+def shell_sort(arr):
+    n = len(arr)
+    gap = n // 2
+
+    while gap > 0:
+        for i in range(gap, n):
+            current = arr[i]
+            j = i
+
+            while j >= gap and arr[j - gap] > current:
+                arr[j] = arr[j - gap]
+                j -= gap
+
+            arr[j] = current
+
+        gap //= 2
+
+    return arr
+```
+
+- 空间 O(1)，不稳定。
+- 复杂度取决于 gap 序列，最简单的折半序列最坏仍可能 O(n²)。
+- 工程和面试中重要性低于归并、快排和堆排，但它展示了“先粗调、再精调”的思想。
 
 ---
 
@@ -212,6 +257,247 @@ def partition(arr, low, high):
 
 ---
 
+## 堆排序
+
+堆排序分两步：
+
+1. 把数组原地建成最大堆，根节点是当前最大值。
+2. 把根与末尾交换，缩小堆范围，再恢复最大堆。
+
+```python
+def heap_sort(arr):
+    n = len(arr)
+
+    # 从最后一个非叶子节点开始，自底向上建最大堆
+    for root in range(n // 2 - 1, -1, -1):
+        sift_down(arr, root, n)
+
+    # 每次把最大值放到当前末尾
+    for end in range(n - 1, 0, -1):
+        arr[0], arr[end] = arr[end], arr[0]
+        sift_down(arr, 0, end)
+
+    return arr
+
+
+def sift_down(arr, root, heap_size):
+    while True:
+        largest = root
+        left = root * 2 + 1
+        right = root * 2 + 2
+
+        if left < heap_size and arr[left] > arr[largest]:
+            largest = left
+        if right < heap_size and arr[right] > arr[largest]:
+            largest = right
+
+        if largest == root:
+            return
+
+        arr[root], arr[largest] = arr[largest], arr[root]
+        root = largest
+```
+
+为什么建堆是 O(n) 而不是 O(n log n)？靠近底层的节点很多，但下沉距离很短；靠近顶层的节点少，虽然可能下沉很多层，总工作量求和为 O(n)。
+
+- 最好、平均、最坏都是 O(n log n)。
+- 额外空间 O(1)。
+- 不稳定，缓存局部性通常不如快排。
+- 当必须保证最坏 O(n log n) 且内存很紧时有价值。
+
+---
+
+## 计数排序
+
+当元素是整数且值域不大时，不比较元素大小，而是统计每个值出现次数。
+
+### 简单版
+
+```python
+def counting_sort(nums):
+    if not nums:
+        return []
+
+    minimum = min(nums)
+    maximum = max(nums)
+    count = [0] * (maximum - minimum + 1)
+
+    for value in nums:
+        count[value - minimum] += 1
+
+    result = []
+    for offset, frequency in enumerate(count):
+        value = offset + minimum
+        result.extend([value] * frequency)
+
+    return result
+```
+
+这个版本支持负数，但不保留附加信息的稳定顺序。
+
+### 稳定版
+
+```python
+def stable_counting_sort(nums):
+    if not nums:
+        return []
+
+    minimum = min(nums)
+    maximum = max(nums)
+    count = [0] * (maximum - minimum + 1)
+
+    for value in nums:
+        count[value - minimum] += 1
+
+    # count[i] 变成“<= 当前值的元素数量”
+    for index in range(1, len(count)):
+        count[index] += count[index - 1]
+
+    output = [0] * len(nums)
+    for value in reversed(nums):
+        position = count[value - minimum] - 1
+        output[position] = value
+        count[value - minimum] -= 1
+
+    return output
+```
+
+从右向左放置保证相等元素稳定。
+
+如果只有 100 个数，但值可能到 10^9，不能创建 10^9 大小的计数数组，此时应使用比较排序或哈希计数。
+
+---
+
+## 桶排序
+
+桶排序把值域分成若干区间，每个桶内部单独排序，最后按桶顺序合并。
+
+```python
+def bucket_sort(nums, bucket_count=10):
+    if len(nums) <= 1:
+        return nums[:]
+
+    minimum = min(nums)
+    maximum = max(nums)
+    if minimum == maximum:
+        return nums[:]
+
+    buckets = [[] for _ in range(bucket_count)]
+    width = (maximum - minimum + 1) / bucket_count
+
+    for value in nums:
+        index = int((value - minimum) / width)
+        index = min(index, bucket_count - 1)
+        buckets[index].append(value)
+
+    result = []
+    for bucket in buckets:
+        bucket.sort()
+        result.extend(bucket)
+
+    return result
+```
+
+- 数据均匀分布时，元素被分散到各桶，平均接近 O(n + k)。
+- 所有元素落进同一桶时退化为桶内排序复杂度。
+- 关键不是“有几个桶”的固定答案，而是如何根据分布设计映射。
+
+---
+
+## 基数排序
+
+基数排序从低位到高位，按每一位做稳定排序。以十进制非负整数为例：
+
+```python
+def radix_sort_nonnegative(nums):
+    if not nums:
+        return []
+
+    result = nums[:]
+    exponent = 1
+    maximum = max(result)
+
+    while maximum // exponent > 0:
+        result = counting_sort_by_digit(result, exponent)
+        exponent *= 10
+
+    return result
+
+
+def counting_sort_by_digit(nums, exponent):
+    count = [0] * 10
+    output = [0] * len(nums)
+
+    for value in nums:
+        digit = (value // exponent) % 10
+        count[digit] += 1
+
+    for digit in range(1, 10):
+        count[digit] += count[digit - 1]
+
+    for value in reversed(nums):
+        digit = (value // exponent) % 10
+        output[count[digit] - 1] = value
+        count[digit] -= 1
+
+    return output
+```
+
+支持有符号整数可以分开处理：
+
+```python
+def radix_sort(nums):
+    negatives = [-value for value in nums if value < 0]
+    nonnegatives = [value for value in nums if value >= 0]
+
+    negatives = radix_sort_nonnegative(negatives)
+    nonnegatives = radix_sort_nonnegative(nonnegatives)
+
+    return [-value for value in reversed(negatives)] + nonnegatives
+```
+
+每一位必须使用稳定排序，否则低位已经建立的顺序会被破坏。
+
+---
+
+## 如何选择排序算法
+
+| 场景 | 选择 |
+|------|------|
+| 日常 Python 刷题 | `sort()` / `sorted()` |
+| 面试要求手写通用排序 | 归并或随机快排 |
+| 链表排序 | 归并排序 |
+| 数据很小或基本有序 | 插入排序 |
+| 要稳定且保证 O(n log n) | 归并排序 |
+| 内存很紧且要最坏 O(n log n) | 堆排序 |
+| 整数值域很小 | 计数排序 |
+| 数据均匀分布且值域可分桶 | 桶排序 |
+| 固定位数整数/字符串 | 基数排序 |
+
+## 统一测试所有排序实现
+
+```python
+def check_sort(sort_function):
+    cases = [
+        [],
+        [1],
+        [2, 1],
+        [1, 1, 1],
+        [3, -1, 2, -1, 0],
+        list(range(10)),
+        list(range(9, -1, -1)),
+    ]
+
+    for case in cases:
+        expected = sorted(case)
+        actual = sort_function(case[:])
+        assert actual == expected, (case, actual, expected)
+```
+
+排序代码最容易在空数组、重复值、负数和边界下标上出错。
+
+---
+
 ## Python 内置排序
 
 实际刷题中，90% 的场景直接用 Python 内置排序就够了。
@@ -272,8 +558,9 @@ sorted(intervals, key=lambda x: (x[0], -x[1]))
 
 ## 小结
 
-1. **基础排序**（冒泡、选择、插入）时间复杂度 O(n²)，面试中需要理解原理，但很少要求手写。
+1. **基础排序**（冒泡、选择、插入、希尔）用于理解交换、选择和局部有序。
 2. **归并排序**和**快速排序**是重中之重，必须能手写。归并稳定且时间始终 O(n log n)；快排平均最快但最坏 O(n²)。
-3. **实际刷题**直接用 `sorted()` / `list.sort()`，重点掌握 `key` 参数的灵活运用。
-4. 排序不是孤立的知识点——**二分查找、贪心、分治**等进阶主题都以排序为基础。
-5. 记住口诀：**"快选堆不稳定"**，其余常见排序都是稳定的。
+3. **堆排序**保证最坏 O(n log n) 且原地；计数、桶、基数排序利用值域特征突破比较排序下界。
+4. **实际刷题**直接用 `sorted()` / `list.sort()`，重点掌握 `key` 参数与稳定性。
+5. 排序不是孤立知识点，二分、贪心、分治、Top K 和区间题都依赖有序性。
+6. 稳定性记忆：**快、选、堆、希通常不稳定**；实现细节也可能改变稳定性。
