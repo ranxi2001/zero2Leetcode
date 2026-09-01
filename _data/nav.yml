@@ -179,6 +179,8 @@ modules:
             slug: "meituan/algo-20260825"
           - title: "算法岗 8.29"
             slug: "meituan/algo-20260829"
+          - title: "算法策略岗 9.1"
+            slug: "meituan/algo-20260901"
       - name: "华为"
         articles:
           - title: "研发岗 4.8"
