@@ -465,7 +465,7 @@ FastAPI 中 `async def` 路由只有在等待真正的异步 IO 时，`await` �
 
 ### 39. `malloc` 和 `free` 的内部原理是什么？
 
-> 来源：百度后端一面，8 月 6 日
+> 来源：百度后端一面，8 月 6 日；[阿里千问平台开发复活赛一面](https://www.nowcoder.com/feed/main/detail/141447389dab4e8e9ca6db742a514f39)
 
 `malloc` 通常先从用户态分配器维护的空闲链表或 size class 中找合适块，小块复用 arena 中的内存，大块可能通过 `mmap` 单独映射；不足时再向内核申请页。`free` 不是简单“把内存清零”，而是把块归还分配器，尝试与相邻空闲块合并，满足条件时才把页归还操作系统。
 
@@ -582,13 +582,15 @@ TCP 是字节流协议，没有消息边界。发送方多次 `write` 可能被�
 
 ---
 
-### 50. 浏览器输入 URL 到页面返回，经历了什么？局域网里怎么找到目标 MAC？
+### 50. 浏览器输入 URL 到页面返回，DNS 如何解析，局域网里怎么找到目标 MAC？
 
 > 来源：百度后端一面，8 月 6 日
 
 主要链路是 URL 解析和缓存检查、DNS 解析、路由选择、ARP/NDP 获取下一跳链路地址、建立 TCP（HTTPS 还要 TLS）、发送 HTTP 请求、服务端经网关/应用/存储处理后返回，浏览器再解析渲染并加载子资源。
 
 以 IPv4 为例，主机根据子网掩码判断目标是否同网段：同网段就 ARP 查询目标 IP 对应的 MAC；不同网段则查询默认网关的 MAC，把以太网帧交给网关。IP 目标地址端到端基本不变，二层源/目标 MAC 会在每一跳重新封装。
+
+DNS 通常先查浏览器/系统缓存，再交给递归解析器；缓存未命中时，解析器按根、顶级域和权威服务器逐级查询，并按 TTL 缓存 A/AAAA/CNAME 等结果。前端生产请求一般先到同源 BFF、API Gateway 或 Ingress，由这一层完成 TLS 终止、身份、限流、路由和观测，再访问内部服务；让浏览器直接发现并调用每个微服务会暴露拓扑、凭证与跨域边界。
 
 ---
 
@@ -1502,7 +1504,7 @@ Domain 通过自己定义的仓储等接口依赖抽象，Infrastructure 反向�
 
 ### 130. ZooKeeper 的 QPS 应该如何压测？常见瓶颈在哪里？
 
-> 来源：小舒一面
+> 来源：小舒一面；[百度 Agent 一面](https://www.nowcoder.com/feed/main/detail/53542e2dcfd44b1d84b0ae55b4fc1b35)
 
 ZooKeeper 没有脱离环境的固定 QPS。结果取决于读写比例、数据大小、watcher 数量、会话创建、客户端并发、磁盘同步、网络时延、集群规模和一致性要求。压测应使用与生产接近的读写及 watch 模型，预热后逐步增加并发，同时记录吞吐、P50/P95/P99、错误率、未完成请求和节点资源。
 
@@ -1819,6 +1821,8 @@ Raft 通过 Leader 选举、日志复制和多数派提交保证已提交日志�
 > 来源：小舒一面
 
 虚拟机虚拟整套硬件和内核，隔离强但启动和资源成本高；容器共享宿主内核，通过 namespace/cgroup 隔离，启动快但安全边界更薄；Kubernetes 不是另一种容器，而是编排平台，负责调度、服务发现、声明式收敛和故障恢复。强隔离/异构内核用 VM，大量一致应用用容器，规模化运维再引入 K8s；也可用 microVM 组合边界与速度。
+
+因此“容器内程序”和“宿主机普通进程”本质上都由宿主内核调度，但容器进程看到的是受限的 PID、Mount、Network、User 等 namespace 视图，并受 cgroup 配额、镜像文件系统和 capability/seccomp 约束。容器不是天然安全边界，特权容器、宿主挂载和共享设备会主动打穿隔离；Windows/WSL2/Hyper-V 还要区分是否存在额外 VM 和独立内核。
 
 ---
 
@@ -2631,6 +2635,18 @@ Docker Desktop 的 WSL2 backend 在 WSL2 的轻量 VM 中运行 Linux 内核和 
 必须暂停应用，是因为收集器要处理 GC Roots、年轻代转移后的引用和标记起始状态；如果应用同时任意修改引用而没有已建立的并发标记协议，根集合会不一致。Initial Mark 不会在这次暂停中遍历完整老年代，也不等于完成三色标记；主要堆遍历发生在并发阶段，后续 Remark 再以 STW 处理并发期间尚未闭合的标记信息。
 
 回答时应区分 G1 的 Young-only/Space-reclamation 阶段和 Concurrent Start、Concurrent Mark、Remark、Cleanup，避免把 CMS、G1、ZGC 的暂停阶段混用同一套术语，并按具体 JDK 版本解释日志标签。
+
+---
+
+### 247. React 的核心工作模型是什么？组件、State、渲染与 Effect 如何协作？
+
+> 来源：[字节中国交易与广告 AI 应用开发一面](https://www.nowcoder.com/feed/main/detail/b34f6902e8544fe2953696ed52e49dba)
+
+React 用组件把 UI 声明为 `props + state` 的函数结果。一次更新经过触发、Render、Commit：Render 计算下一棵元素树并要求保持纯函数语义，React 比较前后树后在 Commit 阶段最小化更新 DOM；浏览器随后布局和绘制。官方 [Render and Commit](https://react.dev/learn/render-and-commit)文档明确区分了计算 UI 与提交 DOM 两个阶段。
+
+State 由组件在树中的位置、组件类型和 `key` 共同绑定，不是存在组件函数里的普通局部变量；批量更新和函数式 updater 用来处理同一事件中的多次状态变更。列表 `key` 应稳定表达业务身份，不能依赖会变化的索引，否则重排时可能错误复用 State。
+
+Effect 用于与网络、订阅、计时器、DOM 或第三方组件等**外部系统同步**，不应承担可在 Render 中直接计算的派生值。依赖变化时先清理旧 Effect 再建立新同步，卸载时必须释放资源；事件处理属于用户动作，Effect 属于渲染结果引发的同步，两者不能混用。性能优化先定位无效 Render，再选择状态下沉、拆分组件、稳定 props 或 memo，不能把 `useMemo/useCallback` 当默认正确性工具。
 
 ---
 

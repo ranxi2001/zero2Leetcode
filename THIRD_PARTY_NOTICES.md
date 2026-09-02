@@ -24,6 +24,7 @@ The interview answers added from the 2026-08-29 through 2026-09-02 audit were in
 - [Java SE 25 Selector](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/channels/Selector.html) and [Oracle G1 GC](https://docs.oracle.com/en/java/javase/25/gctuning/garbage-first-g1-garbage-collector1.html) - NIO readiness selection and collector-specific concurrent-start marking.
 - [Microsoft Windows container isolation](https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyperv-container) and [Docker Desktop VMM](https://docs.docker.com/desktop/features/vmm/) - process isolation, Hyper-V isolation, and Linux VM backends on Windows.
 - [fio documentation](https://fio.readthedocs.io/en/master/fio_doc.html) and [FastAPI async guidance](https://fastapi.tiangolo.com/async/) - reproducible I/O workload parameters and event-loop versus blocking execution boundaries.
+- [React Render and Commit](https://react.dev/learn/render-and-commit) and [Preserving and Resetting State](https://react.dev/learn/preserving-and-resetting-state) - component render/commit phases and state identity in the UI tree.
 
 No upstream prose, code, or benchmark numbers are reproduced. Hardware results and version-specific framework behavior remain subject to the linked documentation.
 
