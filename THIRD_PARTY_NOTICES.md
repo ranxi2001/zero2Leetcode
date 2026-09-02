@@ -13,6 +13,20 @@ The 2026 summer interview answers added on 2026-08-28 were independently written
 
 No upstream prose or examples are reproduced. Version-specific behavior remains subject to the linked projects' current documentation.
 
+## Interview Answer References (2026-09-02)
+
+The interview answers added from the 2026-08-29 through 2026-09-02 audit were independently written and checked against these primary references:
+
+- [Intel SGX EPC oversubscription](https://cdrdv2-public.intel.com/671471/sgx-oversubscription.pdf) - protected EPC paging and oversubscribed working-set behavior.
+- [WHATWG Fetch CORS protocol](https://fetch.spec.whatwg.org/#http-cors-protocol) - browser-enforced cross-origin requests and preflight semantics.
+- [Spring BeanFactory](https://docs.spring.io/spring-framework/reference/core/beans/beanfactory.html) and [Environment abstraction](https://docs.spring.io/spring-framework/reference/core/beans/environment.html) - IoC container boundaries, ordered property sources, and application configuration.
+- [Apache RocketMQ delay messages](https://rocketmq.apache.org/docs/featureBehavior/02delaymessage/) - current delayed-delivery lifecycle, limits, persistence, and retry behavior.
+- [Java SE 25 Selector](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/channels/Selector.html) and [Oracle G1 GC](https://docs.oracle.com/en/java/javase/25/gctuning/garbage-first-g1-garbage-collector1.html) - NIO readiness selection and collector-specific concurrent-start marking.
+- [Microsoft Windows container isolation](https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyperv-container) and [Docker Desktop VMM](https://docs.docker.com/desktop/features/vmm/) - process isolation, Hyper-V isolation, and Linux VM backends on Windows.
+- [fio documentation](https://fio.readthedocs.io/en/master/fio_doc.html) and [FastAPI async guidance](https://fastapi.tiangolo.com/async/) - reproducible I/O workload parameters and event-loop versus blocking execution boundaries.
+
+No upstream prose, code, or benchmark numbers are reproduced. Hardware results and version-specific framework behavior remain subject to the linked documentation.
+
 ## CheerpJ 4.3
 
 Java 17 runs in the visitor's browser using CheerpJ Core loaded from the official
