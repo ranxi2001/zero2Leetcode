@@ -112,8 +112,12 @@
                     <div class="nav-articles">
                         {% for article in module.articles %}
                         {% assign article_path = module.slug | append: '/' | append: article.slug %}
+                        {% assign article_pretty_url = '/' | append: article_path | append: '/' %}
+                        {% assign article_index_url = '/' | append: article_path | append: '/index.html' %}
+                        {% assign article_current = false %}
+                        {% if page.url == article_pretty_url or page.url == article_index_url %}{% assign article_current = true %}{% endif %}
                         <a href="{{ site.baseurl }}/{{ article_path }}/index.html"
-                           class="nav-article{% if page.url contains article.slug %} is-current{% endif %}">
+                           class="nav-article{% if article_current %} is-current{% endif %}">
                             {{ article.title }}
                         </a>
                         {% endfor %}
@@ -124,7 +128,10 @@
                         {% for group in module.groups %}
                         {% assign group_open = false %}
                         {% for article in group.articles %}
-                          {% if page.url contains article.slug %}{% assign group_open = true %}{% endif %}
+                          {% assign candidate_path = module.slug | append: '/' | append: article.slug %}
+                          {% assign candidate_pretty_url = '/' | append: candidate_path | append: '/' %}
+                          {% assign candidate_index_url = '/' | append: candidate_path | append: '/index.html' %}
+                          {% if page.url == candidate_pretty_url or page.url == candidate_index_url %}{% assign group_open = true %}{% endif %}
                         {% endfor %}
                         <div class="nav-group{% if group_open %} is-open{% endif %}">
                             <button class="nav-group-toggle" type="button" aria-label="展开">
@@ -136,8 +143,12 @@
                             <div class="nav-group-items">
                                 {% for article in group.articles %}
                                 {% assign article_path = module.slug | append: '/' | append: article.slug %}
+                                {% assign article_pretty_url = '/' | append: article_path | append: '/' %}
+                                {% assign article_index_url = '/' | append: article_path | append: '/index.html' %}
+                                {% assign article_current = false %}
+                                {% if page.url == article_pretty_url or page.url == article_index_url %}{% assign article_current = true %}{% endif %}
                                 <a href="{{ site.baseurl }}/{{ article_path }}/index.html"
-                                   class="nav-article{% if page.url contains article.slug %} is-current{% endif %}">
+                                   class="nav-article{% if article_current %} is-current{% endif %}">
                                     {{ article.title }}
                                 </a>
                                 {% endfor %}
