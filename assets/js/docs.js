@@ -119,6 +119,7 @@ document.querySelectorAll(".nav-group-toggle").forEach(function (btn) {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('z2l-theme', next);
         swapHljsTheme(next);
+        rerenderMermaid(next);
     });
 
     function swapHljsTheme(theme) {
@@ -129,12 +130,73 @@ document.querySelectorAll(".nav-group-toggle").forEach(function (btn) {
             : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
     }
 
+    var darkVars = {
+        background: '#090910',
+        primaryColor: '#182337',
+        primaryTextColor: '#e5e7eb',
+        primaryBorderColor: '#475569',
+        lineColor: '#2dd4bf',
+        secondaryColor: '#13262a',
+        tertiaryColor: '#1b1b2a',
+        edgeLabelBackground: '#11111a',
+        clusterBkg: '#151521'
+    };
+    var lightVars = {
+        background: '#ffffff',
+        primaryColor: '#e0e7ff',
+        primaryTextColor: '#1a1a2e',
+        primaryBorderColor: '#a5b4fc',
+        lineColor: '#0d9488',
+        secondaryColor: '#ccfbf1',
+        tertiaryColor: '#f8fafc',
+        edgeLabelBackground: '#ffffff',
+        clusterBkg: '#f8fafc'
+    };
+
+    function srcToInnerHTML(src) {
+        return src
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/&lt;br\s*\/?&gt;/gi, '<br/>');
+    }
+
+    function rerenderMermaid(theme) {
+        if (typeof mermaid === 'undefined') return;
+        var diagrams = document.querySelectorAll('.mermaid');
+        if (!diagrams.length) return;
+
+        mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'loose',
+            theme: theme === 'light' ? 'default' : 'dark',
+            themeVariables: Object.assign({}, theme === 'light' ? lightVars : darkVars, {
+                fontFamily: '"Inter", "Noto Sans SC", sans-serif',
+                fontSize: '14px'
+            }),
+            flowchart: { curve: 'basis', htmlLabels: false, padding: 16 },
+            sequence: {
+                actorFontFamily: '"Inter", "Noto Sans SC", sans-serif',
+                messageFontFamily: '"Inter", "Noto Sans SC", sans-serif'
+            }
+        });
+
+        diagrams.forEach(function (diagram) {
+            var src = diagram.dataset.mermaidSrc;
+            if (!src) return;
+            diagram.removeAttribute('data-processed');
+            diagram.innerHTML = srcToInnerHTML(src);
+            mermaid.init(undefined, diagram);
+        });
+    }
+
     /* Respect system preference changes */
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
         if (!localStorage.getItem('z2l-theme')) {
             var theme = e.matches ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             swapHljsTheme(theme);
+            rerenderMermaid(theme);
         }
     });
 })();

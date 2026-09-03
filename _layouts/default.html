@@ -26,10 +26,54 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/docs.css?v=7">
+    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/docs.css?v=8">
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script>if(document.documentElement.getAttribute('data-theme')==='light'){document.getElementById('hljs-theme').href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';}</script>
+    <!-- Mermaid: keep the same tested renderer contract as zero2Agent. -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+    <script>
+        (function () {
+            var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            var darkVars = {
+                background: '#090910',
+                primaryColor: '#182337',
+                primaryTextColor: '#e5e7eb',
+                primaryBorderColor: '#475569',
+                lineColor: '#2dd4bf',
+                secondaryColor: '#13262a',
+                tertiaryColor: '#1b1b2a',
+                edgeLabelBackground: '#11111a',
+                clusterBkg: '#151521'
+            };
+            var lightVars = {
+                background: '#ffffff',
+                primaryColor: '#e0e7ff',
+                primaryTextColor: '#1a1a2e',
+                primaryBorderColor: '#a5b4fc',
+                lineColor: '#0d9488',
+                secondaryColor: '#ccfbf1',
+                tertiaryColor: '#f8fafc',
+                edgeLabelBackground: '#ffffff',
+                clusterBkg: '#f8fafc'
+            };
+
+            mermaid.initialize({
+                startOnLoad: false,
+                securityLevel: 'loose',
+                theme: isLight ? 'default' : 'dark',
+                themeVariables: Object.assign(isLight ? lightVars : darkVars, {
+                    fontFamily: '"Inter", "Noto Sans SC", sans-serif',
+                    fontSize: '14px'
+                }),
+                flowchart: { curve: 'basis', htmlLabels: false, padding: 16 },
+                sequence: {
+                    actorFontFamily: '"Inter", "Noto Sans SC", sans-serif',
+                    messageFontFamily: '"Inter", "Noto Sans SC", sans-serif'
+                }
+            });
+        })();
+    </script>
     <!-- KaTeX math rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -232,14 +276,50 @@
     <button class="back-to-top" id="back-to-top" aria-label="回到顶部" title="回到顶部">🚀</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+        document.querySelectorAll('.language-mermaid code, code.language-mermaid').forEach(function (el) {
+            el.classList.add('nohighlight');
+        });
+        hljs.highlightAll();
+    </script>
+    <!-- Transform kramdown Mermaid fences and render them. -->
+    <script>
+        (function () {
+            function srcToInnerHTML(src) {
+                return src
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/&lt;br\s*\/?&gt;/gi, '<br/>');
+            }
+
+            document.querySelectorAll('.language-mermaid').forEach(function (wrapper) {
+                if (!wrapper.isConnected) return;
+                var isCode = wrapper.matches('code.language-mermaid');
+                var code = isCode ? wrapper : wrapper.querySelector('code');
+                if (!code) return;
+                var src = code.textContent;
+                var div = document.createElement('div');
+                div.className = 'mermaid';
+                div.dataset.mermaidSrc = src;
+                div.innerHTML = srcToInnerHTML(src);
+                var target = isCode
+                    ? (wrapper.closest('.highlighter-rouge') || wrapper.closest('pre'))
+                    : wrapper;
+                target.parentNode.replaceChild(div, target);
+            });
+
+            var diagrams = document.querySelectorAll('.mermaid');
+            if (diagrams.length > 0) mermaid.init(undefined, diagrams);
+        })();
+    </script>
     <!-- Flat nav list for prev/next pager -->
     <script>
         window.Z2L_BASE = "{{ site.baseurl }}";
         window.Z2L_REACTIONS_API = "{{ site.reactions_api }}";
         window.Z2L_NAV = [{% for module in site.data.nav.modules %}{% for article in module.articles %}{"path":"{{ module.slug }}/{{ article.slug }}","title":"{{ article.title | replace: '"', '\"' }}"},{% endfor %}{% if module.groups %}{% for group in module.groups %}{% for article in group.articles %}{"path":"{{ module.slug }}/{{ article.slug }}","title":"{{ article.title | replace: '"', '\"' }}"},{% endfor %}{% endfor %}{% endif %}{% endfor %}];
     </script>
-    <script src="{{ site.baseurl }}/assets/js/docs.js?v=4"></script>
+    <script src="{{ site.baseurl }}/assets/js/docs.js?v=5"></script>
     <script src="{{ site.baseurl }}/assets/js/acm-bridge.js?v=20260802"></script>
     <script src="{{ site.baseurl }}/assets/js/github-stars.js?v=1"></script>
 </body>

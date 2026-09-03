@@ -109,3 +109,23 @@ test('group navigation uses exact article URLs for current-state highlighting', 
     assert.match(layout, /page\.url == article_pretty_url or page\.url == article_index_url/);
     assert.doesNotMatch(layout, /page\.url contains article\.slug/);
 });
+
+test('system course Mermaid diagrams have a renderer and theme-aware styling', () => {
+    const layout = read('_layouts/default.html');
+    const docsJs = read('assets/js/docs.js');
+    const docsCss = read('assets/css/docs.css');
+    const courseSource = coursePages.map(read).join('\n');
+
+    assert.match(layout, /mermaid@9\.4\.3/);
+    assert.match(layout, /\.language-mermaid/);
+    assert.match(layout, /code\.language-mermaid/);
+    assert.match(layout, /closest\('pre'\)/);
+    assert.match(layout, /mermaid\.init/);
+    assert.match(docsJs, /rerenderMermaid/);
+    assert.match(docsCss, /\.mermaid\s*\{/);
+    assert.match(courseSource, /```mermaid/);
+
+    for (const page of coursePages) {
+        assert.match(read(page), /```mermaid/, `${page} should include a diagram`);
+    }
+});

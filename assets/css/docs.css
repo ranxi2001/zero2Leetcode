@@ -499,6 +499,24 @@ code, pre { font-family: var(--font-mono); }
 
 .doc-article img { display: block; max-width: 100%; margin: 20px auto; border-radius: 8px; border: 1px solid var(--border); }
 
+/* ===== Mermaid Diagrams ===== */
+.mermaid {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    margin: 24px 0;
+    padding: 24px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.24);
+}
+
+.mermaid svg {
+    max-width: 100%;
+    height: auto !important;
+    font-family: Inter, "Noto Sans SC", sans-serif !important;
+}
+
 .doc-article a {
     color: var(--brand);
     text-decoration: underline;
@@ -879,6 +897,10 @@ html[data-theme="light"] .doc-article pre code.hljs {
 /* Table */
 html[data-theme="light"] .doc-article th { background: rgba(0,0,0,0.04); }
 html[data-theme="light"] .doc-article td { border-bottom-color: rgba(0,0,0,0.05); }
+
+html[data-theme="light"] .mermaid {
+    background: rgba(0, 0, 0, 0.025);
+}
 
 /* Pager */
 html[data-theme="light"] .pager-btn { background: rgba(0,0,0,0.02); }
