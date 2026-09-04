@@ -259,6 +259,8 @@ modules:
             slug: "huawei/dev-20260826"
           - title: "研发岗 9.2"
             slug: "huawei/dev-20260902"
+          - title: "研发岗 9.4"
+            slug: "huawei/dev-20260904"
           - title: "AI岗 9.4"
             slug: "huawei/ai-20260904"
           - title: "机考备考指南"
