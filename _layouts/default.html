@@ -301,6 +301,9 @@
                 var src = code.textContent;
                 var div = document.createElement('div');
                 div.className = 'mermaid';
+                if (/^\s*mindmap\b/.test(src)) {
+                    div.classList.add('mermaid-mindmap');
+                }
                 div.dataset.mermaidSrc = src;
                 div.innerHTML = srcToInnerHTML(src);
                 var target = isCode

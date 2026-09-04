@@ -129,3 +129,20 @@ test('system course Mermaid diagrams have a renderer and theme-aware styling', (
         assert.match(read(page), /```mermaid/, `${page} should include a diagram`);
     }
 });
+
+test('every numbered system lesson starts with one maintainable mind map', () => {
+    const lessons = coursePages.filter((page) => /\/0\d-/.test(page));
+
+    for (const page of lessons) {
+        const source = read(page);
+        const firstH2 = source.indexOf('\n## ');
+        const mapStart = source.indexOf('```mermaid\nmindmap\n');
+        const mapCount = (source.match(/```mermaid\nmindmap\n/g) || []).length;
+
+        assert.ok(mapStart > 0 && mapStart > firstH2, `${page} should start with a mind map section`);
+        assert.equal(mapCount, 1, `${page} should contain exactly one lesson mind map`);
+    }
+
+    assert.match(read('_layouts/default.html'), /mermaid-mindmap/);
+    assert.match(read('assets/css/docs.css'), /\.mermaid-mindmap/);
+});

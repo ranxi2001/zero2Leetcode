@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/operating-system/04-filesystem-io/
 
 # 文件系统、I/O、epoll 与零拷贝
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((文件系统与输入输出))
+    文件抽象
+      VFS
+      Dentry 与 Inode
+      路径和权限
+    打开文件
+      文件描述符
+      打开文件对象
+      dup fork 和 close
+    名称与持久化
+      硬链接和软链接
+      unlink 与 rename
+      日志文件系统
+    缓存与写回
+      Page Cache
+      Dirty Page
+      write 与 fsync
+    输入输出模型
+      阻塞和非阻塞
+      同步和异步
+      Readiness 与 Completion
+    事件与数据路径
+      select poll epoll
+      LT ET 和惊群
+      mmap sendfile 和零拷贝
+```
+
 ## 一切皆文件的边界
 
 Unix 用文件描述符统一表示很多内核对象：

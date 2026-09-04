@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-network/02-ip-routing/
 
 # IP、子网、路由、ICMP 与 NAT
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((IP 与路由))
+    IP 寻址
+      IPv4 地址
+      CIDR 前缀
+      网络地址与主机范围
+    子网计算
+      子网掩码
+      按位 AND
+      同网段判断
+    路由选择
+      路由表
+      最长前缀匹配
+      默认路由与 ECMP
+    逐跳转发
+      下一跳与出接口
+      TTL
+      ICMP 与 traceroute
+    地址转换
+      SNAT 与 DNAT
+      PAT 状态表
+      端口与映射超时
+    协议演进
+      IPv6 与 NDP
+      分片
+      PMTUD 与 MTU 黑洞
+```
+
 ## IP 层解决什么问题
 
 链路层负责相邻网络，IP 提供跨多段网络的寻址和尽力转发。

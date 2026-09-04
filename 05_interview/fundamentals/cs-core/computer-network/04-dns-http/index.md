@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-network/04-dns-http/
 
 # DNS、HTTP、缓存与连接演进
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((DNS 与 HTTP))
+    DNS 命名
+      域名树与 Zone
+      记录类型
+      权威服务器
+    DNS 解析
+      递归与迭代
+      TTL 与缓存
+      UDP TCP DoT 和 DoH
+    CDN
+      边缘调度
+      缓存与回源
+      HTTPS 终止
+    HTTP 语义
+      URL 与消息
+      方法和幂等
+      状态码
+    Web 状态与缓存
+      Cache Control 和 ETag
+      Cookie 与 Session
+      Token 和代理
+    HTTP 演进
+      HTTP 1.1
+      HTTP 2
+      HTTP 3 与 QUIC
+```
+
 ## DNS 解决什么问题
 
 应用使用域名，人和服务不应依赖固定 IP。DNS 是分层、分布式命名系统，把域名解析为地址或其他记录。

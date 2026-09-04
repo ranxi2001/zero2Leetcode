@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-organization/03-memory-ca
 
 # 存储层次、Cache 与局部性
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((存储与 Cache))
+    存储层次
+      寄存器和多级 Cache
+      DRAM
+      SSD 与持久存储
+    局部性
+      时间局部性
+      空间局部性
+      工作集
+    Cache 组织
+      Cache line
+      Tag Set Offset
+      直接 全相联 组相联
+    命中与替换
+      Compulsory miss
+      Capacity Conflict miss
+      AMAT 与替换策略
+    写入与预取
+      Write through
+      Write back
+      预取与缓存污染
+    程序优化
+      数组与链表
+      矩阵分块
+      TLB 与 false sharing
+```
+
 ## 为什么需要层次结构
 
 理想存储器希望同时做到：

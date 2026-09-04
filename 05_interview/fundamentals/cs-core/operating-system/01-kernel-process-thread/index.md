@@ -12,6 +12,37 @@ permalink: /05_interview/fundamentals/cs-core/operating-system/01-kernel-process
 >
 > 先背结论，再沿着“内核保存什么、状态怎样变化、性能代价来自哪里”回答 408、Linux 和云原生面试追问。
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((内核 进程 线程))
+    权限边界
+      用户态与内核态
+      系统调用
+      中断和异常
+    进程
+      PCB 与 task
+      虚拟地址空间
+      状态转换
+    进程生命周期
+      fork 与 COW
+      exec
+      exit wait 和僵尸
+    线程
+      共享进程资源
+      私有执行现场
+      TLS 与信号
+    执行与通信
+      上下文切换
+      并发与并行
+      IPC
+    运行时与容器
+      用户线程与协程
+      Go GMP
+      Namespace Cgroup 和 PID 1
+```
+
 ## 为什么应用不能直接操作硬件
 
 若普通程序能修改页表、关闭中断或任意访问设备，一个错误就可能破坏整个系统。CPU 提供特权级，操作系统内核运行在高特权级，应用运行在受限用户态。

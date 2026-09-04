@@ -517,6 +517,27 @@ code, pre { font-family: var(--font-mono); }
     font-family: Inter, "Noto Sans SC", sans-serif !important;
 }
 
+.mermaid.mermaid-mindmap {
+    max-height: 620px;
+    overflow: auto;
+}
+
+.mermaid-mindmap svg {
+    max-height: 560px;
+    width: auto;
+}
+
+@media (max-width: 720px) {
+    .mermaid.mermaid-mindmap {
+        justify-content: flex-start;
+    }
+
+    .mermaid-mindmap svg {
+        min-width: 760px;
+        max-width: none;
+    }
+}
+
 .doc-article a {
     color: var(--brand);
     text-decoration: underline;

@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-network/01-layers-link/
 
 # 分层、以太网、MAC 与 ARP
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((分层与链路))
+    网络分层
+      应用 传输 网络
+      链路 物理
+      封装与解封装
+    以太网
+      Ethernet frame
+      MAC 地址
+      MTU
+    交换机
+      学习源 MAC
+      已知单播转发
+      未知单播和广播泛洪
+    ARP
+      同网段解析目标 MAC
+      跨网段解析网关 MAC
+      邻居缓存
+    VLAN
+      Access 端口
+      Trunk 链路
+      划分广播域
+    DHCP
+      Discover Offer
+      Request ACK
+      IP 网关 DNS 和租约
+```
+
 ## TCP/IP 分层模型
 
 常用四层视角：

@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-organization/04-io-multic
 
 # 中断、DMA、多核与缓存一致性
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((输入输出与多核))
+    设备接口
+      控制器与驱动
+      MMIO
+      总线和 PCIe
+    事件处理
+      轮询
+      中断
+      中断合并与亲和性
+    DMA
+      描述符和环形队列
+      设备与内存传输
+      IOMMU
+    缓存一致性
+      多核私有 Cache
+      MESI
+      Cache 间传输
+    并发硬件
+      原子读改写
+      CAS 与 ABA
+      False Sharing
+    内存语义
+      Cache coherence
+      内存顺序与屏障
+      NUMA
+```
+
 ## CPU 怎样与设备通信
 
 设备速度和行为差异巨大。CPU 通常通过设备控制器和寄存器与设备交互，而不是理解每种设备内部细节。

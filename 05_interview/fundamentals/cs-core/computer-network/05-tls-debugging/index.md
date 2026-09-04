@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-network/05-tls-debugging/
 
 # TLS、完整请求链路与网络排障
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((TLS 与网络排障))
+    安全目标
+      机密性
+      完整性
+      身份认证
+    密码学原语
+      对称加密与 AEAD
+      哈希 HMAC 和签名
+      临时密钥交换
+    PKI
+      服务器证书
+      中间 CA 与根 CA
+      SAN 有效期和信任库
+    TLS 1.3
+      ClientHello 与 ServerHello
+      Transcript 和 Finished
+      前向保密
+    连接能力
+      SNI 与 ALPN
+      会话恢复
+      0 RTT 和重放
+    请求与排障
+      HTTPS 全链路
+      DNS TCP TLS HTTP 分层
+      curl 抓包与云原生路径
+```
+
 ## TLS 解决什么问题
 
 在不可信网络上传输，需要：

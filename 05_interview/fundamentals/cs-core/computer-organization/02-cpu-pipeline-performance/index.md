@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-organization/02-cpu-pipel
 
 # CPU、流水线与性能
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((CPU 与性能))
+    性能指标
+      主频和时钟周期
+      CPI 与 IPC
+      延迟和吞吐
+    流水线
+      取指 译码 执行
+      访存与写回
+      填充 停顿 冲刷
+    流水线冒险
+      结构冒险
+      数据冒险
+      控制冒险
+    指令级并行
+      分支预测
+      超标量
+      乱序与按序提交
+    并行层次
+      SIMD
+      SMT
+      多核与 Amdahl
+    性能诊断
+      CPU bound
+      Memory bound
+      perf 与基准测试
+```
+
 ## 性能不只看主频
 
 简化 CPU 时间公式：

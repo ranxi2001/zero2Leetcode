@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/operating-system/02-scheduling-con
 
 # 调度、同步、锁与死锁
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((调度与同步))
+    调度目标
+      利用率和吞吐
+      响应和周转
+      公平与实时性
+    调度算法
+      FCFS 和 SJF
+      SRTF 和 Round Robin
+      Priority 和 MLFQ
+    并发正确性
+      竞态条件
+      原子性和可见性
+      临界区与不变量
+    同步原语
+      Mutex 与 Futex
+      条件变量
+      信号量和读写锁
+    等待问题
+      自旋与阻塞
+      死锁
+      活锁和饥饿
+    工程设计
+      锁顺序和粒度
+      优先级反转
+      有界队列与背压
+```
+
 ## 调度解决什么问题
 
 可运行线程多于 CPU 核心时，内核必须选择谁运行以及运行多久。

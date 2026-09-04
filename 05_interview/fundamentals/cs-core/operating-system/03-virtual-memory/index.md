@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/operating-system/03-virtual-memory
 
 # 地址空间、分页、TLB 与缺页
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((虚拟内存))
+    地址抽象
+      虚拟地址
+      物理地址
+      MMU 与权限
+    分页
+      Page 与 Page Frame
+      多级页表
+      PTE
+    地址翻译
+      TLB hit
+      TLB miss 和 Page Walk
+      TLB Shootdown
+    缺页处理
+      合法与非法访问
+      Minor Fault
+      Major Fault
+    分配与映射
+      malloc 与 Overcommit
+      Copy On Write
+      mmap
+    回收与压力
+      页面置换
+      Swap 与 Thrashing
+      OOM 和大页
+```
+
 ## 虚拟内存解决什么问题
 
 虚拟内存不只是“内存不够时用磁盘”。它提供：

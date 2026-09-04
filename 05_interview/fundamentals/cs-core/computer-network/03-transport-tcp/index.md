@@ -8,6 +8,37 @@ permalink: /05_interview/fundamentals/cs-core/computer-network/03-transport-tcp/
 
 # UDP、TCP 与可靠传输
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((传输层))
+    通信端点
+      端口
+      Socket
+      四元组与分用
+    UDP
+      无连接数据报
+      消息边界
+      丢包乱序与 MTU
+    TCP 连接
+      三次握手
+      字节流与 framing
+      四次挥手
+    可靠传输
+      Sequence 与 ACK
+      RTO 和快速重传
+      SACK 与乱序重组
+    传输控制
+      rwnd 流量控制
+      cwnd 拥塞控制
+      BDP
+    状态与边界
+      TIME WAIT
+      CLOSE WAIT 与监听队列
+      业务幂等
+```
+
 ## 传输层连接进程
 
 IP 把包送到主机，端口把数据交给主机上的进程/Socket。

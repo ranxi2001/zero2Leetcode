@@ -10,6 +10,37 @@ permalink: /05_interview/fundamentals/cs-core/operating-system/05-linux-observab
 
 系统知识最终要能解释真实现象。排障不是背命令，而是根据症状建立假设，再用证据排除。
 
+## 本节知识地图
+
+```mermaid
+mindmap
+  root((Linux 观测))
+    排障方法
+      症状 范围 时间线
+      假设与对照
+      USE 和 RED
+    CPU 与调度
+      user system iowait
+      load 和运行队列
+      perf 与上下文切换
+    内存
+      VSZ RSS PSS
+      Fault Swap OOM
+      PSI 与工作集
+    存储
+      IOPS 带宽 延迟
+      队列与利用率
+      空间 inode 和脏页
+    系统边界
+      strace
+      文件描述符
+      Socket 和网卡
+    云原生与复盘
+      Cgroup 配额
+      Pod 和 Sidecar
+      根因链与修复验证
+```
+
 ## 从四个问题开始
 
 1. **影响是什么**：延迟、吞吐、错误率还是资源耗尽？
