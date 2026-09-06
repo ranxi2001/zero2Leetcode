@@ -363,6 +363,8 @@ modules:
             slug: "ctrip/dev-20260510"
           - title: "算法岗 5.21"
             slug: "ctrip/algo-20260521"
+          - title: "技术岗 9.6"
+            slug: "ctrip/general-20260906"
       - name: "得物"
         articles:
           - title: "暑期实习 4.18"
