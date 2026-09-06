@@ -313,6 +313,8 @@ modules:
             slug: "iflytek/general-20260411"
           - title: "算法岗 8.23"
             slug: "iflytek/algo-20260823"
+          - title: "算法岗 9.6"
+            slug: "iflytek/algo-20260906"
       - name: "拼多多"
         articles:
           - title: "暑期实习-通用 4.12"
@@ -341,6 +343,8 @@ modules:
             slug: "pinduoduo/algo-20260823"
           - title: "秋招-技术岗 8.30"
             slug: "pinduoduo/general-20260830"
+          - title: "秋招-技术岗 9.6"
+            slug: "pinduoduo/general-20260906"
       - name: "OPPO"
         articles:
           - title: "数据分析岗 8.8"
@@ -385,6 +389,8 @@ modules:
             slug: "mihoyo/general-20260428"
           - title: "运维开发（平台向）8.16"
             slug: "mihoyo/devops-20260816"
+          - title: "通用 9.6"
+            slug: "mihoyo/general-20260906"
       - name: "蔚来"
         articles:
           - title: "通用 4.19"
