@@ -181,6 +181,8 @@ modules:
             slug: "meituan/algo-20260829"
           - title: "算法策略岗 9.1"
             slug: "meituan/algo-20260901"
+          - title: "算法岗与研发岗 9.5"
+            slug: "meituan/algo-20260905"
       - name: "华为"
         articles:
           - title: "研发岗 4.8"
@@ -279,12 +281,18 @@ modules:
             slug: "jd/algo-20260822"
           - title: "算法岗 8.29"
             slug: "jd/algo-20260829"
+          - title: "算法岗 9.5"
+            slug: "jd/algo-20260905"
+          - title: "研发岗 9.5"
+            slug: "jd/dev-20260905"
       - name: "滴滴"
         articles:
           - title: "通用岗 8.23"
             slug: "didi/general-20260823"
           - title: "算法方向 8.30"
             slug: "didi/algo-20260830"
+          - title: "后端研发岗 9.6"
+            slug: "didi/dev-20260906"
       - name: "网易"
         articles:
           - title: "雷火研发岗 4.2"
@@ -381,6 +389,8 @@ modules:
             slug: "nio/general-20260419"
           - title: "通用岗 7.26"
             slug: "nio/general-20260726"
+          - title: "通用岗 9.4"
+            slug: "nio/general-20260904"
       - name: "虾皮"
         articles:
           - title: "研发岗 5.9"
