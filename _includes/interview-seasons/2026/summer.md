@@ -2650,6 +2650,78 @@ Effect 用于与网络、订阅、计时器、DOM 或第三方组件等**外部�
 
 ---
 
+### 248. 什么情况下会发生 `StackOverflowError`？如何定位和修复？
+
+> 来源：[去哪儿旅行 AI 全栈一面](https://www.nowcoder.com/discuss/926507047238078464)
+
+每个线程的调用栈容量有限。无限递归、递归终止条件错误、正常但深度过大的递归，以及两个方法循环调用都会不断创建栈帧，最终抛出 `StackOverflowError`；它是 `Error`，不应把“捕获后继续运行”当作修复方案。定位先看异常栈是否重复出现同一组方法，再检查终止条件、输入规模和隐式递归；能改迭代就使用显式栈，增大 `-Xss` 只能作为容量权衡。
+
+---
+
+### 249. 多机环境如何生成全局唯一、趋势递增且高可用的 ID？
+
+> 来源：[拼多多 Agent 开发岗一面](https://www.nowcoder.com/discuss/926273867092430848)
+
+数据库自增或集中号段服务顺序清晰但可能成为瓶颈；UUID 去中心化但不递增；Snowflake 类方案吞吐高且趋势递增，却要处理节点号唯一、时钟回拨和序列溢出。生产上应结合号段租约、机房位宽、故障转移和重复率监控；严格连续序列必须接受串行化和可用性代价。
+
+---
+
+### 250. 子网与 VLAN 分别解决什么问题？它们是什么关系？
+
+> 来源：[百度 Agent 一面](https://www.nowcoder.com/feed/main/detail/72858aade19d443facc870fea8bb134f)
+
+IP 子网是三层地址与路由边界；VLAN 是二层广播域隔离。一个 VLAN 常配置一个或多个 IP 子网，但两者不是同一概念。跨 VLAN 通常需要三层网关。排障时分别检查 VLAN membership/trunk、MAC 表、ARP、掩码与路由，不能把“不同网段”当作完整解释。
+
+---
+
+### 251. SQLite 适合什么项目场景？什么时候应该换成客户端-服务器数据库？
+
+> 来源：[跨设备多 Agent 项目一面](https://www.nowcoder.com/feed/main/detail/9b1329caf4b64389a0ab666585bda045)
+
+SQLite 适合移动/桌面应用、本地缓存、离线数据、边缘设备、测试和小型单机服务。WAL 可改善读写并发，但多实例写入、细粒度权限、跨机高可用、CDC 或复杂运维需求出现时，应考虑 PostgreSQL/MySQL 等服务端数据库。选型要基于写并发、故障域和一致性，而不是只看文件大小。
+
+---
+
+### 252. `ping` 能检测端口吗？端口“开放”和服务进程“监听”有什么区别？
+
+> 来源：[跨设备多 Agent 项目一面](https://www.nowcoder.com/feed/main/detail/9b1329caf4b64389a0ab666585bda045)
+
+普通 `ping` 使用 ICMP，不携带 TCP/UDP 端口，不能证明应用端口可用；端口检测应使用 `nc`、`Test-NetConnection`、`curl` 或协议客户端。进程监听只表示本机 Socket 已绑定并接收，外部可访问还取决于绑定地址、防火墙、安全组、NAT、路由和应用健康。
+
+---
+
+### 253. SHA 与 Base64 有什么区别？密码应该如何存储？
+
+> 来源：[小厂技术一面](https://www.nowcoder.com/feed/main/detail/0aaf90e0710140f486fb71ca2625bec3)
+
+Base64 是可逆编码，不提供保密性；SHA 是单向哈希，但普通 SHA 速度太快，不适合直接存密码。密码应使用 Argon2id、scrypt、bcrypt 或 PBKDF2，配合每密码随机 salt、恒定时间比较和参数升级；需要恢复原文的数据才使用带认证的加密。
+
+---
+
+### 254. MP4 边下边播如何实现？HTTP `Range` 请求有哪些关键语义？
+
+> 来源：[百度具身研发一面](https://www.nowcoder.com/feed/main/detail/258695ecdfbb464790fc8ae55c9f1661)
+
+播放器按时间轴请求字节区间，服务端支持 Range 时返回 `206 Partial Content` 与 `Content-Range`；不支持时返回完整 `200`，越界返回 `416`。MP4 发布时将 `moov` 元数据前移可更快首播和 Seek；CDN 缓存、ETag、鉴权和文件版本必须保持一致，避免范围拼接到不同版本。
+
+---
+
+### 255. ES6 常见遍历机制有什么区别？如何按数据结构和控制流选择？
+
+> 来源：[去哪儿旅行前端一面](https://www.nowcoder.com/feed/main/detail/2ed12b3fa1d4491f8bb029f99cf9de73)
+
+`for...of` 消费 Iterable，支持值遍历、`break` 和异步控制；`for...in` 枚举可枚举字符串键，通常不用于数组。`forEach` 不能提前 `break`，也不会等待异步回调；串行 `await` 用 `for...of`，并发则显式组合 `Promise.all`。`map/filter/reduce` 更适合表达数据变换，不应只为副作用滥用。
+
+---
+
+### 256. CPU 经典五级流水线是什么？乱序执行如何保证结果正确？
+
+> 来源：[昆仑芯 AI 高性能开发一面](https://www.nowcoder.com/feed/main/detail/65b9990e774a4331bb603f0cf1ca4a88)
+
+经典模型包括 IF、ID、EX、MEM、WB 五级，真实 CPU 还会处理结构、数据和控制冒险。乱序核心用寄存器重命名消除假依赖，用调度队列等待操作数，结果进入 Reorder Buffer，只有到队头才按程序顺序提交；分支误预测或精确异常时丢弃未提交结果，因此内部乱序而架构状态仍保持顺序语义。
+
+---
+
 ## 算法与手撕题单
 
 以下题目来自同一时间窗口，适合单独放入算法训练计划：
