@@ -46,6 +46,7 @@ Thumbs.db
 .agents/skills/*
 !.agents/skills/systematic-foundations-tutorial/
 !.agents/skills/systematic-foundations-tutorial/**
+.agents/skills/**/__pycache__/
 !.agents/skills/local-practice-problem-adder/
 !.agents/skills/local-practice-problem-adder/**
 !.agents/skills/interview-article-writer/
