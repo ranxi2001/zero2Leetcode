@@ -68,8 +68,8 @@ eyebrow: Module 06
 | [Kubernetes 与 Agent 基础设施](fundamentals/kubernetes-agent-infra/) | 云原生/Agent Infra | 39道前沿题：虚拟机、容器、K8s调度、Volcano、推理、Sandbox与Agentic RL |
 | [程序员八股文50题](fundamentals/general-backend/) | 通用技术岗 | 数据结构+操作系统+网络+数据库+系统设计，50道高频题全解析 |
 | [2026年3–7月高频后端八股统计](fundamentals/backend-frequency-2026-march-july/) | 高频统计 | 32组真实面经：规范题频次、跨月趋势、复习优先级与算法附录 |
-| [2026年春季后端面经八股](fundamentals/recent-2026-spring/) | 3–5月真题 | 45道题：Java、C++、JVM、数据库、缓存、网络与分布式 |
-| [2026年2–9月后端面经八股](fundamentals/recent-2026-summer/) | 2–9月真题 | 256道题：Java、C++、Go、操作系统、网络、数据库、分布式与AI Infra |
+| [2026年上半年后端面经八股](fundamentals/recent-2026-spring/) | 1–6月归档 | 112道题：语言基础、操作系统、网络、数据库、分布式与AI Infra |
+| [2026年下半年后端面经八股](fundamentals/recent-2026-summer/) | 7–12月归档 | 189道题：Java、C++、Go、操作系统、网络、数据库、分布式与AI Infra |
 
 ## 备考建议
 
