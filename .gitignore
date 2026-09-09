@@ -41,7 +41,17 @@ Thumbs.db
 # 本地打包暂存
 .packs/
 .pack.conf
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/systematic-foundations-tutorial/
+!.agents/skills/systematic-foundations-tutorial/**
+!.agents/skills/local-practice-problem-adder/
+!.agents/skills/local-practice-problem-adder/**
+!.agents/skills/interview-article-writer/
+!.agents/skills/interview-article-writer/**
+!.agents/skills/frontend-dev/
+!.agents/skills/frontend-dev/**
 tmp/pdfs/
 output/pdf/
 华为AI机考一周速成题单&攻略.pdf
