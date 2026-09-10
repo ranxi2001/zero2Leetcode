@@ -29,6 +29,10 @@ description: >
 - Jekyll 构建后运行 `python3 tools/verify-article-pages.py <构建目录>`，核对全部真题 permalink 对应的 HTML 存在；CI 已接入该检查。
 - 推送后等待 Pages 部署完成，并实测文章线上 URL 返回 200 且正文正确；不能用 Actions 成功代替线上验证。
 
+### 微信 SVG 公式保真
+
+抓取结果中出现“有 名成员”“位置为 ，”等空白时，必须检查原始 HTML 的 `svg [data-mml-node="math"]`。不得当成单纯渲染故障，也不得靠上下文猜约束。优先恢复公式语义；无可靠 LaTeX 时可将原始 SVG 保存到自有 `assets/formulas/` 并按原位置内联显示。保留 `viewBox` 大小写及原始高度，检查公式数、资源加载和实际浏览器截图。代码块不得混入公式图片。当前五篇回归入口为 `node --test tests/source-math.test.cjs`。
+
 ## 文章结构模板
 
 每篇文章必须包含以下结构：
