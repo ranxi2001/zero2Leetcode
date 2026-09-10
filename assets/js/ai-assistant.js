@@ -109,18 +109,9 @@ const QUICK_ACTIONS = Object.freeze({
     },
 });
 
-// Free 模型专用 key。它只用于默认体验，Base64 不是安全存储。
-const _k = [
-    'c2stb3ItdjEtMDk1',
-    'MGEzNDk1ODE1OGJh',
-    'M2E3MmNjZWMwNzEy',
-    'NDY2MjA5NWRjY2E0',
-    'ODI3YWJiM2E0NmQx',
-    'ZWZmZTdiMTUwZWNjMw==',
-];
-
+// 不在客户端代码中内置任何 API key，需由用户在设置中自行配置。
 function _dk() {
-    try { return atob(_k.join('')); } catch (error) { return ''; }
+    return '';
 }
 
 const AI_ICON_SVG = `
