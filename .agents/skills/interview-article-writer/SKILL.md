@@ -22,6 +22,13 @@ description: >
 
 ---
 
+## 发布前页面完整性检查（强制）
+
+- 工具 `read_file` 返回的 `行号|内容` 只是展示格式，禁止将行号写进源文件。文章必须以独立的 `---` 开始，否则 Jekyll 会原样复制 Markdown，部署成功但页面 404。
+- 运行 `node --test tests/article-pages.test.cjs`，检查真题目录所有文章的 front matter。
+- Jekyll 构建后运行 `python3 tools/verify-article-pages.py <构建目录>`，核对全部真题 permalink 对应的 HTML 存在；CI 已接入该检查。
+- 推送后等待 Pages 部署完成，并实测文章线上 URL 返回 200 且正文正确；不能用 Actions 成功代替线上验证。
+
 ## 文章结构模板
 
 每篇文章必须包含以下结构：
