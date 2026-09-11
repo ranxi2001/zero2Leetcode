@@ -189,6 +189,10 @@ modules:
             slug: "meituan/algo-20260905"
       - name: "华为"
         articles:
+          - title: "AI岗 9.11"
+            slug: "huawei/ai-20260911"
+          - title: "研发岗 9.11"
+            slug: "huawei/dev-20260911"
           - title: "AI岗 9.9"
             slug: "huawei/ai-20260909"
           - title: "研发岗 9.9"

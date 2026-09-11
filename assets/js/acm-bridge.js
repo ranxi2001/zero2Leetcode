@@ -102,7 +102,7 @@
 
         return {
             code: code.trim(),
-            input: (input || '').trim(),
+            input: (input || '').trimEnd(),
             expected: (expected || '').trim()
         };
     }

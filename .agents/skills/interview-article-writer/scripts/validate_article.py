@@ -27,8 +27,8 @@ INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 QUESTION_RE = re.compile(r"^## 第 \d+ 题(?:：|:)", re.MULTILINE)
 QUESTION_LIKE_RE = re.compile(r"^##\s*第\s*\d+\s*题", re.MULTILINE)
 SAMPLE_RE = re.compile(
-    r"^\*\*输入\*\*\s*$\n\s*\n^```\s*$\n(.*?)^```\s*$"
-    r".*?^\*\*输出\*\*\s*$\n\s*\n^```\s*$\n(.*?)^```\s*$",
+    r"^\*\*输入\*\*[ \t]*$\n\s*\n^```[ \t]*$\n(.*?)^```[ \t]*$"
+    r".*?^\*\*输出\*\*[ \t]*$\n\s*\n^```[ \t]*$\n(.*?)^```[ \t]*$",
     re.MULTILINE | re.DOTALL,
 )
 FORBIDDEN_EXIT_RE = re.compile(
