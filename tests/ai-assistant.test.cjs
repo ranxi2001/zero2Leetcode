@@ -454,6 +454,11 @@ test('conversion response validation rejects safety classifiers and incomplete p
     );
 });
 
+test('default AI key is documented as public rather than secret', () => {
+    assert.match(assistantSource, /is NOT a secret/);
+    assert.doesNotMatch(assistantSource, /\bDEFAULT_API_KEY\s*=/);
+});
+
 test('legacy dynamic free router migrates to the verified code model', () => {
     assert.equal(AI_DEFAULT_MODEL, 'poolside/laguna-s-2.1:free');
     assert.equal(normalizeConfiguredModel('openrouter/free'), AI_DEFAULT_MODEL);
