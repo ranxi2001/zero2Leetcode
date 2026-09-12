@@ -109,8 +109,14 @@ const QUICK_ACTIONS = Object.freeze({
     },
 });
 
-// Free 模型专用 key。它只用于默认体验，Base64 不是安全存储。
-const _k = [
+// This is a free-tier OpenRouter key for the site's default AI experience. It ships
+// in browser JavaScript and is fully recoverable by anyone who opens dev tools —
+// it is NOT a secret and must not be treated as one. Splitting it into fragments
+// below avoids naive plaintext secret-scanners flagging the source; it provides no
+// real security benefit. Keep OpenRouter-side domain/usage restrictions and rate
+// limits enabled on this key at all times, and never replace it with a
+// production-scope credential.
+const PUBLIC_AI_KEY_FRAGMENTS = [
     'c2stb3ItdjEtMDk1',
     'MGEzNDk1ODE1OGJh',
     'M2E3MmNjZWMwNzEy',
@@ -119,8 +125,8 @@ const _k = [
     'ZWZmZTdiMTUwZWNjMw==',
 ];
 
-function _dk() {
-    try { return atob(_k.join('')); } catch (error) { return ''; }
+function getPublicAIKey() {
+    try { return atob(PUBLIC_AI_KEY_FRAGMENTS.join('')); } catch (error) { return ''; }
 }
 
 const AI_ICON_SVG = `
@@ -173,7 +179,7 @@ function loadAIConfig() {
     if (sessionAIConfig) return { ...sessionAIConfig };
     const defaults = {
         baseUrl: 'https://openrouter.ai/api/v1',
-        apiKey: _dk(),
+        apiKey: getPublicAIKey(),
         model: AI_DEFAULT_MODEL,
     };
     try {
