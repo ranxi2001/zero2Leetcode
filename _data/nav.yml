@@ -415,6 +415,8 @@ modules:
             slug: "nio/general-20260726"
           - title: "通用岗 9.4"
             slug: "nio/general-20260904"
+          - title: "通用岗 9.11"
+            slug: "nio/general-20260911"
       - name: "虾皮"
         articles:
           - title: "研发岗 5.9"
