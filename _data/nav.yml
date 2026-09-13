@@ -129,6 +129,8 @@ modules:
             slug: "alibaba/ai-coding-20260819"
           - title: "算法岗 8.29"
             slug: "alibaba/algo-20260829"
+          - title: "工程岗 AI-Coding 9.12"
+            slug: "alibaba/ai-coding-20260912"
       - name: "蚂蚁"
         articles:
           - title: "研发岗 3.26"
