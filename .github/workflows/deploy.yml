@@ -54,6 +54,8 @@ jobs:
         with:
           source: ./
           destination: ./_site
+      - name: Verify article deployment pages
+        run: python3 tools/verify-article-pages.py _site
       - name: Verify browser deployment assets
         run: |
           test -s _site/acm-playground.html
