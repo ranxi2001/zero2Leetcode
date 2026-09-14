@@ -363,6 +363,8 @@ modules:
             slug: "pinduoduo/general-20260830"
           - title: "秋招-技术岗 9.6"
             slug: "pinduoduo/general-20260906"
+          - title: "技术岗 9.13"
+            slug: "pinduoduo/general-20260913"
       - name: "OPPO"
         articles:
           - title: "数据分析岗 8.8"
