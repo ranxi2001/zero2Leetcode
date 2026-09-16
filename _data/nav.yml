@@ -157,6 +157,10 @@ modules:
             slug: "ant/ai-coding-20260827"
       - name: "美团"
         articles:
+          - title: "算法岗 9.15"
+            slug: "meituan/algo-20260915"
+          - title: "研发岗 9.15"
+            slug: "meituan/dev-20260915"
           - title: "研发岗 9.8"
             slug: "meituan/dev-20260908"
           - title: "研发岗 9.8"
@@ -191,6 +195,10 @@ modules:
             slug: "meituan/algo-20260905"
       - name: "华为"
         articles:
+          - title: "AI岗 9.16"
+            slug: "huawei/ai-20260916"
+          - title: "研发岗 9.16"
+            slug: "huawei/dev-20260916"
           - title: "AI岗 9.11"
             slug: "huawei/ai-20260911"
           - title: "研发岗 9.11"
