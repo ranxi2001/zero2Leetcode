@@ -195,6 +195,8 @@ modules:
             slug: "meituan/algo-20260905"
       - name: "华为"
         articles:
+          - title: "AI岗 9.18"
+            slug: "huawei/ai-20260918"
           - title: "AI岗 9.16"
             slug: "huawei/ai-20260916"
           - title: "研发岗 9.16"
@@ -321,6 +323,8 @@ modules:
             slug: "didi/dev-20260906"
       - name: "网易"
         articles:
+          - title: "算法岗 9.19"
+            slug: "netease/algo-20260919"
           - title: "雷火研发岗 4.2"
             slug: "netease/dev-20260402"
           - title: "互娱 4.12"
@@ -459,6 +463,8 @@ modules:
             slug: "xiaohongshu/general-20260910"
       - name: "百度"
         articles:
+          - title: "算法岗 9.17"
+            slug: "baidu/algo-20260917"
           - title: "算法岗 9.10"
             slug: "baidu/algo-20260910"
           - title: "算法岗 9.10"
