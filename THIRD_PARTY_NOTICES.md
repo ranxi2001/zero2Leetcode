@@ -13,6 +13,10 @@ The 2026 summer interview answers added on 2026-08-28 were independently written
 
 No upstream prose or examples are reproduced. Version-specific behavior remains subject to the linked projects' current documentation.
 
+## Interview Answer References (2026-09-21)
+
+The additional 2026-09-15 through 2026-09-21 backend interview answers were independently written from public Nowcoder recollections. Framework-specific claims were checked against [Spring AI Reference](https://docs.spring.io/spring-ai/reference/), [NVIDIA Nsight Compute Documentation](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html), and [NVIDIA Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html). No upstream prose or code is reproduced.
+
 ## Interview Answer References (2026-09-02)
 
 The interview answers added from the 2026-08-29 through 2026-09-02 audit were independently written and checked against these primary references:
