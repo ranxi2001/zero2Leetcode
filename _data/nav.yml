@@ -311,6 +311,8 @@ modules:
             slug: "jd/algo-20260905"
           - title: "研发岗 9.5"
             slug: "jd/dev-20260905"
+          - title: "算法岗 9.26"
+            slug: "jd/algo-20260926"
       - name: "滴滴"
         articles:
           - title: "通用岗 8.23"
