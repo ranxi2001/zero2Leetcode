@@ -2,12 +2,14 @@
 
 ### 1. 类加载的过程是什么？
 
-> 来源：字节 AI 应用开发一面，7 月 21 日
+> 来源：字节 AI 应用开发一面，7 月 21 日；本轮追问：JVM 的类加载完整过程以及双亲委派模型的核心逻辑是什么？ / JVM 通过什么具体机制保证核心类库不被自定义类加载篡改？ / 双亲委派的层级委托逻辑是什么？自定义一个与核心类库完全同名的类（如 java.lang.String），会被 JVM 加载吗？（[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/e7981675c7a44b098d97e90a854f9c3c)）
 
 JVM 经加载、验证、准备、解析、初始化得到可用类。加载读取字节码并创建 `Class` 元数据；验证保证格式和类型安全；准备为静态字段分配内存并设默认值；解析把符号引用转为直接引用；初始化执行类初始化方法。双亲委派减少核心类被重复或恶意替换，但 SPI、容器隔离等场景会有受控打破。
 
 ---
 
+
+双亲委派是先让父加载器按层级向上尝试，父加载器找不到时才由子加载；启动类加载器负责核心类库，且禁止非启动加载器定义 `java.*` 类。自定义 `java.lang.String` 会在定义阶段失败，通常抛出 `SecurityException`，不会替换核心类。
 ### 2. Spring AOP 在哪些情况下会失效？
 
 > 来源：滴滴 AI Agent 后端面经，7 月 23 日
@@ -42,7 +44,7 @@ CMS 经初始标记、并发标记、重新标记和并发清除，目标是缩�
 
 ### 6. 面向对象的三大特性是什么？抽象类和接口怎么选？
 
-> 来源：某 Java 岗，8 月 12 日
+> 来源：某 Java 岗，8 月 12 日；[科大讯飞面试挺有意思，不考八股不问项目](https://www.nowcoder.com/feed/main/detail/773d1337e7314a7d90985fd81510974d)
 
 - **封装**：隐藏内部状态，通过稳定接口维护对象不变量。
 - **继承**：复用和扩展已有行为，但会形成较强的父子耦合。
@@ -67,7 +69,7 @@ CMS 经初始标记、并发标记、重新标记和并发清除，目标是缩�
 
 ### 8. JVM 为什么要划分新生代和老年代？
 
-> 来源：字节 Agent 开发一面，8 月 9 日
+> 来源：字节 Agent 开发一面，8 月 9 日；本轮追问：JVM 垃圾回收是怎样的？（[CVTE 一面](https://www.nowcoder.com/discuss/932319671578030080)）
 
 依据是**弱分代假说**：绝大多数对象朝生夕死，少数对象会长期存活。新生代使用复制算法，回收频繁但只复制少量存活对象；经过多次回收仍存活的对象晋升老年代，老年代用标记整理等算法降低空间浪费。
 
@@ -75,9 +77,11 @@ CMS 经初始标记、并发标记、重新标记和并发清除，目标是缩�
 
 ---
 
+
+GC 通常从 GC Roots 出发做可达性分析，回收不可达对象；复制式收集会搬迁存活对象，标记整理会清除垃圾并压缩空间。部分收集器把标记、清扫或整理并发化，但仍需在安全点短暂停顿，并通过写屏障维护跨代或并发标记的正确性。
 ### 9. HashMap 在 JDK 7 和 JDK 8 中有哪些关键差异？
 
-> 来源：百度内容营销与广告一面，8 月 12 日；[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)
+> 来源：百度内容营销与广告一面，8 月 12 日；[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)；[携程AI 面试复盘](https://www.nowcoder.com/discuss/932274641865887744)；[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)
 
 JDK 7 的桶内结构主要是数组 + 链表，扩容迁移使用头插，在并发误用时可能形成环；JDK 8 改为尾插，并在冲突严重时把链表树化为红黑树，降低极端查询复杂度。JDK 8 还重写了扰动和扩容迁移逻辑，节点迁移时可根据新增的高位直接分到原位置或 `原位置 + oldCap`。
 
@@ -89,7 +93,7 @@ JDK 7 的桶内结构主要是数组 + 链表，扩容迁移使用头插，在�
 
 ### 10. Java 线程池的执行流程是什么？
 
-> 来源：字节 AI 应用开发一面，7 月 21 日；本轮追问：线程池的7个参数是什么？ / 线程池的3大方法是什么？（[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)）；[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)
+> 来源：字节 AI 应用开发一面，7 月 21 日；本轮追问：线程池的7个参数是什么？ / 线程池的3大方法是什么？（[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)）；[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)；本轮追问：拒绝策略中的主线程执行，这个主线程指的是什么？（[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)）；[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)；本轮追问：线程池有几种创建方式？Executor 有几种方式？（[迅雷 Agent一面](https://www.nowcoder.com/discuss/932392798559432704)）
 
 提交任务后，工作线程少于 `corePoolSize` 时先创建核心线程；否则尝试入队；队列满后再创建非核心线程，直到 `maximumPoolSize`；仍无法接收时执行拒绝策略。设计时必须说明队列是否有界、任务是否允许阻塞、拒绝后如何降级，以及如何监控活跃线程、队列等待和任务耗时。
 
@@ -97,14 +101,18 @@ JDK 7 的桶内结构主要是数组 + 链表，扩容迁移使用头插，在�
 
 
 七个参数是 corePoolSize、maximumPoolSize、keepAliveTime、TimeUnit、BlockingQueue、ThreadFactory 和 RejectedExecutionHandler。常说的三大方法通常指 execute、submit、shutdown（分别提交任务、获取 Future、停止接收任务）；面试时应先确认题目口径。
+
+拒绝策略中的“主线程”通常是提交任务的调用方线程，不是线程池内部固定线程；CallerRuns 会让它同步执行任务，既能背压，也可能拖慢请求线程。创建方式可用 ThreadPoolExecutor 手动配置，也可用 Executors 的固定、单线程、缓存、定时等工厂方法；后者需警惕无界队列或线程数失控。
 ### 11. 如果重新设计线程池，要考虑哪些模块？
 
-> 来源：字节 AI 应用开发一面，7 月 21 日
+> 来源：字节 AI 应用开发一面，7 月 21 日；本轮追问：线程池涉及哪些参数？线程池的线程数如何确定？ / CPU密集型任务的核心线程数是核数+1，为什么要+1？ / 拒绝策略都有哪些？你觉得这四种拒绝策略分别适用于哪些场景？ / 有哪些典型的场景会用到“主线程”这个拒绝策略？在这种拒绝策略下会不会造成主线程被压的问题？（[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)）；本轮追问：为什么每个数据源使用独立线程池，能否共享一个召回线程池？ / I/O 型与 CPU 型任务哪个需要更多线程，线程池参数怎样确定？（[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)）；本轮追问：第二个实习多数据源并发召回为什么用专用线程池，不共享会防住什么问题？（[9.15秋招东方财富AI应用一面](https://www.nowcoder.com/feed/main/detail/d406314e733c4fc8945637ce5d06cdcf)）；本轮追问：说说你对线程池、生产者消费者和任务队列的理解。（[腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078)）
 
 需要任务队列、Worker 生命周期、核心/最大线程数、空闲回收、拒绝策略、异常隔离和关闭状态机。生产实现还要有背压、优先级/公平性、上下文传播、超时取消、指标与动态配置。难点不在“能启动线程”，而在竞争条件、任务丢失、关闭时序和过载保护。
 
 ---
 
+
+线程数应按任务性质和实测调参：CPU 型通常接近核数，+1用于线程偶发阻塞时维持利用率；I/O 型可更多，但受等待比例、队列和下游容量约束。拒绝策略包括抛异常、调用方执行、丢弃、丢弃最旧任务；调用方执行会让提交线程变慢，形成背压，可能压住主线程。多数据源宜独立线程池隔离队列和故障，共享池则需配额、优先级与超时。
 ### 12. 双重检查单例为什么需要 `volatile`？
 
 > 来源：字节 AI 应用开发一面，7 月 21 日
@@ -123,7 +131,7 @@ Channel 适合传递数据所有权、编排流水线和事件通知；`Mutex` �
 
 ### 14. GMP 调度中 P 没有本地任务时怎么办？
 
-> 来源：滴滴 AI Agent 后端面经，7 月 23 日；本轮追问：介绍一下Go的GMP调度原理。（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）
+> 来源：滴滴 AI Agent 后端面经，7 月 23 日；本轮追问：介绍一下Go的GMP调度原理。（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）；[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)
 
 P 优先从本地队列取 G，也会周期性检查全局队列；本地为空时尝试从其他 P 偷取一半任务，再检查全局队列、网络轮询器和定时器。系统调用阻塞时，M 可与 P 分离，让 P 绑定其他 M 继续运行。`GOMAXPROCS` 控制同时执行 Go 代码的 P 数量，而不是 goroutine 总数。
 
@@ -131,7 +139,7 @@ P 优先从本地队列取 G，也会周期性检查全局队列；本地为空�
 
 ### 15. Java 中常见的锁有哪些？`synchronized` 的锁升级怎么理解？
 
-> 来源：字节 Agent 开发一面，8 月 9 日；四维纵横三面，8 月 12 日
+> 来源：字节 Agent 开发一面，8 月 9 日；四维纵横三面，8 月 12 日；本轮追问：Java锁的实现方法有哪些？（[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)）
 
 常见同步手段包括 `synchronized`、基于 AQS 的 `ReentrantLock`/读写锁、CAS 原子类、`StampedLock`。选型先看是否需要可中断、超时、公平性、多个条件队列或乐观读；普通互斥场景优先使用语义简单、自动释放的 `synchronized`。
 
@@ -173,7 +181,7 @@ public final class Singleton {
 
 ### 17. 进程、线程、协程有什么区别？
 
-> 来源：百度后端一面，8 月 6 日；百度 Agent 开发二面，8 月 12 日；[百度 Agent 二面（FastAPI 异步追问）](https://www.nowcoder.com/feed/main/detail/bca7dc14bd654e91b89792608111b211)；本轮追问：进程和线程有什么区别？浏览器为什么采用多进程架构？（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）；本轮追问：Goroutine跟Java线程池中的线程两者相比有什么区别？（[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)）；[字节 aime 一面 9.10](https://www.nowcoder.com/feed/main/detail/ed5e9d17f26e489da94afbf1241b885e)
+> 来源：百度后端一面，8 月 6 日；百度 Agent 开发二面，8 月 12 日；[百度 Agent 二面（FastAPI 异步追问）](https://www.nowcoder.com/feed/main/detail/bca7dc14bd654e91b89792608111b211)；本轮追问：进程和线程有什么区别？浏览器为什么采用多进程架构？（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）；本轮追问：Goroutine跟Java线程池中的线程两者相比有什么区别？（[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)）；[字节 aime 一面 9.10](https://www.nowcoder.com/feed/main/detail/ed5e9d17f26e489da94afbf1241b885e)；本轮追问：阻塞状态的 goroutine 是怎么处理的？和线程有什么不同？ / goroutine 和线程切换的时候，有什么不同？（[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)）
 
 | 维度 | 进程 | 线程 | 协程 |
 |------|------|------|------|
@@ -190,6 +198,8 @@ FastAPI 中 `async def` 路由只有在等待真正的异步 IO 时，`await` �
 
 
 浏览器采用多进程可隔离标签页、渲染器和插件，单个页面崩溃或被攻击时不会直接拖垮整个浏览器，但会增加内存与进程通信开销。Goroutine由运行时复用少量线程调度，创建和切换轻；Java线程池管理的是内核线程，通常通过有界队列、拒绝策略控制并发，线程被阻塞时会占用池中资源。
+
+Goroutine 阻塞在 channel、锁或网络 IO 时会被运行时标记为等待，调度器可让出其所在线程去运行其他可运行 goroutine；若调用不可抢占的阻塞系统调用，可能占住线程，需异步化或隔离。切换主要保存用户态执行上下文，由运行时调度，通常不涉及线程级内核调度；线程阻塞则直接占用该线程并触发内核调度。
 ### 18. 一个进程的内存布局是什么？哪些区域容易溢出？
 
 > 来源：百度后端一面，8 月 6 日；百度内容营销与广告一面，8 月 12 日；[字节 AI Agent 研发一面](https://www.nowcoder.com/feed/main/detail/2ba7e96d48634777990b28c2cb322f40)
@@ -245,7 +255,7 @@ HTTP 是协议，RPC 是远程调用抽象，两者不在同一分类层级。RP
 
 ### 23. WebSocket 和 SSE 有什么区别？分别适合哪些通信场景？
 
-> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[字节跳动火山引擎方舟 Managed Agent 一面，8 月 13 日](https://www.nowcoder.com/discuss/917561494512861184)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；本轮追问：除了 WebSocket 还可以用什么？除了 SSE 还可以用什么？（[cvte应用软件开发一面](https://www.nowcoder.com/feed/main/detail/c2155d2308de452c8a6e3cf2bbb482f3)）
+> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[字节跳动火山引擎方舟 Managed Agent 一面，8 月 13 日](https://www.nowcoder.com/discuss/917561494512861184)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；本轮追问：除了 WebSocket 还可以用什么？除了 SSE 还可以用什么？（[cvte应用软件开发一面](https://www.nowcoder.com/feed/main/detail/c2155d2308de452c8a6e3cf2bbb482f3)）；本轮追问：使用 WebSocket 会引发什么其他问题？（[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)）
 
 WebSocket 通常先通过 HTTP Upgrade 握手，再使用持久连接和独立帧协议，客户端与服务端都能主动发送文本或二进制消息。SSE 则是 `Content-Type: text/event-stream` 的长 HTTP 响应，只支持服务端向客户端推送 UTF-8 文本；客户端上行仍使用普通 HTTP 请求。
 
@@ -259,7 +269,7 @@ LLM Token 流、任务进度、通知和日志等单向事件流通常优先 SSE
 WebSocket 之外可选 HTTP 短轮询、长轮询、WebTransport 或 WebRTC，按实时性、双向性和网络兼容性取舍；SSE 之外可用 WebSocket、长轮询、短轮询或 gRPC 流式调用，需补充重连、顺序、心跳与断点续传设计。
 ### 24. TCP 如何保证可靠？三次握手和四次挥手分别解决什么问题？
 
-> 来源：百度后端一面，8 月 6 日；知乎后端一面，8 月 4 日；小红书数据库智能化二面，8 月 3 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)
+> 来源：百度后端一面，8 月 6 日；知乎后端一面，8 月 4 日；小红书数据库智能化二面，8 月 3 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)；[腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078)
 
 TCP 靠序列号、确认应答、校验和、超时重传、快速重传、滑动窗口、流量控制和拥塞控制共同提供可靠有序字节流。
 
@@ -315,7 +325,7 @@ SSE 不是独立传输协议，而是长期保持的 HTTP 响应，服务端以 
 HTTP 的常见问题包括无状态导致重复认证、连接建立开销、文本头部冗余，以及高并发下的队头阻塞和实时推送能力不足。可通过缓存与压缩、Keep-Alive，升级 HTTP/2 多路复用，或使用 HTTP/3/QUIC 降低传输层阻塞来改进。
 ### 29. undo log、redo log 和 binlog 分别做什么？
 
-> 来源：字节 AI 应用开发一面，7 月 21 日
+> 来源：字节 AI 应用开发一面，7 月 21 日；[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)
 
 undo log 记录旧版本，用于事务回滚和 MVCC；redo log 是 InnoDB 的物理/页级重做日志，用 WAL 保证崩溃恢复；binlog 是 Server 层逻辑日志，用于复制和增量恢复。提交时通过两阶段提交协调 redo 与 binlog，避免主库恢复状态和复制日志不一致。
 
@@ -331,15 +341,17 @@ undo log 记录旧版本，用于事务回滚和 MVCC；redo log 是 InnoDB 的�
 
 ### 31. MVCC 如何实现可重复读？
 
-> 来源：滴滴后端二面，7 月 28 日
+> 来源：滴滴后端二面，7 月 28 日；本轮追问：读已提交和可重复读的区别？ / 如果要放弃可重复读，退到读已提交，你会怎么判断与取舍？（[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)）
 
 记录包含事务 ID 和回滚指针，更新生成 undo 版本链；ReadView 根据活跃事务集合判断版本是否可见。InnoDB 可重复读下，同一事务的快照读通常复用 ReadView，因此多次看到一致版本；当前读仍需锁。RC 每条语句生成新的 ReadView，所以能看到其他事务后续提交。
 
 ---
 
+
+取舍看业务是否需要事务内重复读一致：报表、校验等依赖稳定快照时保留 RR；单条查询更关注读取较新已提交数据、并发写入多且可接受前后读不同，可用 RC。降级前检查是否依赖一致快照，并验证不可重复读、幻读和锁等待对业务的影响。
 ### 32. 索引为什么快，哪些场景会失效？
 
-> 来源：滴滴、字节、快手面经，7 月 23–30 日；本轮追问：联合索引在哪些场景下会失效？（[字节跳动 AI Agent研发工程师｜AI算力基础设施 27秋招面经](https://www.nowcoder.com/discuss/930155293864914944)）；[拼多多AI Agent一面，双机位，全程严肃](https://www.nowcoder.com/feed/main/detail/3cb8b70b192f4051b3c19ace4dda1beb)
+> 来源：滴滴、字节、快手面经，7 月 23–30 日；本轮追问：联合索引在哪些场景下会失效？（[字节跳动 AI Agent研发工程师｜AI算力基础设施 27秋招面经](https://www.nowcoder.com/discuss/930155293864914944)）；[拼多多AI Agent一面，双机位，全程严肃](https://www.nowcoder.com/feed/main/detail/3cb8b70b192f4051b3c19ace4dda1beb)；本轮追问：联合索引 (A, B, C)，如果条件只有A和B的等值条件，还可以使用这个索引吗？ / 如果只有B = 某值 AND C = 某值，索引会怎么走？ / 如果条件是A = 某值 AND C = 某值，中间没有B，索引怎么走？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）；本轮追问：最左前缀匹配是什么原理？为什么会失效？（[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)）
 
 B+ 树降低磁盘页访问并支持有序范围扫描。常见无法有效利用索引的情况包括对列做函数/运算、隐式类型转换、`LIKE '%x'`、不满足联合索引最左前缀、选择性太差导致优化器主动全表扫。`IS NULL`、`!=`、`OR` 不是绝对失效，必须结合数据分布和执行计划判断。
 
@@ -349,7 +361,7 @@ B+ 树降低磁盘页访问并支持有序范围扫描。常见无法有效利�
 联合索引通常按最左前缀使用：跳过首列、首列使用范围或不等式后再依赖后列、列间断条件，都会使后续列难以用于定位；排序顺序不匹配时也可能无法充分利用。最终应以 EXPLAIN 的 key、key_len、rows 和 Extra 验证。
 ### 33. 两个请求并发更新同一行会怎样？
 
-> 来源：百度后端一面，7 月 30 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)
+> 来源：百度后端一面，7 月 30 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)；[快手大模型agent研发一面](https://www.nowcoder.com/discuss/932315325276618752)
 
 普通当前写会获取行级排他锁，后到事务等待、超时或遇到死锁回滚。如果没有正确锁定目标行，读改写可能发生丢失更新。可使用条件更新的乐观锁 `WHERE version=?`、原子 SQL、自增/累加表达式或串行化业务 key；应用必须处理冲突重试并设置上限。
 
@@ -357,7 +369,7 @@ B+ 树降低磁盘页访问并支持有序范围扫描。常见无法有效利�
 
 ### 34. 一条 SQL 在 MySQL 中如何执行？
 
-> 来源：小红书数据库智能化一面，8 月 10 日
+> 来源：小红书数据库智能化一面，8 月 10 日；[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)；本轮追问：如何利用EXPLAIN分析执行计划？（[9.20 汇川技术 数字化全栈工程师 一面](https://www.nowcoder.com/feed/main/detail/28032c48a90c4f69827704deb3fae34c)）
 
 连接层完成认证和会话管理；Server 层解析 SQL、做语义检查和优化，生成执行计划；执行器按计划调用存储引擎接口；InnoDB 再通过索引、Buffer Pool、锁和 MVCC 读取或修改记录。写事务还会涉及 undo log、redo log 和 binlog，并通过两阶段提交维持 redo/binlog 一致性。
 
@@ -365,6 +377,8 @@ B+ 树降低磁盘页访问并支持有序范围扫描。常见无法有效利�
 
 ---
 
+
+使用 EXPLAIN 重点看 type、possible_keys、key、key_len、rows、filtered、Extra 及连接顺序，关注全表扫描、估算行数偏差、临时表和文件排序；再用 EXPLAIN ANALYZE 对比实际行数与耗时，结合表统计信息、索引和 SQL 改写验证优化是否生效。
 ### 35. `CHAR`、`VARCHAR` 和 JSON 怎么选？
 
 > 来源：百度后端一面，8 月 6 日
@@ -390,7 +404,7 @@ InnoDB 默认可重复读。快照读主要靠 MVCC，当前读会加记录锁�
 
 ### 37. B 树和 B+ 树有什么区别？MySQL 为什么用 B+ 树索引？
 
-> 来源：百度后端一面，8 月 6 日；[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)；[美团ai全栈一面](https://www.nowcoder.com/feed/main/detail/a5b8c6571f94441a8af10cd6af07ac3a)；[拼多多AI Agent一面，双机位，全程严肃](https://www.nowcoder.com/feed/main/detail/3cb8b70b192f4051b3c19ace4dda1beb)；[字节 Agent 秋招一面](https://www.nowcoder.com/discuss/929731481189044224)
+> 来源：百度后端一面，8 月 6 日；[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)；[美团ai全栈一面](https://www.nowcoder.com/feed/main/detail/a5b8c6571f94441a8af10cd6af07ac3a)；[拼多多AI Agent一面，双机位，全程严肃](https://www.nowcoder.com/feed/main/detail/3cb8b70b192f4051b3c19ace4dda1beb)；[字节 Agent 秋招一面](https://www.nowcoder.com/discuss/929731481189044224)；[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)；本轮追问：相比没有索引，查询效率提高多少？如何从复杂度角度计算？（[字节剪映AI应用开发一面](https://www.nowcoder.com/feed/main/detail/7211e82c75284d23a89b569cd9dc289d)）
 
 B 树的内部节点和叶子都可保存记录；B+ 树的内部节点只存键和子指针，完整记录集中在叶子，叶子还按顺序相连。同样页大小下，B+ 树内部节点能容纳更多键，树更矮、随机 IO 更少；叶子链表又适合范围扫描和排序。
 
@@ -398,6 +412,8 @@ InnoDB 聚簇索引叶子存整行，二级索引叶子存主键，因此通过�
 
 ---
 
+
+复杂度上，含索引的等值或范围定位通常约为 O(log_B N)，B 为每页可容纳的键数；全表扫描约为 O(N)。实际收益还取决于选择性、数据是否在缓存、回表次数及是否覆盖索引，不能仅由复杂度直接换算成固定倍数。
 ### 38. MySQL 主从复制和高可用怎么设计？
 
 > 来源：百度后端一面、字节后端社招一面，8 月 6 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)
@@ -422,7 +438,7 @@ InnoDB 聚簇索引叶子存整行，二级索引叶子存主键，因此通过�
 
 ### 40. Redis 常见数据结构与适用场景是什么？
 
-> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[招银网络科技9.16 二面+HR面](https://www.nowcoder.com/discuss/929765743787274240)；本轮追问：Redis 除了缓存还能做什么？（[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)）
+> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[招银网络科技9.16 二面+HR面](https://www.nowcoder.com/discuss/929765743787274240)；本轮追问：Redis 除了缓存还能做什么？（[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)）；[字节剪映AI应用开发一面](https://www.nowcoder.com/feed/main/detail/7211e82c75284d23a89b569cd9dc289d)；[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)
 
 String 用于缓存、计数和位图；Hash 存对象字段；List 适合顺序队列但可靠消息更宜用 Streams/MQ；Set 做去重和集合运算；ZSet 用分数排序，适合排行榜和延迟任务。选择时要看访问模式和元素规模，不能把一个超大集合塞进单 Key。
 
@@ -432,7 +448,7 @@ String 用于缓存、计数和位图；Hash 存对象字段；List 适合顺序
 Redis 还可用于分布式锁、限流、会话与临时状态、发布订阅，以及用 Streams 做可确认、可重放的消息流。使用时需关注持久化、过期策略、故障转移和消息可靠性，不能默认等同于专业 MQ。
 ### 41. Redis 单线程为什么仍然快？阻塞会造成什么影响？
 
-> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[字节中国交易与广告 AI 应用开发一面](https://www.nowcoder.com/feed/main/detail/b34f6902e8544fe2953696ed52e49dba)；本轮追问：项目中使用过什么缓存？Redis为什么快？（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）
+> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[字节中国交易与广告 AI 应用开发一面](https://www.nowcoder.com/feed/main/detail/b34f6902e8544fe2953696ed52e49dba)；本轮追问：项目中使用过什么缓存？Redis为什么快？（[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)）；[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)
 
 内存访问、高效结构和 IO 多路复用让单线程事件循环可以高效处理大量短命令，并避免命令执行时的锁竞争。一旦执行大 Key 操作、复杂集合命令、同步删除或 fork/磁盘抖动，后续请求会排队，尾延迟迅速升高。治理依赖慢日志、拆 Key、渐进式操作、`UNLINK` 和实例隔离。
 
@@ -450,12 +466,14 @@ Redis 还可用于分布式锁、限流、会话与临时状态、发布订阅�
 
 ### 43. Redis 哨兵模式如何完成故障转移？
 
-> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[中兴软开一面](https://www.nowcoder.com/feed/main/detail/0b39815babfb47108464ffabdf929eba)
+> 来源：滴滴 AI Agent 后端面经，7 月 23 日；[中兴软开一面](https://www.nowcoder.com/feed/main/detail/0b39815babfb47108464ffabdf929eba)；本轮追问：设计一个由 10 个 Redis 机器构成的集群，内部存储普通的 K-V，K 是 UID，V 是一个二进制文件，要求考虑单点故障、负载均衡等，实现高可用、低延迟。（[奇怪の字节二面面经（大概率凉经）](https://www.nowcoder.com/feed/main/detail/bcf0b8497fcb4982b2292cafbcb08d69)）
 
 Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 Sentinel 协商形成客观下线，再选举领导者挑选从库晋升，并让其他从库复制新主。客户端要能发现拓扑变化并重连。Sentinel 提供高可用而不是数据零丢失，异步复制仍有故障窗口。
 
 ---
 
+
+若是 10 台机器承载普通 KV，应采用 Redis Cluster 分片而非仅靠 Sentinel：例如 5 个主节点、每主 1 个从节点，按哈希槽分布 UID；客户端按槽路由并在拓扑变更后刷新。用副本、故障转移、跨故障域部署和容量压测处理单点与负载；二进制文件过大时应评估对象存储，Redis 只存元数据或小对象。
 ### 44. 大 Key 有什么风险？如何处理？
 
 > 来源：滴滴 AI Agent 后端面经，7 月 23 日
@@ -466,7 +484,7 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 
 ### 45. 缓存穿透、击穿和雪崩如何区分？
 
-> 来源：滴滴国际化后端二面、百度后端一面，7 月 28–30 日；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)；本轮追问：你写的首页高性能接口中的多层缓存、缓存击穿和缓存雪崩，是真实遇到过的问题吗？你是如何考虑并设计的？（[飞书深诺（全栈AI应用开发方向）](https://www.nowcoder.com/feed/main/detail/46a9336c7ead4586bae34e521d4f61d0)）
+> 来源：滴滴国际化后端二面、百度后端一面，7 月 28–30 日；[度小满AI全栈一面](https://www.nowcoder.com/discuss/931241025345978368)；本轮追问：你写的首页高性能接口中的多层缓存、缓存击穿和缓存雪崩，是真实遇到过的问题吗？你是如何考虑并设计的？（[飞书深诺（全栈AI应用开发方向）](https://www.nowcoder.com/feed/main/detail/46a9336c7ead4586bae34e521d4f61d0)）；[恒生电子技术岗ai面](https://www.nowcoder.com/feed/main/detail/49a60657cf63400897542e731c3feae4)
 
 穿透是查询不存在数据，使用校验、空值缓存和布隆过滤器；击穿是单个热点失效，大量请求同时回源，可用互斥重建、逻辑过期或热点永不过期；雪崩是大量 Key 同时失效或缓存集群故障，要随机化 TTL、多级缓存、限流降级和高可用。三者都要防止重试进一步放大流量。
 
@@ -476,7 +494,7 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 是否真实发生不能只靠方案描述判断，应核对访问日志、命中率、回源 QPS、重建耗时和告警时间线。设计上先基线测量，再用压测或故障演练验证：热点失效只放行一个重建请求，批量失效时通过随机 TTL、限流和降级控制回源流量。
 ### 46. 缓存与数据库如何保证最终一致？
 
-> 来源：滴滴国际化、拼多多、百度后端面经，7 月 28–30 日；[小红书 Agent 平台研发一面](https://www.nowcoder.com/discuss/931189826643066880)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；本轮追问：多屏场景下，怎么保证信息一致性？（[蔚来——大模型算法岗（智能座舱/自动驾驶）实习一面](https://www.nowcoder.com/discuss/930755708008558592)）；[赛诺贝斯 面经 一面过 笔试过 hc无](https://www.nowcoder.com/discuss/930126120177926144)
+> 来源：滴滴国际化、拼多多、百度后端面经，7 月 28–30 日；[小红书 Agent 平台研发一面](https://www.nowcoder.com/discuss/931189826643066880)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；本轮追问：多屏场景下，怎么保证信息一致性？（[蔚来——大模型算法岗（智能座舱/自动驾驶）实习一面](https://www.nowcoder.com/discuss/930755708008558592)）；[赛诺贝斯 面经 一面过 笔试过 hc无](https://www.nowcoder.com/discuss/930126120177926144)；本轮追问：延迟双删相对“先更新数据库，再删除缓存”，具体加强在哪里？解决了什么问题？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）；[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)；本轮追问：本地缓存怎样处理一致性？（[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)）；本轮追问：本地缓存一致性是否需要考虑，当前如何处理？（[9.15科大讯飞AI应用一面](https://www.nowcoder.com/feed/main/detail/aece93373f9c47ea95c831aef6471886)）；本轮追问：Guava/Tair 两级缓存如何处理一致性？（[9.15秋招东方财富AI应用一面](https://www.nowcoder.com/feed/main/detail/d406314e733c4fc8945637ce5d06cdcf)）
 
 常用方案是先提交数据库，再删除缓存；删除失败进入重试队列或通过 binlog/CDC 补偿。读回填时可携带版本，防止旧请求覆盖新值；强一致要求更高时，可串行化热点写或直接绕过缓存。不要承诺缓存和数据库天然强一致，先明确业务允许的不一致窗口。
 
@@ -484,6 +502,8 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 
 
 多屏以服务端数据库为唯一事实源，每次变更携带单调递增版本号或序列号，通过消息推送或长轮询同步；客户端按版本丢弃旧事件，断线后按游标补拉，冲突按业务规则合并或以服务端结果覆盖，并保证处理幂等。
+
+延迟双删是在更新数据库并删除缓存后，等待一段时间再次删除，主要压缩并发读回旧值后回填的窗口，但不能替代重试和版本校验。本地缓存需配合TTL、版本号及发布失效通知；两级缓存应按版本校验并同步失效，避免L1覆盖L2或数据库的新值。
 ### 47. Redis 常见数据结构有哪些？String 和 Hash 底层如何实现？
 
 > 来源：百度后端一面，8 月 6 日；快手测开一面，8 月 12 日
@@ -496,7 +516,7 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 
 ### 48. 缓存失效后大量请求打到数据库，怎么解决？缓存一致性怎么保证？
 
-> 来源：百度秋招后端一面，7 月 30 日；拼多多提前批一面，7 月 30 日；本轮追问：在线文档正文缓存十分钟，如果管理员在缓存有效期内取消了某个用户的访问权限，该用户再次访问并命中缓存时，系统能否直接返回正文？这个功能怎么设计？ / 权限被取消时，是否应该立即让正文缓存失效？还可以采用哪些方案保证权限及时生效？（[9.14小红书 PE（产品工程师/全栈方向--实习）二面 (流程泡到9.21挂)](https://www.nowcoder.com/discuss/929891805049421824)）
+> 来源：百度秋招后端一面，7 月 30 日；拼多多提前批一面，7 月 30 日；本轮追问：在线文档正文缓存十分钟，如果管理员在缓存有效期内取消了某个用户的访问权限，该用户再次访问并命中缓存时，系统能否直接返回正文？这个功能怎么设计？ / 权限被取消时，是否应该立即让正文缓存失效？还可以采用哪些方案保证权限及时生效？（[9.14小红书 PE（产品工程师/全栈方向--实习）二面 (流程泡到9.21挂)](https://www.nowcoder.com/discuss/929891805049421824)）；[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)；[度小满 AI 全栈二面](https://www.nowcoder.com/discuss/931952631340077056)
 
 热点 Key 同时失效是缓存击穿。可用互斥重建/单飞、逻辑过期异步刷新、热点永不过期配合主动更新，并给 TTL 加随机抖动。还要用限流、熔断和数据库保护防止缓存故障拖垮下游。
 
@@ -510,7 +530,7 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 权限校验不能依赖正文缓存命中：每次请求仍先校验当前权限，通过后才返回缓存正文。取消权限时可主动删除用户维度缓存；也可采用权限版本号、短 TTL、黑名单或网关实时鉴权，按一致性要求取舍。
 ### 49. Kafka 如何避免重复消费？
 
-> 来源：滴滴国际化后端二面、拼多多后端一面，7 月 28–30 日
+> 来源：滴滴国际化后端二面、拼多多后端一面，7 月 28–30 日；[淘天供应链ai应用研发一面](https://www.nowcoder.com/feed/main/detail/8656f1483ebd441bac7c17c313e5394a)
 
 重复通常来自处理成功但 offset 未提交、消费者重平衡或生产者重试。端到端治理依赖业务幂等：唯一事件 ID + 数据库唯一键、状态机或幂等表；消费成功后再提交 offset。Kafka 事务能覆盖 Kafka 内部的 consume-transform-produce，但写外部数据库仍需 Outbox、幂等或事务协调。
 
@@ -542,7 +562,7 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 
 ### 53. 消息队列如何处理顺序、重复和丢失？
 
-> 来源：拼多多提前批一面，7 月 30 日；快手测开一面，8 月 12 日；[美团AI全栈一面，AICoding把我整不会了](https://www.nowcoder.com/discuss/929871920625963008)
+> 来源：拼多多提前批一面，7 月 30 日；快手测开一面，8 月 12 日；[美团AI全栈一面，AICoding把我整不会了](https://www.nowcoder.com/discuss/929871920625963008)；[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)；本轮追问：消息队列重复消息怎么解决？如何使用幂等 ID，并给出伪代码？能不能用布隆过滤器？（[淘天供应链ai应用研发一面](https://www.nowcoder.com/feed/main/detail/8656f1483ebd441bac7c17c313e5394a)）
 
 - **顺序**：同一业务键路由到同一分区/队列，分区内单消费者或严格串行；全局顺序会牺牲吞吐。
 - **重复**：MQ 通常只能提供至少一次，消费端用业务唯一键、去重表或状态机实现幂等。
@@ -552,6 +572,8 @@ Sentinel 周期探测实例，单个 Sentinel 判定主观下线后，与其他 
 
 ---
 
+
+消费时以业务幂等 ID 建唯一约束，伪代码：`if insert_if_absent(id): handle(msg); commit(); ACK`，失败则回滚重试；布隆过滤器只能作前置加速，存在误判且不能防并发，不能替代持久化去重表。
 ### 54. MQ 突然积压，怎么定位？消息队列在架构中承担什么职责？
 
 > 来源：百度秋招后端一面，7 月 30 日；快手测开一面，8 月 12 日
@@ -574,7 +596,7 @@ MQ 的核心职责是异步解耦、削峰填谷、广播事件和失败重试�
 
 ### 56. 线上接口从 200ms 升到 5s 且 CPU 飙升，怎么排查？
 
-> 来源：拼多多后端一面，7 月 30 日；本轮追问：SQL 已从 800 毫秒优化到 50 毫秒，但整体接口仍然很慢，如何继续定位和优化？ / 接口总耗时 80 毫秒、单次 SQL 只有 10 毫秒，如果还要继续优化，你会从哪些方面分析？项目中是否使用过缓存或并发手段？（[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)）
+> 来源：拼多多后端一面，7 月 30 日；本轮追问：SQL 已从 800 毫秒优化到 50 毫秒，但整体接口仍然很慢，如何继续定位和优化？ / 接口总耗时 80 毫秒、单次 SQL 只有 10 毫秒，如果还要继续优化，你会从哪些方面分析？项目中是否使用过缓存或并发手段？（[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)）；[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)；[科大讯飞面试挺有意思，不考八股不问项目](https://www.nowcoder.com/feed/main/detail/773d1337e7314a7d90985fd81510974d)；本轮追问：主链路耗时较长，为什么并行改造后只优化了一小段？（[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)）
 
 先止损：限流、熔断、降级、暂停可疑发布并保护 DB/Redis/ES。再按变更时间线和 trace 判断延迟在哪一跳，检查 CPU 火焰图、线程池队列、GC、锁、慢 SQL、缓存命中、下游超时和重试量。定位后灰度修复，并通过容量压测、告警阈值和复盘防止重现。不要一看到 CPU 高就先扩容，重试风暴会让扩容也失效。
 
@@ -582,6 +604,8 @@ MQ 的核心职责是异步解耦、削峰填谷、广播事件和失败重试�
 
 
 继续按 trace 拆分序列化、网络、线程池、锁、GC、下游调用和重试，区分排队时间与执行时间；低于单 SQL 的部分可用热点缓存、批量/异步或受控并发，但要校验一致性、缓存击穿、连接池和下游容量，并以基准压测确认收益。
+
+并行收益受关键路径和串行部分限制，可用 trace 瀑布图按 Amdahl 思路定位：依赖未拆开、汇聚等待、线程池排队、连接池瓶颈或 fan-out 过大，都会让并行收益很小。应比较改造前后的关键路径、排队时间和下游容量，而非只看单个调用耗时。
 ### 57. 短链系统如何设计？
 
 > 来源：滴滴国际化后端二面，7 月 28 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)
@@ -605,7 +629,7 @@ MQ 的核心职责是异步解耦、削峰填谷、广播事件和失败重试�
 
 ### 59. QPS 突增 10 倍，系统如何保证不崩？
 
-> 来源：小红书数据库智能化一面，8 月 10 日；百度秋招后端一面，7 月 30 日；本轮追问：设计一个能够支撑 10 万 QPS、并可继续水平扩展的商品详情查询服务。底层只有一张存储商品详情的 MySQL 表，直播间用户点击商品后会调用该服务；管理端修改价格后，C 端用户也需要看到新价格。（[小红书 Agent 平台研发一面](https://www.nowcoder.com/discuss/931189826643066880)）
+> 来源：小红书数据库智能化一面，8 月 10 日；百度秋招后端一面，7 月 30 日；本轮追问：设计一个能够支撑 10 万 QPS、并可继续水平扩展的商品详情查询服务。底层只有一张存储商品详情的 MySQL 表，直播间用户点击商品后会调用该服务；管理端修改价格后，C 端用户也需要看到新价格。（[小红书 Agent 平台研发一面](https://www.nowcoder.com/discuss/931189826643066880)）；本轮追问：十万、百万 QPS 下的业务架构如何设计（[携程AI 面试复盘](https://www.nowcoder.com/discuss/932274641865887744)）
 
 入口层做鉴权、令牌桶限流和请求优先级；无状态服务水平扩容；热点读使用多级缓存和请求合并；慢任务进入队列削峰；DB 通过索引、连接池上限、读写分离和批处理保护。每个下游都要有超时、熔断和隔离舱，避免一个依赖拖垮全部线程。
 
@@ -615,6 +639,8 @@ MQ 的核心职责是异步解耦、削峰填谷、广播事件和失败重试�
 
 
 商品详情采用 Redis 多级缓存加本地热点缓存，缓存未命中用 singleflight 合并请求，避免击穿；价格修改以 MySQL 为准，事务提交后发布失效或版本消息，删除相关缓存并校验版本，必要时短 TTL 兜底。热点商品可预热和分片，缓存集群、应用层和网关均可水平扩展，同时监控命中率、延迟、回源 QPS 与过期消息积压。
+
+十万到百万 QPS 应让 CDN、网关和多级缓存承接绝大多数读流量，应用按分片无状态扩展，热点 key 独立隔离；数据库只承担可控回源和异步写入，并通过压测校准分片、缓存、连接池和降级容量，避免把流量直接压到 MySQL。
 ### 60. Nginx 能不能做限流？常见策略是什么？
 
 > 来源：小红书数据库智能化一面，8 月 10 日
@@ -669,7 +695,7 @@ FCP 表示首次绘制 DOM 内容的时间，目标应结合真实用户数据�
 
 ### 65. 自动化测试框架的基本原理是什么？人和 AI 的职责边界在哪里？
 
-> 来源：快手测开一面，8 月 12 日
+> 来源：快手测开一面，8 月 12 日；本轮追问：测试框架里除了单测，还有没有别的验证能力？有没有考虑端到端测试？（[阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00)）
 
 传统框架负责用例组织、驱动执行、断言、数据/环境管理、Mock、报告与失败重试。接口测试重点校验协议、状态码、Schema、业务副作用和幂等；UI 自动化通过稳定定位符和页面对象封装操作，并保留截图、日志、网络和 Trace 证据。
 
@@ -859,7 +885,7 @@ ZooKeeper 没有脱离环境的固定 QPS。结果取决于读写比例、数据
 
 ### 83. 特征依赖形成 DAG 时，如何处理超时、降级、缓存和请求去重？
 
-> 来源：小舒一面
+> 来源：小舒一面；本轮追问：串行改并行后是否应调整各 RPC 和整条分支的超时？（[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)）；本轮追问：工具之间有依赖，怎么并行执行并处理错误？（[9.15秋招东方财富AI应用一面](https://www.nowcoder.com/feed/main/detail/d406314e733c4fc8945637ce5d06cdcf)）
 
 先把特征计算建模为有向无环图，显式标记依赖、关键性和每个节点的预算。调度器并行执行互不依赖的节点并传播全局 deadline；关键前置失败时取消无意义的下游任务，非关键特征超时则使用默认值、最近一次成功值或降级模型，同时把降级信息传给最终结果。
 
@@ -929,20 +955,24 @@ Pod 是实际运行工作负载的最小调度单元，IP 会随重建变化；S
 
 ### 90. 多租户系统如何同时实现数据隔离和资源隔离？
 
-> 来源：杭州某小厂实习面经，8 月 19 日
+> 来源：杭州某小厂实习面经，8 月 19 日；本轮追问：多租户场景下，不同租户怎么做资源隔离、并发限制？（[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)）
 
 数据层可按风险和规模选择独立库、独立 schema 或共享表加 `tenant_id`。共享表不能只依赖开发者手写 `WHERE tenant_id`，应在认证后形成不可伪造的租户上下文，由 ORM 全局过滤、数据库行级安全和唯一索引共同约束；缓存、对象存储、消息和搜索索引也必须把租户纳入命名空间。资源层再设置连接池、线程池、队列、QPS、存储和成本配额，防止热点租户拖垮他人。审计日志应记录租户、操作者和请求链路。
 
 ---
 
+
+并发控制可按租户维护信号量或令牌桶，分别限制并发请求、队列长度和 QPS；超限排队、限流或快速失败，并设置租户级连接池、线程池及任务配额。用隔离压测验证单个租户突发流量不会挤占其他租户资源。
 ### 91. Python 装饰器的原理是什么？常见工程用途有哪些？
 
-> 来源：燧原软件解决方案一面，8 月 21 日
+> 来源：燧原软件解决方案一面，8 月 21 日；本轮追问：如果要给一个带位置参数、关键字参数，还有返回值的业务函数加统计执行耗时的装饰器，你会怎么处理被装饰函数的参数传递和返回值透传问题？ / Python中用来实现装饰器时，能自动保留被装饰函数源信息，比如函数名、文档字符串的标准库装饰器是什么？（[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/724b6bc0f02b42e58ff7397be51df3b5)）
 
 函数是对象，装饰器接收函数并返回新的可调用对象；`@decorator` 等价于定义后执行 `func = decorator(func)`。带参数装饰器会再增加一层闭包。工程中常用于日志、指标、鉴权、缓存、重试和事务边界。实现时用 `functools.wraps` 保留函数名、文档和签名，并谨慎处理同步/异步函数、异常语义和共享可变状态，避免装饰器悄悄改变原函数契约。
 
 ---
 
+
+可用 `@functools.wraps(func)` 定义 `wrapper(*args, **kwargs)`，原样调用 `result = func(*args, **kwargs)`，记录耗时后返回 `result`；异常应继续抛出，避免改变调用方契约。
 ### 92. `mmap` 是什么？适合哪些文件和进程通信场景？
 
 > 来源：拼多多 AI Agent 岗技术面，8 月 19 日
@@ -1171,7 +1201,7 @@ Raft 通过 Leader 选举、日志复制和多数派提交保证已提交日志�
 
 ### 119. 虚拟机、容器和 Kubernetes 分别解决什么问题？
 
-> 来源：小舒一面
+> 来源：小舒一面；本轮追问：gVisor 与 Docker 容器、虚拟机有何不同？（[9.15科大讯飞AI应用一面](https://www.nowcoder.com/feed/main/detail/aece93373f9c47ea95c831aef6471886)）
 
 虚拟机虚拟整套硬件和内核，隔离强但启动和资源成本高；容器共享宿主内核，通过 namespace/cgroup 隔离，启动快但安全边界更薄；Kubernetes 不是另一种容器，而是编排平台，负责调度、服务发现、声明式收敛和故障恢复。强隔离/异构内核用 VM，大量一致应用用容器，规模化运维再引入 K8s；也可用 microVM 组合边界与速度。
 
@@ -1179,6 +1209,8 @@ Raft 通过 Leader 选举、日志复制和多数派提交保证已提交日志�
 
 ---
 
+
+gVisor 位于容器运行时与宿主内核之间，以用户态 Sentry 拦截并实现部分系统调用；容器仍共享宿主内核，但攻击面和隔离通常强于普通 Docker，兼容性与性能开销也更高，不能等同完整 VM。
 ### 120. `writev` 如何通过聚合缓冲区减少系统调用？
 
 > 来源：拼多多 AI Agent 岗技术面
@@ -1263,7 +1295,7 @@ Kubernetes 的 CNI 不是一种固定网络模式，而是节点侧配置 Pod �
 
 ### 130. TLS 根证书如何建立对服务端身份的信任？
 
-> 来源：字节抖音电商一面，2026 年 8 月 24 日；本轮追问：HTTPS端到端链路是怎样的？（[字节数据中台Agent全栈面经](https://www.nowcoder.com/feed/main/detail/fe77496948f74b4091ab4bb6e8156c8b)）
+> 来源：字节抖音电商一面，2026 年 8 月 24 日；本轮追问：HTTPS端到端链路是怎样的？（[字节数据中台Agent全栈面经](https://www.nowcoder.com/feed/main/detail/fe77496948f74b4091ab4bb6e8156c8b)）；本轮追问：HTTPS 是什么？（[CVTE 一面](https://www.nowcoder.com/discuss/932319671578030080)）
 
 客户端本地信任库预置的是受信根 CA 证书或信任锚，而不是所有网站证书。服务端在握手中发送叶子证书和通常所需的中间证书；客户端逐级验证签名，直到链条连接到本地信任锚，同时检查证书有效期、用途约束、Basic Constraints、Name Constraints 等规则。根证书通常是自签名的，它之所以可信来自操作系统、浏览器或组织的分发与治理，而不是“自签名本身证明可信”。
 
@@ -1285,7 +1317,7 @@ Kubernetes 的 CNI 不是一种固定网络模式，而是节点侧配置 Pod �
 
 ### 132. 实时热点榜单在高并发下如何设计数据结构、缓存、数据库与一致性？
 
-> 来源：字节 Agent 开发一面，2026 年 8 月 24 日
+> 来源：字节 Agent 开发一面，2026 年 8 月 24 日；本轮追问：历史访问预热若热点变化，有什么副作用，怎样识别新热点？ / 你提到的近似统计结构怎样工作，能不能找出 Top K 热点 Key？（[9.15秋招东方财富AI应用一面](https://www.nowcoder.com/feed/main/detail/d406314e733c4fc8945637ce5d06cdcf)）
 
 先定义榜单窗口、分数函数、去重口径、更新延迟和精确度要求。写入链路把浏览、点赞等事件追加到消息队列，由流处理按内容 ID 聚合并计算时间衰减分数；热点候选可按时间分桶维护，在线 Top-N 使用 Redis Sorted Set 或分片 Top-K，避免每次请求扫描全量数据。读侧通过本地缓存/CDN 和 Redis 提供版本化榜单，数据库或数据湖保存事件与聚合结果，承担审计、重算和容灾，而不是让关系库直接承受每次排行更新。
 
@@ -1293,6 +1325,8 @@ Kubernetes 的 CNI 不是一种固定网络模式，而是节点侧配置 Pod �
 
 ---
 
+
+预热可能把旧热点带来的流量和内存占用延续到新周期，造成缓存污染，应设置衰减、TTL和准入阈值，并监控命中率、访问频次和新 Key 增长识别突发热点。近似计数可用 Count-Min Sketch 估频，但它不能枚举 Key，需配合候选堆或 Space-Saving 保留候选，再对候选做精确计数和 Top-K 校验。
 ### 133. 只有 1 GB 物理内存且没有 swap，进程能否打开或访问 2 GB 文件？
 
 > 来源：字节抖音电商一面，2026 年 8 月 24 日
@@ -1353,7 +1387,7 @@ GIL 不能替代这些同步原语，因为线程可能在 I/O、扩展代码或
 换出页通常由近似 LRU 的回收策略选择：优先考虑近期未访问、活跃度低且回收代价小的页，干净文件页可直接丢弃，脏页需先回写，匿名页则需换入 Swap。实际还会结合活跃/非活跃链表、访问位、内存优先级及 cgroup 限制，并通过回收扫描和换入换出统计验证效果。
 ### 138. TCP 与 UDP 的差异、适用场景和可靠性边界是什么？
 
-> 来源：[蔚来自动驾驶 Infra 实习面经](https://www.nowcoder.com/feed/main/detail/56a04cec4404407198dc9627a7fa887c)、[腾讯 CDG AI Infra 框架侧面经](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168)；[字节 AI Agent 研发一面](https://www.nowcoder.com/feed/main/detail/2ba7e96d48634777990b28c2cb322f40)
+> 来源：[蔚来自动驾驶 Infra 实习面经](https://www.nowcoder.com/feed/main/detail/56a04cec4404407198dc9627a7fa887c)、[腾讯 CDG AI Infra 框架侧面经](https://www.nowcoder.com/feed/main/detail/6bbfaca62dc64d45851f3ea6c48ff168)；[字节 AI Agent 研发一面](https://www.nowcoder.com/feed/main/detail/2ba7e96d48634777990b28c2cb322f40)；[CVTE 一面](https://www.nowcoder.com/discuss/932319671578030080)
 
 TCP 是面向连接的可靠字节流，通过序列号、确认、重传、流量控制和拥塞控制提供按序、无重复的传输；应用必须自行做消息分帧。UDP 保留报文边界，无连接状态，协议本身不保证送达、顺序或去重，也没有 TCP 式拥塞控制，但头部和连接管理开销更小，允许应用按业务自行选择可靠性策略。
 
@@ -1393,7 +1427,7 @@ TCP 是面向连接的可靠字节流，通过序列号、确认、重传、流�
 
 ### 142. C++ 多态和虚函数通常如何实现？构造、析构期间调用虚函数会怎样？
 
-> 来源：[飞腾 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/90c405df0a0f4dd99298768496b0c942)、[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)、[太初 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/45c0b82115024f16a88ad9a37f2ab398)
+> 来源：[飞腾 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/90c405df0a0f4dd99298768496b0c942)、[沐曦 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/5f3629b12be346de8dbc954a75d0990f)、[太初 AI Infra 一面](https://www.nowcoder.com/feed/main/detail/45c0b82115024f16a88ad9a37f2ab398)；[阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00)
 
 C++ 的函数重载、模板和 CRTP 属于编译期多态；通过基类指针或引用调用虚函数属于运行期多态。常见 ABI 为含虚函数的对象保存 vptr，指向记录虚函数入口的 vtable，调用时按动态类型间接分派；但标准只规定可观察行为，不强制虚表的具体内存布局。多态基类若可能通过基类指针删除派生对象，析构函数通常必须是 virtual。
 
@@ -1493,7 +1527,7 @@ Redis 的顶层 keyspace 通常使用哈希字典，单 key 的值再按 String�
 
 ### 152. `Callable`、`Future` 和 `CompletableFuture` 有什么区别？如何等待多个任务全部完成？
 
-> 来源：影石 Java 后端一面，2026 年 8 月 11 日
+> 来源：影石 Java 后端一面，2026 年 8 月 11 日；本轮追问：并发后是否仍要等全部结果，最终耗时由什么决定？（[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)）
 
 `Callable<V>` 描述一个可返回结果并抛出受检异常的任务；提交给 `ExecutorService` 后得到 `Future<V>`，后者表示异步结果，可查询状态、取消或通过 `get()` 等待。`Future` 的组合能力较弱；`CompletableFuture` 同时是结果容器和异步阶段，支持串行、并行、异常恢复与 `allOf/anyOf` 组合，但默认线程池和阻塞调用必须显式治理。
 
@@ -1501,6 +1535,8 @@ Redis 的顶层 keyspace 通常使用哈希字典，单 key 的值再按 String�
 
 ---
 
+
+是否等待全部结果取决于业务聚合方式：需要完整拼装时必须等最慢任务，最终耗时约为最长任务耗时加排队、调度和网络开销；只需任一成功或达到阈值时可提前返回，并取消或隔离剩余任务。
 ### 153. Java 反射如何工作？反射为什么可能破坏单例，应该怎样防护？
 
 > 来源：影石 Java 后端一面，2026 年 8 月 11 日
@@ -1513,7 +1549,7 @@ Redis 的顶层 keyspace 通常使用哈希字典，单 key 的值再按 String�
 
 ### 154. InnoDB 的聚簇索引和二级索引分别存什么？主键与普通索引查询如何回表？
 
-> 来源：影石 Java 后端一面，2026 年 8 月 11 日；[美团ai全栈一面](https://www.nowcoder.com/feed/main/detail/a5b8c6571f94441a8af10cd6af07ac3a)；[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)；[字节广告团队agent面经（一二面）](https://www.nowcoder.com/discuss/930870582843805696)
+> 来源：影石 Java 后端一面，2026 年 8 月 11 日；[美团ai全栈一面](https://www.nowcoder.com/feed/main/detail/a5b8c6571f94441a8af10cd6af07ac3a)；[字节跳动Agent开发1面凉经](https://www.nowcoder.com/discuss/929406267141914624)；[字节广告团队agent面经（一二面）](https://www.nowcoder.com/discuss/930870582843805696)；本轮追问：上述查询在索引树上具体是什么流程？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）
 
 InnoDB 的聚簇索引叶子节点保存整行数据，一张表只有一个聚簇组织顺序，通常由主键承担；没有合适主键时会选择可用唯一键或生成隐藏行 ID。二级索引叶子保存索引列和主键值，因此通过普通电话号码索引查询未覆盖字段时，要先取得主键，再访问聚簇索引完成回表。
 
@@ -1521,9 +1557,11 @@ InnoDB 的聚簇索引叶子节点保存整行数据，一张表只有一个聚�
 
 ---
 
+
+索引树查询从根页开始，按键值比较定位到下一层，逐层读取非叶子页直到叶子页；二级索引叶子得到主键后，再以主键从聚簇索引根页重复定位并读取整行，这就是回表。
 ### 155. InnoDB 中普通 `SELECT`、锁定读和 `UPDATE` 分别会加什么锁？范围条件为什么影响插入？
 
-> 来源：影石 Java 后端一面，2026 年 8 月 11 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)；本轮追问：间隙锁的产生原因和作用是什么？（[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)）
+> 来源：影石 Java 后端一面，2026 年 8 月 11 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)；本轮追问：间隙锁的产生原因和作用是什么？（[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)）；本轮追问：InnoDB 执行 update 语句，条件分别是主键、唯一键、普通非索引字段时，加锁逻辑有什么区别？ / InnoDB 全表扫描更新时，为什么不会做锁优化、无法只精准锁定符合条件的记录？ / 普通非索引字段作为 update 条件，会扫描全表加聚簇索引记录锁，在可重复读隔离级别下，会额外锁住哪些不存在的间隙范围？（[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/e7981675c7a44b098d97e90a854f9c3c)）
 
 普通一致性 `SELECT` 在常见 MVCC 场景下读取快照，通常不加记录锁；`SELECT ... FOR UPDATE/SHARE` 和 `UPDATE/DELETE` 属于当前读。使用唯一索引等值命中时通常锁定目标记录；非唯一索引或范围扫描在可重复读下可能使用 Record、Gap 或 Next-Key Lock，以锁住扫描到的索引范围并抑制幻读。
 
@@ -1533,6 +1571,8 @@ InnoDB 的聚簇索引叶子节点保存整行数据，一张表只有一个聚�
 
 
 间隙锁本质上锁住索引记录之间的区间，而非某条已存在的记录；其作用是让当前读的范围在事务期间不能被插入新索引值，从而避免幻读并维护范围判断的一致性。它通常与 Next-Key Lock 结合，具体是否出现仍取决于隔离级别、索引和执行计划。
+
+主键等值通常锁命中的聚簇记录；唯一索引等值命中时锁唯一索引记录及对应聚簇记录，范围或非唯一索引会锁扫描范围。非索引条件需扫描聚簇索引并锁住扫描到的记录，RR 下还可能以 Next-Key 锁覆盖记录间隙，阻塞范围内插入；最终应以执行计划和 `data_locks` 为准。
 ### 156. CDC 分别从 MySQL 和 PostgreSQL 的什么日志读取变更？如何保证快照与增量衔接？
 
 > 来源：影石 Java 后端一面，2026 年 8 月 11 日
@@ -1557,7 +1597,7 @@ IoC 表示对象创建、依赖装配和生命周期从业务代码交给容器�
 自动装配是容器按类型、名称或限定符等候选规则解析依赖并注入；可用 @Autowired、@Resource、@Inject，也可配合 @Primary、@Qualifier 消除多个候选。无候选或多候选且未消歧会启动失败，应通过构造器和容器日志验证实际装配结果。
 ### 158. Redis 的 RDB、AOF 和混合持久化分别如何工作？线上怎样选？
 
-> 来源：京东后端开发一面，2026 年 8 月 20 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；本轮追问：Redis 宕机会丢失状态，这个弊端怎么处理？（[淘天AI应用开发二面](https://www.nowcoder.com/feed/main/detail/d5d1f688dae5496abbce783aa28d6731)）；本轮追问：Redis 断电了、数据丢了怎么办？（[智谱ai native builder实习一面](https://www.nowcoder.com/discuss/929419257438302208)）
+> 来源：京东后端开发一面，2026 年 8 月 20 日；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；本轮追问：Redis 宕机会丢失状态，这个弊端怎么处理？（[淘天AI应用开发二面](https://www.nowcoder.com/feed/main/detail/d5d1f688dae5496abbce783aa28d6731)）；本轮追问：Redis 断电了、数据丢了怎么办？（[智谱ai native builder实习一面](https://www.nowcoder.com/discuss/929419257438302208)）；本轮追问：Redis宕机如何恢复？（[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)）
 
 RDB 在指定时机生成数据快照，文件紧凑、恢复快，适合备份和全量恢复，但可能丢失最近一次快照后的写入；生成快照通常依赖 fork 与 Copy-on-Write，大内存和高写入下要关注 fork 延迟与额外内存。AOF 追加写命令并按 `appendfsync` 策略刷盘，数据丢失窗口更小，但文件和恢复成本通常更高，并需要后台重写压缩历史。
 
@@ -1599,7 +1639,7 @@ SQL 注入发生在应用把不可信输入拼成 SQL 语义的边界，因此�
 
 ### 162. Python 高阶函数、闭包与回调中的参数和生命周期如何流转？
 
-> 来源：[大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487)
+> 来源：[大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487)；本轮追问：闭包会带来内存泄漏，实际开发中你会用什么方法解决闭包导致的内存问题？（[恒生电子技术岗ai面](https://www.nowcoder.com/feed/main/detail/49a60657cf63400897542e731c3feae4)）
 
 Python 函数本身是对象，可以作为参数传入、作为返回值返回，实例也可通过 `__call__` 变成可调用对象。调用高阶函数时，传入的是函数对象引用；包装器收集 `*args/**kwargs` 后再次调用它，Python 再按位置参数、关键字参数和默认值把实参绑定到形参。[Python 调用表达式](https://docs.python.org/3/reference/expressions.html#calls)定义了绑定规则，[数据模型](https://docs.python.org/3/reference/datamodel.html)则描述了函数、绑定方法和 callable 对象。
 
@@ -1607,6 +1647,8 @@ Python 函数本身是对象，可以作为参数传入、作为返回值返回�
 
 ---
 
+
+实际可通过注销回调、避免闭包强引用 self，或用 weakref.ref/WeakMethod 保存对象；对长期注册表设置生命周期和上限。用 tracemalloc 或对象引用链定位未释放对象，确认解绑、任务结束和异常路径都能执行清理。
 ### 163. Celery 在异步任务平台中负责什么？Broker、Worker、Result Backend、Retry 与幂等如何协作？
 
 > 来源：[大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487)
@@ -1771,7 +1813,7 @@ HDD 随机访问主要包含排队、寻道、旋转等待和传输；SSD 没有
 
 ### 178. Windows 上 Docker、WSL2 和 Hyper-V 隔离的边界是什么？
 
-> 来源：[百度 Agent 二面](https://www.nowcoder.com/feed/main/detail/bca7dc14bd654e91b89792608111b211)
+> 来源：[百度 Agent 二面](https://www.nowcoder.com/feed/main/detail/bca7dc14bd654e91b89792608111b211)；本轮追问：microVM 是什么？与普通 VM、Docker 的区别以及隔离强度如何理解？（[9.15科大讯飞AI应用一面](https://www.nowcoder.com/feed/main/detail/aece93373f9c47ea95c831aef6471886)）
 
 先区分工作负载。Windows 容器的 process isolation 与宿主共享 Windows 内核；Hyper-V isolation 会为每个容器提供轻量虚拟机和独立内核，隔离更强，也有额外启动和资源成本。Microsoft 的 [Windows 容器隔离文档](https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyperv-container)还说明了宿主/镜像版本兼容和两种模式的选择边界。
 
@@ -1781,6 +1823,8 @@ Docker Desktop 的 WSL2 backend 在 WSL2 的轻量 VM 中运行 Linux 内核和 
 
 ---
 
+
+microVM 由虚拟化硬件提供独立内核和较小的虚拟机边界，通常比完整 VM 更轻、更快；Docker 容器共享宿主内核，隔离弱于 microVM。实际强度还取决于设备、共享目录、管理面和权限配置，不能只按名称判断。
 ### 179. 并发标记开始前为什么需要 Initial Mark / Concurrent Start STW？这一阶段做什么？
 
 > 来源：[去哪儿 AI 全栈自动面](https://www.nowcoder.com/feed/main/detail/9cf516b3c2404100baeac52564e40709)
@@ -1935,7 +1979,7 @@ Python 是动态类型语言：变量在运行时绑定到对象，赋值时通�
 
 ### 199. 慢 SQL 如何定位瓶颈并进行优化？
 
-> 来源：[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)
+> 来源：[字节 AI 全栈一面（飞书）](https://www.nowcoder.com/discuss/931555466247700480)；[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)；[9.20 汇川技术 数字化全栈工程师 一面](https://www.nowcoder.com/feed/main/detail/28032c48a90c4f69827704deb3fae34c)
 
 先确认慢的是数据库执行还是网络、连接池或锁等待，并用慢查询日志、请求参数、耗时分布和链路追踪复现。对 SQL 查看执行计划，重点看扫描行数与实际返回量、索引命中、连接顺序、排序临时表、回表及锁等待；再结合表统计信息和数据分布判断原因。优化可能包括联合索引、改写不可索引条件、减少列和结果集、调整分页、拆分复杂查询或避免无效关联。修改前后用相同参数和数据对比执行计划、P95/P99、CPU、IO及锁指标，并验证写入一致性；不要只凭单次耗时或盲目加索引。
 
@@ -1953,10 +1997,12 @@ Python 是动态类型语言：变量在运行时绑定到对象，赋值时通�
 
 ### 202. Redis 分布式锁如何实现？有哪些安全性和可靠性问题？
 
-> 来源：[字节广告团队agent面经（一二面）](https://www.nowcoder.com/discuss/930870582843805696)；[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)
+> 来源：[字节广告团队agent面经（一二面）](https://www.nowcoder.com/discuss/930870582843805696)；[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)；本轮追问：分布式场景下，本地锁限制并发为什么会失效？ / 为什么永不过期的热点 key 方案相比分布式锁，有更低的一致性风险？（[恒生电子技术岗ai面](https://www.nowcoder.com/feed/main/detail/49a60657cf63400897542e731c3feae4)）
 
 常见实现是给锁设置随机值，用 `SET key value NX PX ttl` 原子抢锁；释放时必须用 Lua 脚本校验 value 仍属于当前客户端后再删除，不能直接 `DEL`。续租要有看门狗和超时边界，业务还应具备幂等性。Redis 故障转移、网络分区或客户端暂停可能造成锁过期、重复执行和脑裂，因此不能把它当作绝对互斥保证；关键写入可配合 fencing token，在资源端拒绝旧令牌，并根据一致性要求评估单实例、哨兵或集群方案。
 
+
+本地锁只在单进程内生效，多进程或多实例仍会并发访问共享资源。若热点 key 用作长期有效的共享状态，可避免锁过期、误删和续租失效带来的一致性问题；但需通过原子更新或版本校验处理显式失效与数据新鲜度。
 ### 203. 支付接口如何设计幂等性？
 
 > 来源：[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[9.14小红书 PE（产品工程师/全栈方向--实习）二面 (流程泡到9.21挂)](https://www.nowcoder.com/discuss/929891805049421824)
@@ -1971,7 +2017,7 @@ Python 是动态类型语言：变量在运行时绑定到对象，赋值时通�
 
 ### 205. TCP 的流量控制和滑动窗口是怎样的？
 
-> 来源：[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)
+> 来源：[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)
 
 TCP 通过接收端通告窗口实现流量控制，发送端未确认的数据量不能超过接收窗口；滑动窗口则允许多个报文段连续发送，收到 ACK 后窗口向前滑动，提高链路利用率。实际发送量通常受接收窗口和拥塞窗口共同限制，取两者较小值。接收方缓冲区变小会通告更小窗口，甚至出现零窗口，发送方需等待窗口更新；丢包或超时会触发重传，并可能收缩拥塞窗口。窗口扩大能提高吞吐，但会增加缓存、乱序和拥塞风险。排查时结合抓包查看 Seq、Ack、Window、重传及 RTT，区分接收端受限、网络拥塞和应用读取缓慢。
 
@@ -1995,19 +2041,23 @@ TCP 通过接收端通告窗口实现流量控制，发送端未确认的数据�
 
 ### 209. Java 多线程模型、线程生命周期与并发机制是什么？
 
-> 来源：[顺丰线下面（成都）ai开发工程师](https://www.nowcoder.com/feed/main/detail/f78bce27d42f44e096061f183350f3c2)
+> 来源：[顺丰线下面（成都）ai开发工程师](https://www.nowcoder.com/feed/main/detail/f78bce27d42f44e096061f183350f3c2)；本轮追问：你说主线程与子线程有关联，这种关联具体体现在哪里？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）
 
 Java线程通常由 Thread 承载任务，由 JVM 调度到底层操作系统线程；生命周期包括 NEW、RUNNABLE、BLOCKED、WAITING、TIMED_WAITING 和 TERMINATED。创建可直接继承 Thread，但工程上常用 Runnable、Callable 配合 ExecutorService 线程池，避免频繁创建线程。synchronized、Lock 和原子类分别用于互斥、可控锁管理及无锁原子更新，volatile只保证可见性与部分有序性，不保证复合操作原子性。排查并发问题要关注死锁、饥饿、线程泄漏、队列堆积和上下文切换，并通过线程转储、监控与压力测试验证；线程池大小需按CPU密集或IO密集、任务耗时和下游承载能力设置，关闭线程池和处理中断也不能遗漏。
 
+
+主线程与子线程没有天然的父子生命周期绑定；主线程结束不等于子线程结束。非守护子线程仍可阻止JVM退出，守护线程则不会；需要等待结果时用join、Future或结构化的任务管理，并处理中断。
 ### 210. MySQL 与 Doris 的定位差异及选型依据是什么？
 
-> 来源：[搜狐畅游 Agent 开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/f0648c2e373f4f03a10dd0fffbd235cd)
+> 来源：[搜狐畅游 Agent 开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/f0648c2e373f4f03a10dd0fffbd235cd)；本轮追问：存储介质为什么用 Doris，不用 Hive 或 ES？Doris 的优势在哪里？如何做技术选型？（[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)）
 
 MySQL 更适合在线事务处理，强调行级增删改、事务一致性、索引查询和高并发小请求；Doris 更适合分析型场景，面向明细或聚合查询，通常通过列式存储、向量化执行和分布式计算提升扫描分析效率。选型应看访问模式、数据规模与增长、延迟目标、写入更新比例、JOIN 和聚合复杂度、事务需求、运维能力及成本。常见做法是 MySQL 承载核心业务事实，Doris 通过同步或批流一体链路承载报表分析，而不是把两者简单当作互相替代。需验证真实 SQL、并发、数据新鲜度、故障恢复和资源隔离；同步延迟、重复写入、跨库一致性和复杂事务都是边界。
 
+
+Hive 更适合低成本离线批处理和数仓底座，ES 更适合全文检索与倒排查询；Doris 侧重高并发、低延迟的交互式 OLAP。选型需用真实查询、写入、更新、数据新鲜度、聚合复杂度和运维成本压测验证，避免按产品名片面决策。
 ### 211. Java ThreadLocal 的作用、实现原理与使用注意事项是什么？
 
-> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
+> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)
 
 ThreadLocal 为每个线程保存独立变量，常用于请求上下文、事务标记等：通过 ThreadLocal.withInitial、set、get、remove 操作。其数据实际挂在线程对象的 ThreadLocalMap 中，以 ThreadLocal 实例为弱引用键、值为强引用；线程池线程长期复用时，任务结束必须在 finally 中 remove，避免上下文串用和过期值占用内存。它不等于线程安全共享，也不适合跨线程传递；异步场景应显式传参或使用经过验证的上下文传播方案，并测试异常、嵌套调用和线程池复用。
 
@@ -2019,19 +2069,21 @@ ThreadLocal 默认只在线程内可见。InheritableThreadLocal 在线程创建
 
 ### 213. 什么是覆盖索引？它为什么能避免回表，使用时有哪些限制？
 
-> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
+> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；本轮追问：联合索引 (A, B, C)，假设WHERE条件已经满足要求，SELECT后面写什么可以不回表？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）；本轮追问：联合索引在减少回表方面是如何发挥作用的？（[9.20 汇川技术 数字化全栈工程师 一面](https://www.nowcoder.com/feed/main/detail/28032c48a90c4f69827704deb3fae34c)）
 
 覆盖索引是指查询所需的过滤、排序及返回列都包含在同一个索引中，存储引擎可直接从索引记录返回结果，通常无需按主键再访问聚簇数据行，即避免回表。组合索引 ABC 能否覆盖，不要求查询列一定连续或符合最左前缀；只要 SELECT 等所需列都在 A、B、C 中即可覆盖，但谓词能否高效定位仍受最左前缀、等值和范围条件影响。索引过宽会增加写放大和空间，需用执行计划、实际数据分布及回表统计验证；SELECT * 通常难以覆盖。
 
 ### 214. WHERE 条件的书写顺序会影响组合索引的使用吗？为什么？
 
-> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
+> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)；本轮追问：创建联合索引时字段的放置顺序，会不会影响查询效率？为什么？ / 如果有一个联合索引abc，查询条件是b等于1 and c等于2，这个查询能用到这个联合索引吗？ / 联合索引在B+树中存储时，是按照什么规则来组织键值顺序，从而支撑最左匹配特性的？（[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/724b6bc0f02b42e58ff7397be51df3b5)）
 
 优化器通常会把 WHERE 条件按索引访问规则分析，因此书写顺序一般不决定组合索引能否使用。B、C 都缺少 A 时，普通 B+Tree 组合索引通常不能按最左前缀高效定位，只能考虑其他索引或扫描；不要仅凭 SQL 文本顺序判断。只有 A、C 时可利用 A 定位，C 因缺少中间列通常不能作为连续索引查找条件，可能通过索引条件下推或过滤参与，是否回表取决于返回列是否被索引覆盖。A 为范围条件后，后续列的定位能力也会受限；应结合 EXPLAIN、实际基数和数据分布选择索引。
 
+
+联合索引按元组键的字典序组织：先比较首列，首列相同时再比较下一列，以此类推。因此只有连续满足左侧列时才能在树上缩小查找范围，跳过前列后无法直接按后列定位。
 ### 215. MQ、线程池加 HTTP/RPC 等异步方案有什么区别？如何进行技术选型？
 
-> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
+> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)
 
 子线程加 HTTP/RPC 适合服务内或服务间的低延迟一次调用：任务通常随进程生命周期管理，失败、重试、限流和结果回传由业务负责。MQ 通过 broker 持久化和缓冲消息，发送方与消费方解耦，适合削峰、跨服务异步和可重放处理，但会引入消息重复、延迟、顺序、积压及运维成本。选型先看是否允许丢失、延迟上限、流量突发、消费时长和故障隔离；必须设计幂等、超时、重试退避、死信、监控和容量压测。不要仅因“异步”就上 MQ，简单短任务可用线程池，跨进程且需可靠投递时再选 MQ。
 
@@ -2055,13 +2107,15 @@ ThreadLocal 默认只在线程内可见。InheritableThreadLocal 在线程创建
 
 ### 219. 服务部署上线后如何系统化排查问题？
 
-> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)
+> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)；本轮追问：训练完成后是否做过模型部署和测试？遇到过哪些问题？（[9.22 阿里千问二面](https://www.nowcoder.com/feed/main/detail/5ff7b7fde8bc49eb960d5badde3ac623)）
 
 先确认影响范围和现象，保留请求错误率、延迟、日志、链路追踪及主机资源等证据，再按时间线对比最近发布、配置、流量和依赖变化。通过健康检查、单接口复现、依赖连通性和数据库慢查询定位故障边界；优先止损，如回滚、摘流或降级，并保护数据避免重复写入。修复后做回归、并发和故障恢复验证，最后补充监控、告警、幂等与复盘项。
 
+
+模型部署还需验证训练与推理的预处理、特征和后处理一致性，检查模型加载、算子兼容、显存、吞吐与超时。用离线集、接口回归和并发压测对比离线结果；常见问题包括精度漂移、冷启动慢、显存不足和批处理导致延迟升高。
 ### 220. 常见设计模式有哪些？分别解决什么问题？
 
-> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)
+> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)；[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/724b6bc0f02b42e58ff7397be51df3b5)
 
 常见设计模式可按问题分类：创建型如工厂、建造者，解决对象创建复杂或需要解耦；结构型如适配器、装饰器、代理，解决接口兼容、功能扩展和访问控制；行为型如策略、观察者、模板方法、责任链，解决算法替换、事件通知、流程复用等。选型不能只看模式名称，应结合变化点、对象生命周期、并发与可测试性，避免为简单逻辑引入过多抽象。
 
@@ -2073,10 +2127,12 @@ ThreadLocal 默认只在线程内可见。InheritableThreadLocal 在线程创建
 
 ### 222. 数据库数据量多大算大？如何判断数据规模是否需要专项优化？
 
-> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)
+> 来源：[9.17 润科通用一面](https://www.nowcoder.com/feed/main/detail/f426a93495c34fd7a66a91d1e59bf2e7)；本轮追问：对于几亿、几十亿规模的数据量，你在处理过程中遇到过什么问题？如何解决？（[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)）
 
 数据库没有统一的“大数据量”阈值，不能只看表的行数或磁盘大小。应结合查询延迟、并发、索引命中率、写入吞吐、锁等待、备份恢复时间、增长速度以及单表和单分区热点判断。当慢查询、维护窗口、容量余量或恢复目标无法满足时，才需要专项优化。优化前先用监控和执行计划定位，再选择索引、归档、分区、读写分离或分库分表，并验证收益与一致性代价。
 
+
+几亿到几十亿时，常见问题是索引膨胀、深分页变慢、写入与查询争用及备份恢复过久；可按时间或业务键分区归档，改游标分页，拆分热点读写，并用执行计划、压测和恢复演练验证。
 ### 223. 正文缓存与权限校验如何协同设计，才能避免返回已无权访问的缓存内容？
 
 > 来源：[9.14小红书 PE（产品工程师/全栈方向--实习）二面 (流程泡到9.21挂)](https://www.nowcoder.com/discuss/929891805049421824)
@@ -2097,13 +2153,15 @@ ThreadLocal 默认只在线程内可见。InheritableThreadLocal 在线程创建
 
 ### 226. 文件上传任务队列如何设计？
 
-> 来源：[cherrystudio面试](https://www.nowcoder.com/feed/main/detail/84ecd256fe4d4a1597a0f29f18f853fb)
+> 来源：[cherrystudio面试](https://www.nowcoder.com/feed/main/detail/84ecd256fe4d4a1597a0f29f18f853fb)；本轮追问：DB 队列具体如何设计和执行？（[9.15科大讯飞AI应用一面](https://www.nowcoder.com/feed/main/detail/aece93373f9c47ea95c831aef6471886)）
 
 通常由上传接口负责鉴权、校验元数据并生成幂等任务，再把文件放入对象存储、任务写入消息队列，由Worker异步完成校验、病毒扫描、转码或入库。任务应采用可持久化状态机，支持超时重试、退避、死信和进度查询；用文件哈希、任务ID及数据库唯一约束避免重复处理。生产中还要限制大小、类型、配额和权限，避免路径穿越及恶意文件。排查应结合队列积压、消费延迟、失败原因和对象存储状态，并处理数据库与消息发送不一致问题。
 
+
+DB 队列可建任务表，包含任务ID、文件ID、状态、重试次数、下一次执行时间、租约截止时间和错误信息，并以唯一业务键保证幂等。Worker 用事务按状态和时间筛选任务，结合行锁或乐观锁原子抢占并写入租约；处理成功更新完成，失败递增重试并退避，超限转死信，定时任务回收过期租约。
 ### 227. Spring Bean 的生命周期有哪些阶段？各阶段涉及哪些扩展点？
 
-> 来源：[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)
+> 来源：[浙江未讯科技](https://www.nowcoder.com/feed/main/detail/b6822699408a4ab1906c32a1e0fc7517)；[迅雷 Agent一面](https://www.nowcoder.com/discuss/932392798559432704)
 
 Spring Bean 通常经历实例化、属性注入、Aware 回调、BeanPostProcessor 前置处理、初始化、后置处理和销毁。初始化阶段可用 @PostConstruct、InitializingBean 或 init-method；后置处理器还可包装代理。原型 Bean 默认由容器创建但不负责完整销毁。实际排查应结合日志、依赖关系和代理类型确认顺序，并避免在构造器中依赖尚未注入的 Bean。
 
@@ -2115,10 +2173,12 @@ Spring Bean 通常经历实例化、属性注入、Aware 回调、BeanPostProces
 
 ### 229. 高频数据访问场景下，如何通过缓存、索引、批量化和并发控制进行优化？
 
-> 来源：[cvte应用软件开发一面](https://www.nowcoder.com/feed/main/detail/c2155d2308de452c8a6e3cf2bbb482f3)
+> 来源：[cvte应用软件开发一面](https://www.nowcoder.com/feed/main/detail/c2155d2308de452c8a6e3cf2bbb482f3)；本轮追问：有没有考虑过不用倒排索引，选择其他方案进行优化？比如通过业务分析或者数据分析？ / 现在有一个场景，对几十亿数据进行筛选和过滤，但是加索引之后效果还是不好，这个时候你会怎么优化整个链路？底表数据量可能上千亿，加索引查询后仍然有几亿条数据返回。（[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)）
 
 可先用监控确认热点、命中率、慢查询和锁等待，再组合优化：热点读采用旁路缓存并设计 TTL、失效和穿透/击穿/雪崩保护；数据库按查询条件建合适索引，用 EXPLAIN 验证，避免低选择性或冗余索引；批量读写、分页和合并请求减少往返。并发场景控制连接池、限流和锁粒度，必要时用 singleflight 防重复回源。需明确缓存一致性、容量、淘汰和降级策略，压测验证而非只看平均延迟。
 
+
+不必默认倒排索引：先按业务拆分高频条件，建立宽表、物化结果或位图/布隆过滤等摘要。几十亿乃至千亿筛选应使用分区裁剪、列式存储和谓词下推，先缩小候选集再分层查询，禁止把几亿结果回传应用层，并以扫描量、峰值内存和端到端耗时验证。
 ### 230. 高并发抢票系统如何设计？如何防止超卖并保证库存一致性？
 
 > 来源：[智谱ai native builder实习一面](https://www.nowcoder.com/discuss/929419257438302208)
@@ -2169,10 +2229,12 @@ flex: 1 是 flex-grow、flex-shrink、flex-basis 三个属性的简写，通常�
 
 ### 238. 什么是写时复制（Copy-on-Write）？有哪些应用场景？
 
-> 来源：[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)
+> 来源：[度小满一面](https://www.nowcoder.com/feed/main/detail/41baab8c631647568203ebfaf3898574)；本轮追问：Copy-on-Write 管理具体是怎么设计的？（[阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00)）
 
 写时复制（CoW）是让多个主体先共享同一份数据，只有某一方真正写入时，系统才复制将被修改的页或对象，从而延迟并减少复制成本。典型场景包括进程 fork 后共享地址空间、虚拟机或存储快照、不可变字符串与容器优化。它不是“零成本共享”：首次写入会产生缺页、复制和额外延迟，频繁修改可能放大内存占用；并发场景还需另行保证同步，不能把 CoW 当作线程安全机制。排查时应观察脏页、缺页、内存峰值和写入延迟。
 
+
+具体设计可按页或对象维护共享元数据，并在写入时通过缺页异常或版本检查拦截；写线程复制目标数据、更新映射后再写入。并发下需保证复制与元数据更新的原子性，配合锁或版本校验避免丢写。
 ### 239. CAS 是什么？ABA 问题如何产生，如何解决？
 
 > 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
@@ -2181,10 +2243,12 @@ CAS（Compare-And-Swap）是原子地比较内存值与期望值，相等才更�
 
 ### 240. AQS 是什么？底层同步队列和数据结构如何组织？
 
-> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)
+> 来源：[携程 AI 应用开发一面（已oc）](https://www.nowcoder.com/feed/main/detail/2b1c35eace4a4bb3bd88ee669f163793)；[携程AI 面试复盘](https://www.nowcoder.com/discuss/932274641865887744)；本轮追问：Java的AQS和CAS分别是什么？（[携程AI应用开发实习一面（OC）](https://www.nowcoder.com/discuss/933058120102739968)）
 
 AQS（AbstractQueuedSynchronizer）是 Java 并发工具的基础框架，用一个 volatile state 表示同步状态，并通过 CAS 与队列管理竞争线程。获取失败的线程通常封装为节点，加入基于双向链表的 CLH 风格同步队列，前驱释放或状态变化时通过 unpark 唤醒后继；节点还记录独占/共享模式、等待状态和取消状态。子类只需实现 tryAcquire、tryRelease 等钩子即可构造锁、信号量或倒计时器。AQS 还维护独立的 Condition 等待队列，条件满足后节点再转入同步队列。实现时要处理中断、超时、取消、伪唤醒和内存可见性；公平性、吞吐量与延迟之间存在权衡，不能仅凭队列结构断言严格公平。排查应结合线程栈、state 变化和锁竞争数据验证。
 
+
+CAS 是基于比较并交换的原子操作：仅当内存值仍等于预期值时才写入新值，否则失败并重试；它常用于 AQS 的 state 更新。AQS 在此基础上负责排队、阻塞和唤醒，CAS 本身不提供线程排队或公平性，且需注意 ABA、自旋开销和内存可见性。
 ### 241. 实现 LRU 缓存时为什么不直接继承 LinkedHashMap？
 
 > 来源：[脑利一面](https://www.nowcoder.com/feed/main/detail/4002450a24194b4eaa759a2450cab7f5)
@@ -2211,9 +2275,223 @@ LinkedHashMap 适合做基础实现，但直接继承会把缓存策略、并发
 
 ### 245. Spring AI 的核心架构与底层调用机制是什么？
 
-> 来源：[赛诺贝斯 面经 一面过 笔试过 hc无](https://www.nowcoder.com/discuss/930126120177926144)
+> 来源：[赛诺贝斯 面经 一面过 笔试过 hc无](https://www.nowcoder.com/discuss/930126120177926144)；本轮追问：主流 AI 应用开发框架的核心价值是什么？以 Spring AI 为例，其核心设计巧思、解决的行业痛点、落地适用场景有哪些？ / Spring AI 针对大模型工具调用，核心抽象层的设计原理是什么？如何屏蔽各家大模型的 API 差异？ / Spring AI 在复杂 RAG、多 Agent 场景下存在哪些原生短板？实际落地会踩哪些核心坑？（[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/e7981675c7a44b098d97e90a854f9c3c)）
 
 Spring AI 不是模型本身，而是对不同厂商模型调用的 Java 抽象层：应用可通过 ChatClient/Model API 发起同步或流式请求，并用 Advisors 组织提示词、日志、重试等横切逻辑；Tools、Memory 和 Vector Store 分别连接函数调用、会话状态与检索系统。底层仍由对应 provider 的 SDK 或 HTTP API 完成推理，框架负责适配、消息转换和生命周期编排，具体能力取决于供应商。其架构与组件边界可参考 [Spring AI Reference](https://docs.spring.io/spring-ai/reference/)。生产环境还需自行配置超时、限流、重试、幂等、密钥保护、脱敏和可观测性，并验证流式中断、供应商错误及检索数据质量。
+
+## 近期新增：2026-09-29 面经补充
+
+
+这类框架的价值在于统一消息、工具、记忆和模型适配接口，降低接入与切换成本，适合企业问答、工作流和轻量 Agent。复杂 RAG 中仍需自行处理查询改写、混合检索、引用校验和上下文预算；多 Agent 的状态共享、并发编排、循环终止、权限隔离与故障恢复也不是原生完整解决方案，落地前应做链路压测和失败回放。
+### 246. 数据库表结构变更与新增表时如何设计平滑演进？
+
+> 来源：[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)
+
+采用“扩展—迁移—收缩”的兼容演进。先新增可空字段、索引或新表，代码同时兼容旧旧结构；发布双写或通过事务消息、Outbox 保证新表同步，再分批回填并校验总量、校验和与业务口径。确认读流量已切换且监控稳定后，停止旧写入，最后删除旧字段。需控制回填批量、锁范围和主从延迟，所有写入必须幂等；发布前准备反向切流、暂停回填和恢复备份等回滚方案。
+
+### 247. CPU 利用率低的原因如何排查与优化？
+
+> 来源：[科大讯飞面试挺有意思，不考八股不问项目](https://www.nowcoder.com/feed/main/detail/773d1337e7314a7d90985fd81510974d)
+
+CPU 利用率低不等于系统空闲，常见原因是线程在等待磁盘、网络、锁或数据库连接，也可能是单线程瓶颈、请求量不足、CPU 限频或容器配额受限。先结合 uptime、vmstat、iostat、pidstat、线程栈和链路追踪区分 user、system、iowait、阻塞与调度等待，再定位具体资源。优化应针对根因：异步化和合理并发、缩短锁范围、批量 I/O、连接池与缓存调优，避免盲目加线程，并用压测、延迟分位数、吞吐和错误率验证收益。
+
+### 248. Python async/await 的实现原理是什么？事件循环如何驱动协程？
+
+> 来源：[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)
+
+`async def`调用后得到协程对象，真正执行由`Task`包装并交给事件循环。遇到`await`时，协程通过`__await__`让出控制权，事件循环保存其状态，等待IO、定时器或其他任务完成；条件满足后，再通过`send`把结果送回协程，异常或取消则通过`throw`注入。事件循环通常结合就绪队列和IO多路复用器反复调度，因此协程是协作式并发：协程不主动让出、执行同步阻塞调用或CPU密集计算，整个循环都会被卡住。生产中还需处理取消传播、超时、任务异常和资源清理，并用事件循环调试、超时日志及阻塞检测验证行为。
+
+### 249. Java 方法参数传递是值传递还是引用传递？对象参数的修改和重新赋值分别有什么效果？
+
+> 来源：[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)
+
+Java 只有值传递。基本类型参数传入的是值的副本，方法内修改不会影响调用方；对象参数传入的是对象引用的副本，因此通过该引用修改对象字段或集合内容，调用方能看到变化。但若在方法内让参数指向新对象，只改变局部副本，不会改变调用方变量的指向。String 等不可变对象看似修改，实际通常是重新创建并重新绑定局部变量。排查时应区分“修改对象状态”和“修改引用指向”，必要时返回新对象或通过可变对象、包装结果传递变化。
+
+### 250. 遍历 HashMap 时如何安全删除元素？不同删除方式有什么区别？
+
+> 来源：[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)
+
+遍历 HashMap 时，推荐使用迭代器的 `remove()` 删除当前元素，例如通过 `Iterator<Map.Entry<K,V>>` 遍历 `entrySet()`，满足条件后调用 `iterator.remove()`。直接调用 `map.remove(key)` 会修改结构，通常导致后续迭代抛出 `ConcurrentModificationException`。也可用 `map.entrySet().removeIf(...)` 表达批量条件删除。若需删除多个已知键，可先复制键集合再删除；并发场景不能仅依赖 HashMap，需根据一致性要求选择并发容器或加锁，同时处理线程安全与复合操作的原子性。
+
+### 251. 用户态线程与内核态线程的调度和切换为什么存在性能差异？
+
+> 来源：[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)
+
+用户态线程由运行库在进程内保存寄存器、栈和调度队列，切换通常只需少量用户态指令，不必进入内核，因而开销低；内核线程切换需陷入内核，由调度器选择任务，保存/恢复内核上下文，可能引发地址空间、缓存和调度器相关开销。但用户态线程阻塞在系统调用、缺页或同步原语上时，整个承载进程可能受影响，且难利用多核；内核线程能被抢占并真正并行。选型应结合阻塞模型、CPU并行度和隔离需求，压测切换、尾延迟、吞吐及阻塞场景，而不能只比较空载切换次数。
+
+### 252. 性能插桩系统如何采集、聚合并展示运行时性能数据？
+
+> 来源：[阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00)
+
+性能插桩通常在函数、请求、数据库调用或渲染生命周期等关键点埋点，采集耗时、次数、错误率、资源消耗和上下文标识；数据先在进程内异步缓冲，再批量上报到采集端，经过清洗、采样、聚合后写入时序库或分析存储，前端按服务、版本、接口和时间范围展示趋势、分位数与火焰图。设计时要控制插桩开销、标签基数和敏感信息泄漏，并接受网络异常造成的数据丢失。应通过开关、压测、对照实验和端到端校验验证准确性。
+
+### 253. 计算机网络五层模型分别是什么？数据链路层负责什么，常见协议和机制有哪些？
+
+> 来源：[阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00)；[携程AI 面试复盘](https://www.nowcoder.com/discuss/932274641865887744)
+
+常说的五层模型从下到上是物理层、数据链路层、网络层、传输层和应用层，分别关注比特传输、同一链路通信、跨网络寻址与路由、端到端传输，以及具体业务协议；OSI 七层模型还将会话层、表示层单独划出。数据链路层负责帧封装、MAC 寻址、介质访问、差错检测，常见机制包括以太网、Wi-Fi、VLAN、交换机转发、CRC 和 ARP（通常被视为二层与三层之间的协议）。排查时应结合抓包判断是物理丢包、链路冲突、地址解析还是上层超时，不能把分层当成绝对隔离。
+
+### 254. 点赞等互动数据应如何选择缓存、数据库与持久化策略？
+
+> 来源：[字节剪映AI应用开发一面](https://www.nowcoder.com/feed/main/detail/7211e82c75284d23a89b569cd9dc289d)
+
+点赞这类数据通常应以数据库持久化为准，缓存用于降低热点读取压力，而不是唯一事实来源。写入路径可先校验用户与目标对象，再通过唯一键约束或幂等接口保证同一用户只能点赞一次；高并发场景可采用消息队列异步落库，但要处理重复消费、乱序、积压和最终一致性。缓存更新可采用旁路缓存、失效后回源，或按业务容忍度使用计数器并定期与数据库校正。取消点赞、删除用户、数据库故障和缓存丢失都应有补偿策略；展示数字应明确是实时值还是近似值，并监控延迟、失败率和对账差异。
+
+### 255. Java 中 sleep、wait 与 notify 的区别及适用场景是什么？
+
+> 来源：[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)
+
+sleep 是线程的定时阻塞，通常不会释放已持有的锁；wait 用于线程间协作，必须在对应对象监视器内调用，进入等待后会释放该对象的锁，待被唤醒后重新竞争锁。notify 只唤醒一个等待线程，调用后也不会立即释放锁，锁仍在退出同步块时释放。wait 需放在 while 条件循环中，防止虚假唤醒和条件变化；生产代码还应处理 InterruptedException，并优先考虑并发工具类或阻塞队列。
+
+### 256. 什么是内存泄漏？常见原因、影响与排查方法有哪些？
+
+> 来源：[九方智投 一面凉经](https://www.nowcoder.com/feed/main/detail/92efed84eb68493d82132e03b7e43ae0)
+
+内存泄漏是对象已无业务意义、却仍被可达引用链持有，导致垃圾回收无法回收；在 Java 中通常表现为堆占用持续增长、频繁 GC，严重时触发 OOM。常见原因包括静态集合长期累积、缓存无上限或无过期、监听器未注销、ThreadLocal 未清理，以及连接、文件等资源未关闭。排查应结合趋势监控、GC 日志、堆转储和 MAT 等工具，比较多次快照中的增长对象及其 GC Roots；还要区分真正泄漏与正常缓存、瞬时流量或单纯堆配置不足。修复后需通过压测和回归观察占用是否稳定。
+
+### 257. 面向不同用户需求的个性化缓存如何设计？
+
+> 来源：[小红书 Product Engineer（AI与全栈方向）-社区工程 一面面经](https://www.nowcoder.com/feed/main/detail/70ad5ead2f784676b0b399eab877d3d4)
+
+个性化缓存应先确定命中边界：把真正影响结果的用户属性、租户、权限、语言、地区或版本纳入 key，不能只用资源 ID，否则会串数据；但不要把高基数、易变字段无脑拼入 key，避免命中率低和空间爆炸。可采用分层设计：公共内容共享缓存，个性化部分按稳定画像或策略版本缓存，极少数结果直接计算。设置 TTL、容量上限和淘汰策略，并在画像、权限或内容变更时按版本号失效。需防缓存穿透、击穿、雪崩，保护敏感数据并校验访问权限；通过命中率、延迟、内存占用、错误率和跨用户隔离测试验证方案。
+
+### 258. 分析型数据库中倒排索引的适用场景、引入依据与性能瓶颈如何排查？
+
+> 来源：[(秋招) 9.16 字节中交广 - 交易与广告业务 - AI全栈开发工程师](https://www.nowcoder.com/discuss/932587389027962880)
+
+倒排索引适合高选择性的文本词项、短语或关键词过滤，不应因为“查询慢”就直接引入。先用慢查询、Profile、执行计划和基线对比判断瓶颈是在扫描、过滤、网络还是聚合，再观察词频、命中率、索引构建与写入开销。验证时用代表性数据和查询集做压测，比较延迟、吞吐、存储及写入放大；还要覆盖分词、低频词、模糊查询和冷热数据。若查询选择性低，倒排收益有限，可能增加维护成本。
+
+### 259. 如何设计本地缓存与分布式缓存组成的两级缓存，并评估命中率和一致性？
+
+> 来源：[9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85)
+
+两级缓存通常是进程内 Guava 在前、Tair 等分布式缓存为后：先查本地，未命中再查 Tair，仍未命中才访问数据库，并回填两级。命中率不能直接给固定数字，应分别统计本地命中、分布式命中和最终回源率，按请求量加权，同时观察 P95 延迟、回源流量和热点分布。一致性可按业务容忍度选择 TTL、主动失效或版本号；更新时要防止本地旧值、缓存击穿、雪崩和穿透，必要时加随机过期、单飞/互斥、空值缓存，并保证回源与回填的超时、降级和幂等。
+
+### 260. 不依赖 Spring AI 时，Java 如何对接大模型与向量数据库？核心适配痛点有哪些？
+
+> 来源：[27秋招-恒生电子AI面试-AI应用开发岗-26.9.23](https://www.nowcoder.com/feed/main/detail/e7981675c7a44b098d97e90a854f9c3c)
+
+不依赖 Spring AI 时，Java 通常需要自行封装模型 HTTP/SSE 客户端、鉴权、超时、重试、流式响应和错误码，再分别适配聊天、Embedding、重排及向量库 SDK。核心痛点是不同厂商的请求协议、异步模型、Token 统计和结构化输出不一致，向量维度、距离度量、批量写入与过滤语法也可能不兼容。应定义内部接口、统一 DTO 与可观测字段，并对重试和写入设计幂等，避免重复扣费或重复数据；密钥、提示词和用户内容还需脱敏及权限隔离。可将 [Spring AI Reference](https://docs.spring.io/spring-ai/reference/) 作为抽象层设计的对照，但自研仍需用契约测试、故障注入和真实查询集验证。
+
+### 261. 离线大数据架构中的常用组件分别解决什么问题？如何协同工作？
+
+> 来源：[奇怪の字节二面面经（大概率凉经）](https://www.nowcoder.com/feed/main/detail/bcf0b8497fcb4982b2292cafbcb08d69)
+
+离线大数据通常由存储、计算、资源调度、元数据、调度编排和数据质量组件协同组成：HDFS 或对象存储保存数据，Parquet/ORC 等格式降低扫描成本，Hive/Spark 负责批处理，YARN 或 Kubernetes 提供资源隔离，Metastore 管理表和分区，Airflow 等编排依赖。数据按“采集入湖—分层加工—质量校验—产出服务”流转。生产中还要关注小文件、分区倾斜、Schema 演进、失败重试的幂等性、权限审计和成本监控，不能只看任务是否成功。
+
+### 262. Flink State 持续膨胀时如何治理其存储、性能与可维护性？
+
+> 来源：[奇怪の字节二面面经（大概率凉经）](https://www.nowcoder.com/feed/main/detail/bcf0b8497fcb4982b2292cafbcb08d69)
+
+先区分 State 变大是 Key 数量、单 Key 数据、窗口长度还是定时器增长，并通过 State、checkpoint 时延、增量大小、反压和 RocksDB/磁盘指标定位。治理上设置合理 TTL、窗口和状态粒度，及时清理无效 Key，避免把高基数维度直接放入状态；TTL 只解决逻辑过期，物理空间回收和 compaction 仍需观察。再选择合适的 State Backend、增量 checkpoint 和本地磁盘，控制 checkpoint 并发与保留数。变更前用 savepoint 做迁移演练，验证恢复、扩缩容、Exactly-once 语义及历史结果，防止清理策略造成重复或数据丢失。
+
+### 263. Java concurrent 包包含哪些核心组件？分别解决什么并发问题？
+
+> 来源：[迅雷 Agent一面](https://www.nowcoder.com/discuss/932392798559432704)
+
+Java 的 java.util.concurrent 主要包括线程池与 Executor、Future/CompletableFuture，负责任务调度和异步编排；Lock、ReadWriteLock、Condition、Semaphore、CountDownLatch、CyclicBarrier 等同步工具，解决互斥、限流和阶段协作；Atomic 类与 LongAdder 提供低锁或无锁的原子更新；ConcurrentHashMap、BlockingQueue 等并发容器降低共享数据竞争。ForkJoinPool 适合可拆分任务。选型还要结合可见性、顺序性、取消传播、线程池隔离和队列饱和策略，并排查死锁、活锁、线程泄漏、异常丢失和上下文传递问题。
+
+### 264. Fencing Token 的作用是什么？引入它会带来哪些额外开销，如何权衡？
+
+> 来源：[快手大模型agent研发一面](https://www.nowcoder.com/discuss/932315325276618752)
+
+Fencing Token 不是重复加锁，而是由协调者为每次成功获取 Lease 分配递增的任期号。Worker 执行写入时携带该号，下游资源保存已接受的最大值并拒绝更小的请求，因此即使旧 Worker 因暂停或网络分区在 Lease 过期后恢复，也不能覆盖新 Worker 的结果。Lease 负责判断持有权和回收，Token 负责隔离陈旧请求，二者可以放在同一租约记录中，但语义仍应分开。代价包括生成并持久化序号、将 Token 传递到每个写路径、下游改造和额外比较；对纯幂等或无共享写入的任务可能不值得。应按资源风险、故障窗口和改造成本选择。
+
+### 265. 从键盘输入到字符显示在屏幕上，操作系统和硬件经历了哪些完整过程？
+
+> 来源：[腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078)
+
+按键后，键盘控制器把物理动作编码成扫描码，经 USB 或其他接口传给内核驱动；驱动处理中断并转换为按键事件，输入子系统再交给终端、桌面环境或应用。应用依据键盘布局、修饰键和编码规则把事件解析为字符 A，写入终端或窗口系统。随后应用更新文本缓冲区，图形栈将字符栅格化为字形，合成器把窗口内容写入显存，显示控制器通过帧缓冲和显示接口刷新屏幕。过程中还可能受焦点、输入法、权限、驱动异常和丢失事件影响，排查应分层检查硬件事件、内核日志、应用输入和最终渲染。
+
+### 266. 如何设计一个消息队列？有锁和无锁实现分别需要考虑什么？
+
+> 来源：[腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078)
+
+可将消息队列拆为生产、存储、消费、确认和重试模块：消息需有唯一 ID、分区或路由键、持久化策略、可见性超时、死信队列和监控。锁实现简单，适合保护队列头尾、容量和消费状态，但要防止竞争、死锁及锁粒度过大；无锁实现通常用原子 CAS 和环形缓冲区，要求清晰的内存序、槽位所有权和 ABA 防护，调试与扩展更难。无论哪种方案，都不能只依赖“成功返回”保证不丢消息，应明确至少一次或其他投递语义，消费者必须幂等，重试还要避免消息风暴，并通过并发、宕机、重复确认和压力测试验证。
+
+### 267. 一次 HTTP 请求从客户端发起到服务端返回的完整执行链路是什么？
+
+> 来源：[度小满 AI 全栈二面](https://www.nowcoder.com/discuss/931952631340077056)
+
+一次请求通常先经过客户端配置的 DNS、代理或网关，建立 TCP 连接；HTTPS 还会进行 TLS 握手。随后请求经负载均衡转发，服务端解析 HTTP、执行鉴权和中间件逻辑，访问缓存、数据库或其他服务，生成状态码、响应头和响应体，再沿连接返回客户端。排查时应按 DNS、连接、TLS、网关、应用、下游依次看日志和耗时。还要关注连接复用、超时、限流、重试和幂等性：重试非幂等请求可能造成重复写入，不能只依赖客户端重试解决故障。
+
+### 268. 异构数据库节点如何在 TypeScript 工作流平台中集成？驱动、连接池与跨平台适配有哪些工程难点？
+
+> 来源：[9.20 汇川技术 数字化全栈工程师 一面](https://www.nowcoder.com/feed/main/detail/28032c48a90c4f69827704deb3fae34c)
+
+通常 Hive 集成难度更高：它往往涉及 JDBC/Thrift 驱动、Kerberos 或配置文件、远程作业提交、长耗时查询和结果流式读取；Neo4j 主要是 Bolt/HTTP 协议、事务与图查询封装。平台应定义统一节点接口，将驱动适配、连接池、超时、取消、重试和资源释放隔离；连接池需按租户与数据源隔离，凭证放密钥系统。跨平台要避免硬编码路径和本地命令，并在容器、代理、TLS 场景测试。重试只用于明确幂等操作，需通过集成测试、故障注入和连接泄漏监控验证。
+
+### 269. ArrayList 和 LinkedList 的底层结构、复杂度与适用场景有什么区别？
+
+> 来源：[百度 AIGC 多模态智能体算法工程师二面](https://www.nowcoder.com/feed/main/detail/2d033fd6daa04e2aaad2282b75531bbc)
+
+ArrayList 基于可扩容数组，按下标访问平均 O(1)，尾部追加摊销 O(1)，中间插入或删除通常需搬移元素，约 O(n)。LinkedList 是双向链表，按下标查找为 O(n)，若已拿到节点或迭代器，局部插入删除可为 O(1)，但定位节点仍可能耗时。ArrayList 连续内存、缓存局部性好且额外开销小，通常是默认选择；LinkedList 只有在频繁的已定位节点操作、且确实需要链表语义时才适合，不能仅因“插入快”就选它。
+
+### 270. 渠道入口归因如何设计与实现？
+
+> 来源：[快手电商大模型应用开发一面（已offer）](https://www.nowcoder.com/feed/main/detail/acc9c99b46e7489386bab12b47b56c11)
+
+入口归因通常在渠道链接中携带渠道、活动和点击标识，首次访问时写入 Cookie 或服务端会话，注册、下单等转化事件再关联该标识。设计时要先明确首次触点、末次触点或多触点规则，并设置有效期、跨域传递和覆盖优先级。服务端应校验参数、避免开放重定向，事件写入要有唯一键以去重，处理重放和延迟上报；对账时比较点击、落地、注册和支付数据，监控缺失率。还要最小化采集并提供删除、权限和审计能力，具体合规要求需由专业人员判断。
+
+### 271. 浅拷贝和深拷贝有什么区别？分别适用于什么场景？
+
+> 来源：[阿里云一面](https://www.nowcoder.com/feed/main/detail/ceade00d742046d0bef6bee7fe7a7aad)
+
+浅拷贝只复制对象本身，内部仍共享嵌套的可变对象；深拷贝会递归复制嵌套对象，修改副本通常不影响原对象。浅拷贝适合对象层级浅、内部数据不可变或明确允许共享的场景，成本低；深拷贝适合需要完全隔离状态的场景，但更耗时耗内存，还可能遇到循环引用、不可复制对象或自定义资源。Python 中可用 copy.copy 和 copy.deepcopy，并应通过修改嵌套字段验证实际隔离效果。
+
+### 272. Java 中使用 `+` 拼接 String 有什么问题？底层如何实现？
+
+> 来源：[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)
+
+String 不可变，使用 + 会产生新的字符串；编译器通常会把同一表达式中的拼接优化为类似 StringBuilder 的过程，但循环中反复拼接仍可能不断创建对象、复制内容，造成时间和内存开销。大量或动态拼接应优先使用 StringBuilder；多段固定内容可考虑 String.join。还要注意 null 会被转成字符串文本，不能把这种语法层面的便利当作性能保证，最终应结合编译产物或基准测试确认。
+
+### 273. Java 中 try-finally 都有 return 时最终返回哪个？为什么？
+
+> 来源：[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)
+
+try 和 finally 都执行 return 时，最终返回 finally 中的值。执行 try 的 return 表达式时，结果会先保存；随后进入 finally，若 finally 再 return，就会覆盖之前的返回值。若 finally 抛出异常，则异常覆盖返回结果。即使 finally 只有修改返回对象内部状态，也可能影响观察结果，但不会改变已经保存的基本类型值。通常不应在 finally 中 return，否则会吞掉异常并降低可读性；资源释放应放在 finally 或使用 try-with-resources。
+
+### 274. Java 中 `equals()` 和 `==` 有什么区别？
+
+> 来源：[字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4)
+
+基本类型使用`==`比较数值；引用类型使用`==`比较是否指向同一个对象，而`equals()`用于表达对象的逻辑相等，默认实现通常仍接近引用比较，是否按字段比较取决于类的重写。重写`equals()`时必须同时满足自反、对称、传递、一致和非空，并保持与`hashCode()`一致，否则放入HashMap或HashSet会出现查找失败。比较字符串应使用`equals()`，并注意空值，可写成常量在前或使用`Objects.equals()`。还要留意自动装箱、缓存和拆箱导致的边界行为。
+
+### 275. 一个数据包从服务器网卡到应用程序的完整处理流程是什么？
+
+> 来源：[【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640)
+
+数据包到达网卡后，网卡通过DMA写入内核缓冲区并触发中断或NAPI轮询；驱动把数据交给内核协议栈，依次完成链路层、IP、TCP/UDP处理。TCP还要校验、排序、重组并放入socket接收队列，监听线程通过阻塞、select、epoll等机制被唤醒，应用再从socket读取，必要时经过TLS解密和HTTP解析。实际排查应区分丢包、队列溢出、连接建立、协议栈拥塞和应用消费慢，可结合网卡统计、抓包、内核指标及应用日志定位；零拷贝能减少复制，但会增加生命周期和兼容性约束。
+
+### 276. 多人协作开发时，如何制定、落地并持续治理团队开发规范？
+
+> 来源：[迅雷 Agent一面](https://www.nowcoder.com/discuss/932392798559432704)
+
+先把规范限定在能降低风险的范围内，按代码风格、分支与提交、接口契约、测试、日志和安全边界分类，由团队共同评审并形成短文档。落地依靠格式化、静态检查、类型检查、单元测试和 CI 门禁，关键规则尽量自动化，例外必须记录原因。AI Native 场景还要约束生成代码的依赖、敏感信息、许可证风险和人工评审责任，不能把 AI 输出直接视为可信。持续治理看缺陷率、回滚率、检查误报和交付效率，定期复盘删减无效规则。
+
+### 277. Python 中 is 和 == 有什么区别？分别适用于什么场景？
+
+> 来源：[华为AI开发一面](https://www.nowcoder.com/feed/main/detail/bb07b66e5c434b08992bf8747dd7bd3e)
+
+is 判断两个对象是否为同一对象，即身份比较；== 调用对象的相等性规则，判断值或语义是否相等。通常用 is 判断单例，最典型是 `value is None`，不用 `== None`；业务数据、字符串和数字的内容比较应使用 `==`。不要依赖小整数或字符串驻留等实现细节，两个内容相同的对象不保证身份相同。自定义类还可以通过 `__eq__` 改变 == 的语义，因此比较结果可能受类型实现影响。
+
+### 278. 面向对象设计中的开闭原则是什么？如何通过抽象和扩展实现对修改关闭、对扩展开放？
+
+> 来源：[CVTE 一面](https://www.nowcoder.com/discuss/932319671578030080)
+
+开闭原则是对已有稳定代码尽量关闭修改、对新需求开放扩展，核心是把变化点隔离到抽象之后。可以定义接口、策略、模板方法或插件协议，让调用方依赖稳定抽象，新增实现通过注册或组合接入，而不是不断修改条件分支。它不是绝对禁止修改：需求变化或抽象设计错误时仍需重构。抽象过早会增加复杂度，因此应结合变化频率、测试覆盖和扩展成本判断；通过单元测试、契约测试和真实用例验证扩展不破坏既有行为。
+
+### 279. 原码、反码和补码分别是什么？补码为什么适合计算机表示有符号整数？
+
+> 来源：[腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078)
+
+原码用最高位表示符号，其余位表示绝对值；反码中正数不变，负数按位取反；补码中正数不变，负数是在反码基础上加一。现代计算机通常采用补码表示有符号整数，因为加减可以统一使用加法器，符号扩展规则也较自然，并且只有一个零。需要注意固定字长会发生溢出，结果按位截断后可能改变符号；最小负数通常没有对应的正数，因此取绝对值、取负和类型转换都要检查边界。
+
+### 280. 如何设计可复用的运营活动开发框架以降低代码重复？
+
+> 来源：[【社招】腾讯三面面经](https://www.nowcoder.com/feed/main/detail/431b4ca35c7f43909219d31aebba5b56)
+
+可以建设“活动脚手架+领域组件+配置驱动”的框架：脚手架统一登录、权限、路由、发布和监控，领域组件复用报名、优惠、库存、抽奖等能力，活动差异通过配置和受控扩展点实现。框架应定义生命周期、数据校验、幂等键、状态机、超时与回滚边界，避免演变成难以修改的大一统平台。通过模板测试、契约测试和线上指标验证复用效果；对高风险操作保留审批、审计和灰度发布。
 
 ## 算法与手撕题单
 
@@ -2221,14 +2499,14 @@ Spring AI 不是模型本身，而是对不同厂商模型调用的 Java 抽象�
 
 | 题目 | 来源 |
 |------|------|
-| 最大子数组和 | 拼多多提前批一面，7 月 30 日；[字节数据平台 Agent 一面](https://www.nowcoder.com/feed/main/detail/f5f840632a19417b91b8987762427a6a) |
-| 二叉树前序遍历、层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面；[阿里实习 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/31edaaa47197404a8647601612312786)；[百度大模型研发一面](https://www.nowcoder.com/discuss/921590204903723008) |
+| 最大子数组和 | 拼多多提前批一面，7 月 30 日；[字节数据平台 Agent 一面](https://www.nowcoder.com/feed/main/detail/f5f840632a19417b91b8987762427a6a)；[敦煌网推荐算法](https://www.nowcoder.com/feed/main/detail/915613d6a3274e87b815a85ca8002a45) |
+| 二叉树前序遍历、层序遍历 | 知乎后端一面，8 月 4 日；小红书数据库智能化一面，8 月 10 日；视频 b 二面；[阿里实习 AI Infra 面经](https://www.nowcoder.com/feed/main/detail/31edaaa47197404a8647601612312786)；[百度大模型研发一面](https://www.nowcoder.com/discuss/921590204903723008)；[奇怪の字节二面面经（大概率凉经）](https://www.nowcoder.com/feed/main/detail/bcf0b8497fcb4982b2292cafbcb08d69) |
 | 两两交换链表节点 | 拼多多服务端三面，8 月 4 日；百度内容营销与广告一面，8 月 12 日 |
 | 奇偶链表 | 字节后端社招一面，8 月 6 日 |
 | 最长有效括号 | 字节后端社招二面，8 月 6 日；[虾皮 AI Infra 二面](https://www.nowcoder.com/feed/main/detail/62b9123e4b7f497285e7d6f68844cdd6)；[百度 Coding Agent 三面](https://www.nowcoder.com/feed/main/detail/b9521e2b51e04afeac0a3a32e13f4da9)；[美团 Agent 一面](https://www.nowcoder.com/feed/main/detail/58159306df52463ab75d72daa80d66df) |
-| 数组第 K 大元素 / 中位数等顺序统计量 | 字节后端社招三面，8 月 6 日；[快手 AI 全栈一面](https://www.nowcoder.com/discuss/921807075905130496)；[淘宝闪购 AI 应用研发二面](https://www.nowcoder.com/feed/main/detail/09ec7c36a2774223a93044a02b2c3ec0)（超大数组中位数追问，原帖未给内存/外存约束）；[9.18 虾皮shopee chatbot研发实习一面凉经](https://www.nowcoder.com/feed/main/detail/9f02a7f8009d4aca9fc730a18b9f96cc) |
+| 数组第 K 大元素 / 中位数等顺序统计量 | 字节后端社招三面，8 月 6 日；[快手 AI 全栈一面](https://www.nowcoder.com/discuss/921807075905130496)；[淘宝闪购 AI 应用研发二面](https://www.nowcoder.com/feed/main/detail/09ec7c36a2774223a93044a02b2c3ec0)（超大数组中位数追问，原帖未给内存/外存约束）；[9.18 虾皮shopee chatbot研发实习一面凉经](https://www.nowcoder.com/feed/main/detail/9f02a7f8009d4aca9fc730a18b9f96cc)；[字节多模态大模型面经一面](https://www.nowcoder.com/discuss/932594519835443200) |
 | 删除重复字符并保持字典序最小 | 字节 Agent 开发一面，8 月 9 日 |
-| 有效括号字符串、最长递增子序列 | 小红书数据库智能化面经，8 月 10 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)；[阿里云 SOC Agent Infra 一面（LIS）](https://www.nowcoder.com/feed/main/detail/1bde9ba913d74ca6847962f679865f7e) |
+| 有效括号字符串、最长递增子序列 | 小红书数据库智能化面经，8 月 10 日；[小红书/百度 Agent 开发实习一面](https://www.nowcoder.com/feed/main/detail/e319aadc79a9479397a6661a7f5ca088)；[阿里云 SOC Agent Infra 一面（LIS）](https://www.nowcoder.com/feed/main/detail/1bde9ba913d74ca6847962f679865f7e)；[字节剪映AI应用开发一面](https://www.nowcoder.com/feed/main/detail/7211e82c75284d23a89b569cd9dc289d) |
 | SQL：查询平均工资最高部门的管理者 | 快手测开一面，8 月 12 日 |
 | 最多 K 个重复元素的最长子数组（LC 2958） | 阿里云 AI 全栈开发一面 |
 | 限制最大并发数为 3，批量调用外部接口 | 快手 Agent 开发一面 |
@@ -2236,7 +2514,7 @@ Spring AI 不是模型本身，而是对不同厂商模型调用的 Java 抽象�
 | 合并两个有序数组 | 影石创新 AI Agent 一面；[多益三面](https://www.nowcoder.com/discuss/922801355649974272) |
 | LRU Cache | 懂车帝 Agent 开发一面；[阶跃星辰 AI Infra 实习面经](https://www.nowcoder.com/feed/main/detail/320def38cd484da3bb26b01932996ef2)；[快手 AI Infra 校招面经](https://www.nowcoder.com/feed/main/detail/eccb5cafdfce452c8d56374ef070685d)；[虾皮一面](https://www.nowcoder.com/feed/main/detail/e133c2610bde4adc812bba66c62e1641)；[算能科技 Agent 开发一面](https://www.nowcoder.com/feed/main/detail/f832cb9f9c494fbfad7e492bada7ec19)；[字节跳动 AI Agent研发工程师｜AI算力基础设施 27秋招面经](https://www.nowcoder.com/discuss/930155293864914944)；[脑利一面](https://www.nowcoder.com/feed/main/detail/4002450a24194b4eaa759a2450cab7f5)；[拼多多AI Agent一面，双机位，全程严肃](https://www.nowcoder.com/feed/main/detail/3cb8b70b192f4051b3c19ace4dda1beb)；[cvte应用软件开发一面](https://www.nowcoder.com/feed/main/detail/c2155d2308de452c8a6e3cf2bbb482f3) |
 | 二叉树锯齿形层序遍历 | 字节跳动 AI Agent 开发一面 |
-| 手写多头注意力（MHA） | 小鹏 VLA 大模型算法工程师一面；[滴滴一些面经合集（算法）](https://www.nowcoder.com/feed/main/detail/37cae17c5f2a49ee81375721f53bbf9b)；[9.14日美团多模态生成大模型二面](https://www.nowcoder.com/discuss/930520072370606080) |
+| 手写多头注意力（MHA） | 小鹏 VLA 大模型算法工程师一面；[滴滴一些面经合集（算法）](https://www.nowcoder.com/feed/main/detail/37cae17c5f2a49ee81375721f53bbf9b)；[9.14日美团多模态生成大模型二面](https://www.nowcoder.com/discuss/930520072370606080)；[淘天集团 Agent算法 一面](https://www.nowcoder.com/discuss/931957859154132992) |
 | 顺时针旋转矩阵 90° / 旋转图像 | 小鹏 VLA 大模型算法工程师一面；[蔚来 AI Infra 一面（Python）](https://www.nowcoder.com/feed/main/detail/7cb7ccbb4a3145cf99dbb05aff767299)；[字节 AI 应用开发二面](https://www.nowcoder.com/feed/main/detail/7e8a821479a649fd914e449d312eeb95)；[小红书多模态秋招二面](https://www.nowcoder.com/discuss/930755993066041344) |
 | 查找会议静默区间及多人重叠区间 | 字节跳动 AI Agent 一面 |
 | 判断链表是否有环 | 视频 b 二面 |
@@ -2258,9 +2536,9 @@ Spring AI 不是模型本身，而是对不同厂商模型调用的 Java 抽象�
 | 爬楼梯（递归、记忆化与动态规划，LC 70） | 字节火山引擎 Managed Agent 一面，2026 年 8 月 13 日；[阿里云 ai应用开发 一面](https://www.nowcoder.com/feed/main/detail/7e27cf4dedb142d9b643471ba31276ed) |
 | 最近 T 秒访问日志：按用户最后访问时间降序返回 | [百度 Coding Agent 一面](https://www.nowcoder.com/feed/main/detail/b9521e2b51e04afeac0a3a32e13f4da9) |
 | 统计包含数组全部不同值的连续子数组数量 | [拼多多大模型算法一面](https://www.nowcoder.com/discuss/922592377364041728) |
-| 递归合并嵌套 JSON（dict/list/数值/字符串/布尔规则，且不修改输入） | [字节 Agent 开发一面](https://www.nowcoder.com/feed/main/detail/d2cf5165d1184b59879eff5793b7b453) |
+| 递归合并嵌套 JSON（dict/list/数值/字符串/布尔规则，且不修改输入） | [字节 Agent 开发一面](https://www.nowcoder.com/feed/main/detail/d2cf5165d1184b59879eff5793b7b453)；[字节 AI Agent 开发 一面（抖音电商 · 一面掉池子里面了）](https://www.nowcoder.com/discuss/932407145864130560) |
 | 最长回文子串（LC 5） | [字节数据平台 Agent 一面](https://www.nowcoder.com/feed/main/detail/f5f840632a19417b91b8987762427a6a)；[百度 AI 测开一面](https://www.nowcoder.com/feed/main/detail/cd8e446a6ec14edfa53cf4c7b6864c4d)；[字节 AI Agent 研发一面](https://www.nowcoder.com/feed/main/detail/2ba7e96d48634777990b28c2cb322f40)；[小红书 Agent 平台研发一面](https://www.nowcoder.com/discuss/931189826643066880)；[字节广告团队agent面经（一二面）](https://www.nowcoder.com/discuss/930870582843805696) |
-| 最长公共前缀 | [元石科技后端/Agent 一面](https://www.nowcoder.com/discuss/921742843704549376) |
+| 最长公共前缀 | [元石科技后端/Agent 一面](https://www.nowcoder.com/discuss/921742843704549376)；[美团agent一面](https://www.nowcoder.com/feed/main/detail/554bdcc695ae42f8b0d78e3c44dd17d5) |
 | 大数乘法 | [腾讯 WXG 微信读书一面](https://www.nowcoder.com/feed/main/detail/3ffc762437274543b6a8f5e2ea6fb535) |
 | URL 查询参数解析为 Map | [大方云图研发实习一面](https://www.nowcoder.com/feed/main/detail/a9a40feb4e1e4d0ca7c3f8c3ba67d487) |
 | 两个栈实现队列，并追问线程安全 | [字节 Agent 开发一面](https://www.nowcoder.com/discuss/921444774287003648)；[字节算法（Agent）凉经](https://www.nowcoder.com/feed/main/detail/6d80836574e647d39eb9842dc4131ace) |
@@ -2308,3 +2586,18 @@ Spring AI 不是模型本身，而是对不同厂商模型调用的 Java 抽象�
 | 全排列 | [蔚来——大模型算法岗（智能座舱/自动驾驶）实习一面](https://www.nowcoder.com/discuss/930755708008558592) |
 | 快速排序 | [9.18 虾皮shopee chatbot研发实习一面凉经](https://www.nowcoder.com/feed/main/detail/9f02a7f8009d4aca9fc730a18b9f96cc) |
 | 判断二叉树是否为另一棵二叉树的子结构 | [字节 Agent 秋招一面](https://www.nowcoder.com/discuss/929731481189044224) |
+
+| 滑动窗口最大值 | [百度 AIGC 多模态智能体算法工程师二面](https://www.nowcoder.com/feed/main/detail/2d033fd6daa04e2aaad2282b75531bbc) |
+| 和为 K 的连续子数组数量 | [百度 AIGC 多模态智能体算法工程师二面](https://www.nowcoder.com/feed/main/detail/2d033fd6daa04e2aaad2282b75531bbc)；[小红书 Product Engineer（AI与全栈方向）-社区工程 一面面经](https://www.nowcoder.com/feed/main/detail/70ad5ead2f784676b0b399eab877d3d4) |
+| 最大乘积子数组（O(1)额外空间） | [百度 AIGC 多模态智能体算法工程师一面](https://www.nowcoder.com/feed/main/detail/5b720bd1dbb3489986697d6bcd0747f3) |
+| 网格不同路径 | [小红书广告交易算法日常实习面经](https://www.nowcoder.com/feed/main/detail/e91bea35822a44cda5192ea9c5efea0d) |
+| 最长公共子序列 | [字节多模态大模型面经一面](https://www.nowcoder.com/discuss/932594519835443200) |
+| 有父指针的二叉树最近公共祖先 | [9.14字节推荐架构一面](https://www.nowcoder.com/feed/main/detail/467d01beed8a40b89ac414b90fc7fb85) |
+| 矩阵对角线 Z 字形遍历 | [腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078) |
+| 海量数据中查找只出现一次的元素 | [腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078) |
+| 生成所有有效括号组合 | [拼多多 agent 一面凉经](https://www.nowcoder.com/feed/main/detail/4dd4b979b1f74625aaef3e7b975142ba) |
+| 组合 | [【面经】字节/AI 应用工程师 一面挂经……](https://www.nowcoder.com/discuss/933023499399024640) |
+| 约瑟夫环 | [阿里虎鲸文娱 - AI 基础设施 - 一面](https://www.nowcoder.com/feed/main/detail/9c2e1794ccc14448a6fc43d596f60f00) |
+| 用 random5 实现等概率 random7 | [字节 Agent 秋招二面](https://www.nowcoder.com/discuss/932657562825027584) |
+| 不用取余判断整数奇偶 | [腾讯 TEG 云架构平台部一面、二面面经](https://www.nowcoder.com/feed/main/detail/6aa13bf7472441bb9c5174ee8e7af078) |
+| 目标和 | [字节全栈一面](https://www.nowcoder.com/feed/main/detail/a01aeac81ad342d88252f899c47f2dc4) |
