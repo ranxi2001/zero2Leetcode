@@ -481,6 +481,8 @@ modules:
             slug: "baidu/algo-20260806"
           - title: "算法岗 8.13"
             slug: "baidu/algo-20260813"
+          - title: "算法岗 8.20"
+            slug: "baidu/algo-20260820"
           - title: "算法岗 8.27"
             slug: "baidu/algo-20260827"
           - title: "算法岗 9.3"
