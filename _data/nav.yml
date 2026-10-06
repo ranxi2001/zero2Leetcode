@@ -323,6 +323,8 @@ modules:
             slug: "didi/dev-20260906"
       - name: "网易"
         articles:
+          - title: "算法岗 9.29"
+            slug: "netease/algo-20260929"
           - title: "算法岗 9.19"
             slug: "netease/algo-20260919"
           - title: "雷火研发岗 4.2"
