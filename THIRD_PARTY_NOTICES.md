@@ -86,3 +86,25 @@ for all modules in the source JDK are preserved under
 - Original notice: [`NOTICE`](third_party/temurin-21.0.12+8/NOTICE)
 - Original release metadata: [`release`](third_party/temurin-21.0.12+8/release)
 - Complete module notices: [`legal/`](third_party/temurin-21.0.12+8/legal/)
+
+## Interview Answer References (2026-10-07)
+
+The incremental answers from the September 23 through October 7 interview review were independently written using these primary references:
+
+- [jcmd](https://docs.oracle.com/en/java/javase/25/docs/specs/man/jcmd.html)
+- [TCP 标准](https://www.rfc-editor.org/rfc/rfc9293.html#section-3.5)
+- [MySQL InnoDB 文档](https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html)
+- [Redis 分布式锁文档](https://redis.io/docs/latest/develop/clients/patterns/distributed-locks/)
+- [OpenAPI](https://spec.openapis.org/oas/latest.html#operation-object)
+- [MySQL 索引文档](https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html)
+- [Druid 配置文档](https://github.com/alibaba/druid/wiki/DruidDataSource%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8)
+- [Oracle OOM 排查文档](https://docs.oracle.com/en/java/javase/25/troubleshoot/troubleshooting-memory-leaks.html)
+- [请求处理文档](https://nginx.org/en/docs/http/request_processing.html)
+- [proxy_pass](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass)
+- [Docker 容器概念](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/)
+- [CLI 文档](https://docs.docker.com/reference/cli/docker/)
+- [Same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy)
+- [Android Activity lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle)
+
+
+No upstream prose, code, figures, or datasets are reproduced. Protocol and implementation facts are attributed at the relevant answer; architecture, evaluation, and operational recommendations are independent engineering analysis. Public interview links document question provenance only.
