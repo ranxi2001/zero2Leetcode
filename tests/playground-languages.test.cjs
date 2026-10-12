@@ -118,7 +118,7 @@ test('all locally executable problems produce Java and Go core templates', () =>
     const support = context.window.LEETCODE_LANGUAGE_SUPPORT;
     const executable = getProblems(context).filter((problem) => problem.testCases?.length);
 
-    assert.equal(executable.length, 116);
+    assert.equal(executable.length, 117);
     for (const problem of executable) {
         const signature = support.parseProblemSignature(problem);
         assert.ok(signature, `LC ${problem.id} should expose a typed core signature`);
@@ -168,6 +168,27 @@ test('Go harness executes core functions and returns structured test results', (
             Array.from(result.actual).sort((a, b) => a - b),
             Array.from(problem.testCases[index].expected).sort((a, b) => a - b)
         );
+    });
+});
+
+test('Go LC 142 adapter checks cycle entry identity', () => {
+    const context = createContext();
+    const support = context.window.LEETCODE_LANGUAGE_SUPPORT;
+    const problem = getProblem(context, 142);
+    const source = support.buildGoSource(problem, `func detectCycle(head *ListNode) *ListNode {
+        seen := map[*ListNode]bool{}
+        for head != nil {
+            if seen[head] { return head }
+            seen[head] = true
+            head = head.Next
+        }
+        return nil
+    }`);
+    const execution = runGeneratedGo(source);
+    assert.equal(execution.status, 0, execution.stderr);
+    support.parseRunnerOutput(execution.stdout, problem.testCases.length).forEach((result, index) => {
+        assert.equal(result.error, undefined);
+        assert.equal(result.actual, problem.testCases[index].expected);
     });
 });
 

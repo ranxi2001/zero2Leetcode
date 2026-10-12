@@ -510,6 +510,25 @@ ${typedBody.startsWith('    //') ? '' : typedBody + '\n'} }
 
     function buildJavaCase(problem, signature, testCase, index) {
         const id = Number(problem.id);
+        if (id === 142) {
+            return `Z2L.runCase(${index}, () -> {
+            int[] values = ${javaValue(testCase.input[0], 'List[int]', '', problem)};
+            ListNode[] nodes = new ListNode[values.length];
+            for (int i = 0; i < nodes.length; i++) nodes[i] = new ListNode(values[i]);
+            for (int i = 0; i + 1 < nodes.length; i++) nodes[i].next = nodes[i + 1];
+            int pos = ${testCase.input[1]};
+            if (nodes.length > 0 && pos >= 0) nodes[nodes.length - 1].next = nodes[pos];
+            ListNode result = new Solution().detectCycle(nodes.length == 0 ? null : nodes[0]);
+            Integer found = null;
+            for (int i = 0; i < nodes.length; i++) {
+                ListNode next = i + 1 < nodes.length ? nodes[i + 1] : (pos >= 0 ? nodes[pos] : null);
+                if (nodes[i].val != values[i] || nodes[i].next != next) throw new IllegalStateException("Do not modify the list");
+                if (result == nodes[i]) found = i;
+            }
+            if (result != null && found == null) throw new IllegalStateException("Return an original node or null");
+            return found;
+        });`;
+        }
         if (id === 189) {
             return `Z2L.runCase(${index}, () -> {
             int[] nums = ${javaValue(testCase.input[0], 'List[int]', '', problem)};
@@ -571,6 +590,28 @@ ${typedBody.startsWith('    //') ? '' : typedBody + '\n'} }
 
     function buildGoCase(problem, signature, testCase, index) {
         const id = Number(problem.id);
+        if (id === 142) {
+            return `z2lRunCase(${index}, func() any {
+        values := ${goValue(testCase.input[0], 'List[int]', '')}
+        nodes := make([]*ListNode, len(values))
+        for i, value := range values { nodes[i] = &ListNode{Val: value} }
+        for i := 0; i + 1 < len(nodes); i++ { nodes[i].Next = nodes[i + 1] }
+        pos := ${testCase.input[1]}
+        if len(nodes) > 0 && pos >= 0 { nodes[len(nodes) - 1].Next = nodes[pos] }
+        var head *ListNode
+        if len(nodes) > 0 { head = nodes[0] }
+        result := detectCycle(head)
+        var found any
+        for i, node := range nodes {
+            var next *ListNode
+            if i + 1 < len(nodes) { next = nodes[i + 1] } else if pos >= 0 { next = nodes[pos] }
+            if node.Val != values[i] || node.Next != next { panic("Do not modify the list") }
+            if result == node { found = i }
+        }
+        if result != nil && found == nil { panic("Return an original node or nil") }
+        return found
+    })`;
+        }
         if (id === 189) {
             return `z2lRunCase(${index}, func() any {
         nums := ${goValue(testCase.input[0], 'List[int]', '')}

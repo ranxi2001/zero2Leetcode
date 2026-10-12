@@ -405,7 +405,7 @@ window.PLAYGROUND_EXTRA_PROBLEMS = (window.PLAYGROUND_EXTRA_PROBLEMS || []).conc
 <h3>142. 环形链表 II <span class="difficulty-tag medium">Medium</span></h3>
 <p>给定一个链表的头节点 <code>head</code>，返回链表开始入环的第一个节点。如果链表无环，则返回 <code>null</code>。</p>
 <p>不允许修改链表。</p>
-<p><strong>说明：</strong>本题需要构造带环链表并返回某个节点对象。当前 Playground 的单函数测试模型不适合可靠验证该题，因此本地只提供题面与模板，不提供自动测试用例。</p>
+<p><strong>本地判题：</strong>已内置 <code>ListNode</code> 类。系统根据 <code>head</code> 数组和 <code>pos</code> 自动构造链表：<code>pos</code> 是尾节点连接的节点索引，<code>-1</code> 表示无环，不会传入你的函数。请返回原链表中的入环节点对象或 <code>None</code>，不要返回节点值或索引。测试结果将节点显示为从 0 开始的索引，无环显示为 <code>null</code>，并检查链表未被修改。</p>
 <h4>示例</h4>
 <pre>输入：head = [3,2,0,-4], pos = 1
 输出：索引 1 对应的节点（值为 2）</pre>
@@ -433,10 +433,41 @@ def detect_cycle(head):
     # 在这里写你的代码
     pass
 `,
-    functionName: 'detect_cycle',
-    setup: (typeof LINKED_LIST_SETUP !== 'undefined') ? LINKED_LIST_SETUP : '',
-    argWrappers: ['_to_linked_list'],
-    testCases: [],
+    functionName: '_test_detect_cycle',
+    setup: `
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def _test_detect_cycle(values, pos):
+    nodes = [ListNode(value) for value in values]
+    for i in range(len(nodes) - 1):
+        nodes[i].next = nodes[i + 1]
+    if nodes and pos >= 0:
+        nodes[-1].next = nodes[pos]
+    original = [(node.val, node.next) for node in nodes]
+    result = detect_cycle(nodes[0] if nodes else None)
+    for node, (value, successor) in zip(nodes, original):
+        if node.val != value or node.next is not successor:
+            raise ValueError("不允许修改链表的节点值或 next 指针")
+    if result is None:
+        return None
+    for index, node in enumerate(nodes):
+        if result is node:
+            return index
+    raise ValueError("请返回原链表中的节点对象或 None，不要返回节点值、索引或新建节点")
+`,
+    testCases: [
+      { input: [[3, 2, 0, -4], 1], expected: 1 },
+      { input: [[1, 2], 0], expected: 0 },
+      { input: [[1], -1], expected: null },
+      { input: [[], -1], expected: null },
+      { input: [[1], 0], expected: 0 },
+      { input: [[1, 2, 3, 4], -1], expected: null },
+      { input: [[7, 7, 7, 7], 2], expected: 2 },
+      { input: [[1, 2, 3], 2], expected: 2 },
+    ],
     compareFunc: 'equal',
     solutionUrl: 'https://leetcode.cn/problems/linked-list-cycle-ii/solutions/',
     blogUrl: 'https://www.cnblogs.com/ranxi169/p/19766937',
