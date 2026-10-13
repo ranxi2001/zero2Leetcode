@@ -108,3 +108,29 @@ The incremental answers from the September 23 through October 7 interview review
 
 
 No upstream prose, code, figures, or datasets are reproduced. Protocol and implementation facts are attributed at the relevant answer; architecture, evaluation, and operational recommendations are independent engineering analysis. Public interview links document question provenance only.
+
+
+## Weekly Interview Answer References (2026-10-13)
+
+The answers updated from the October 7–13 interview review were independently written and checked against these primary references:
+
+- [HTTP 语义 RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)
+- [MySQL EXPLAIN 文档](https://dev.mysql.com/doc/refman/8.4/en/explain-output.html)
+- [ReentrantLock 文档](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html)
+- [Python free-threading 文档](https://docs.python.org/3/howto/free-threading-python.html)
+- [Spring @Transactional 文档](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html)
+- [Spring Task Execution](https://docs.spring.io/spring-framework/reference/integration/scheduling.html)
+- [FastAPI SQL 数据库教程](https://fastapi.tiangolo.com/tutorial/sql-databases/)
+- [ODB 官方仓库](https://github.com/codesynthesis-com/odb)
+- [Drogon 官方仓库](https://github.com/drogonframework/drogon)
+- [Linux sendfile 手册](https://man7.org/linux/man-pages/man2/sendfile.2.html)
+- [Redis Lua 文档](https://redis.io/docs/latest/develop/programmability/eval-intro/)
+- [Redis keyspace notifications 文档](https://redis.io/docs/latest/develop/pubsub/keyspace-notifications/)
+- [Redis 内存淘汰文档](https://redis.io/docs/latest/develop/reference/eviction/)
+- [Redis Pipeline 文档](https://redis.io/docs/latest/develop/using-commands/pipelining/)
+- [《TCP 拥塞控制 RFC 5681》](https://www.rfc-editor.org/info/rfc5681)
+- [PATCH RFC 5789](https://www.rfc-editor.org/rfc/rfc5789)
+- [WebSocket 协议 RFC 6455](https://www.rfc-editor.org/rfc/rfc6455)
+- [OAuth 2.0 安全最佳实践](https://www.rfc-editor.org/rfc/rfc9700)
+
+No upstream prose, code, diagrams, or datasets are reproduced. Interview links establish question provenance; the linked specifications, papers, and official implementations establish answer facts. Architecture, testing, deployment, and evaluation recommendations are independent engineering analysis.
