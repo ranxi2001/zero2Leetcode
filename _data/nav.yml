@@ -193,6 +193,10 @@ modules:
             slug: "meituan/algo-20260905"
       - name: "华为"
         articles:
+          - title: "AI岗 10.14"
+            slug: "huawei/ai-20261014"
+          - title: "研发岗 10.14"
+            slug: "huawei/dev-20261014"
           - title: "AI岗 10.10"
             slug: "huawei/ai-20261010"
           - title: "研发岗 10.10"
@@ -345,6 +349,8 @@ modules:
             slug: "bilibili/general-20260511"
       - name: "科大讯飞"
         articles:
+          - title: "算法岗 10.11"
+            slug: "iflytek/algo-20261011"
           - title: "通用 4.11"
             slug: "iflytek/general-20260411"
           - title: "算法岗 8.23"
@@ -353,6 +359,8 @@ modules:
             slug: "iflytek/algo-20260906"
       - name: "拼多多"
         articles:
+          - title: "AI Infra 研发岗 10.11"
+            slug: "pinduoduo/ai-20261011"
           - title: "技术岗 9.22"
             slug: "pinduoduo/general-20260922"
           - title: "暑期实习-通用 4.12"
