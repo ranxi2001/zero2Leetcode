@@ -6,6 +6,7 @@ const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
 const batchPath = path.join(root, 'assets/js/playground-extra/batch-2.js');
+const playgroundPath = path.join(root, 'playground.html');
 
 function loadProblem() {
   const context = {
@@ -18,6 +19,11 @@ function loadProblem() {
   vm.runInContext(fs.readFileSync(batchPath, 'utf8'), context, { filename: batchPath });
   return context.window.PLAYGROUND_EXTRA_PROBLEMS.find((item) => item.id === 23);
 }
+
+test('LC 23 batch script is cache-busted on the playground page', () => {
+  const html = fs.readFileSync(playgroundPath, 'utf8');
+  assert.match(html, /<script src="assets\/js\/playground-extra\/batch-2\.js\?v=\d+"><\/script>/);
+});
 
 test('LeetCode 23 description shows regular and empty-input examples', () => {
   const problem = loadProblem();
