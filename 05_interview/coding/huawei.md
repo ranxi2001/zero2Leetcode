@@ -8,9 +8,9 @@ permalink: /05_interview/coding/huawei/
 
 # 华为面试手撕高频题与备考规划
 
-2027 届秋招增量资料：[2027届应届生华为手撕面试经验汇总]({{ site.baseurl }}/05_interview/coding/huawei-2027/)，含近期题目、逐题来源与独立统计口径。
+2027 届秋招资料（本页已累加已有题目的频次，不新增题目）：[2027届应届生华为手撕面试经验汇总]({{ site.baseurl }}/05_interview/coding/huawei-2027/)，含近期题目、逐题来源与独立统计口径。
 
-> 基于 6139 篇面经统计（小红书 4867 + 牛客 1272），LC 真题 199 种、总频次 629 次。华为面试手撕 = 80% LeetCode 原题（Hot 100 为主）+ 20% 基础算法/ML 手撕。每位考生通常有一次换题机会。
+> 历史统计基于 6139 篇面经（小红书 4867 + 牛客 1272），LC 真题 199 种、总频次 629 次；2026-10-15 累加 2027 届资料中本页已有的 13 道题、17 次记录后，累计频次为 646 次（仅合并已有题目）。华为面试手撕 = 80% LeetCode 原题（Hot 100 为主）+ 20% 基础算法/ML 手撕。每位考生通常有一次换题机会。
 
 ---
 
@@ -86,37 +86,37 @@ permalink: /05_interview/coding/huawei/
 
 ## 高频手撕题 Top 38（分类详解）
 
-> 统计来源：小红书（4867 篇）+ 牛客网（1272 篇）共 **6139 篇**华为校招面经，LC 真题 199 种、总频次 629 次（高频≥5 共 38 种）。数据版本：v12，生成于 2026-05-02，已剔除 OD 机考/笔试来源。
+> 历史统计来源：小红书（4867 篇）+ 牛客网（1272 篇）共 **6139 篇**华为校招面经，LC 真题 199 种、总频次 629 次（历史高频≥5 共 38 种）。基础数据版本：v12，生成于 2026-05-02，已剔除 OD 机考/笔试来源。2026-10-15 已将 2027 届资料中本页已有题目的 17 次记录累加至下表，累计频次 646 次；新题及未确认编码的题目不计入，版本未细分的 Attention 不并入 Self-Attention 或 MHA。
 
 ### 分类总览
 
 | 分类 | 高频题数 | 代表高频题（频次） |
 |------|---------|-------------------|
-| 双指针/滑动窗口 | 7 道 | 无重复字符最长子串（**30次**）、接雨水（11次） |
-| 图论（DFS/BFS） | 3 道 | 岛屿数量（**29次**）、课程表（6次） |
+| 双指针/滑动窗口 | 7 道 | 无重复字符最长子串（**32次**）、接雨水（11次） |
+| 图论（DFS/BFS） | 3 道 | 岛屿数量（**31次**）、课程表（6次） |
 | 栈系列 | 5 道 | 有效括号（**22次**）、字符串解码（15次） |
-| 链表 | 7 道 | LRU缓存（17次）、反转链表（12次） |
-| 二叉树 | 4 道 | 层序遍历（10次）、最长递增子序列（8次） |
+| 链表 | 7 道 | LRU缓存（17次）、反转链表（14次） |
+| 二叉树 | 4 道 | 层序遍历（10次）、最长递增子序列（9次） |
 | 排序/二分 | 4 道 | 合并区间（14次）、数组第K大元素（10次） |
-| DP/回溯/哈希 | 8 道 | 全排列（9次）、最大子数组和（7次） |
+| DP/回溯/哈希 | 8 道 | 全排列（10次）、最大子数组和（7次） |
 
 ### 双指针/滑动窗口（7 道）
 
 | # | 题目 | 频次 |
 |---|------|------|
-| ① | [LC 3. 无重复字符的最长子串](https://onefly.top/zero2Leetcode/playground.html?id=3) | **30次** |
+| ① | [LC 3. 无重复字符的最长子串](https://onefly.top/zero2Leetcode/playground.html?id=3) | **32次** |
 | ② | [LC 42. 接雨水](https://onefly.top/zero2Leetcode/playground.html?id=42)（双指针/单调栈） | **11次** |
+| ② | [LC 15. 三数之和](https://onefly.top/zero2Leetcode/playground.html?id=15) | 11次 |
 | ③ | [LC 11. 盛最多水的容器](https://onefly.top/zero2Leetcode/playground.html?id=11) | 9次 |
-| ③ | [LC 15. 三数之和](https://onefly.top/zero2Leetcode/playground.html?id=15) | 9次 |
-| ④ | [LC 209. 长度最小的子数组](https://onefly.top/zero2Leetcode/playground.html?id=209) | 7次 |
-| ④ | [LC 142. 环形链表 II](https://onefly.top/zero2Leetcode/playground.html?id=142) | 7次 |
-| ⑤ | [LC 239. 滑动窗口最大值](https://onefly.top/zero2Leetcode/playground.html?id=239) | 5次 |
+| ④ | [LC 209. 长度最小的子数组](https://onefly.top/zero2Leetcode/playground.html?id=209) | 8次 |
+| ⑤ | [LC 142. 环形链表 II](https://onefly.top/zero2Leetcode/playground.html?id=142) | 7次 |
+| ⑥ | [LC 239. 滑动窗口最大值](https://onefly.top/zero2Leetcode/playground.html?id=239) | 5次 |
 
 ### 图论（3 道）
 
 | # | 题目 | 频次 |
 |---|------|------|
-| ① | [LC 200. 岛屿数量](https://onefly.top/zero2Leetcode/playground.html?id=200)（DFS/BFS） | **29次** |
+| ① | [LC 200. 岛屿数量](https://onefly.top/zero2Leetcode/playground.html?id=200)（DFS/BFS） | **31次** |
 | ② | [LC 207. 课程表](https://onefly.top/zero2Leetcode/playground.html?id=207)（拓扑排序） | 6次 |
 | ③ | [LC 695. 岛屿的最大面积](https://onefly.top/zero2Leetcode/playground.html?id=695) | 5次 |
 
@@ -126,30 +126,30 @@ permalink: /05_interview/coding/huawei/
 |---|------|------|
 | ① | [LC 20. 有效的括号](https://onefly.top/zero2Leetcode/playground.html?id=20) | **22次** |
 | ② | [LC 394. 字符串解码](https://onefly.top/zero2Leetcode/playground.html?id=394) | **15次** |
-| ③ | [LC 739. 每日温度](https://onefly.top/zero2Leetcode/playground.html?id=739) | 6次 |
-| ③ | [LC 155. 最小栈](https://onefly.top/zero2Leetcode/playground.html?id=155) | 6次 |
-| ④ | [LC 23. 合并K个升序链表](https://onefly.top/zero2Leetcode/playground.html?id=23) | 5次 |
+| ③ | [LC 739. 每日温度](https://onefly.top/zero2Leetcode/playground.html?id=739) | 7次 |
+| ④ | [LC 155. 最小栈](https://onefly.top/zero2Leetcode/playground.html?id=155) | 6次 |
+| ⑤ | [LC 23. 合并K个升序链表](https://onefly.top/zero2Leetcode/playground.html?id=23) | 5次 |
 
 ### 链表（7 道）
 
 | # | 题目 | 频次 |
 |---|------|------|
 | ① | [LC 146. LRU 缓存](https://onefly.top/zero2Leetcode/playground.html?id=146)（双向链表+哈希） | **17次** |
-| ② | [LC 206. 反转链表](https://onefly.top/zero2Leetcode/playground.html?id=206) | **12次** |
+| ② | [LC 206. 反转链表](https://onefly.top/zero2Leetcode/playground.html?id=206) | **14次** |
 | ③ | [LC 1. 两数之和](https://onefly.top/zero2Leetcode/playground.html?id=1)（哈希） | 11次 |
-| ④ | [LC 19. 删除链表倒数第N个节点](https://onefly.top/zero2Leetcode/playground.html?id=19) | 8次 |
-| ⑤ | [LC 2. 两数相加](https://onefly.top/zero2Leetcode/playground.html?id=2) | 6次 |
-| ⑤ | [LC 21. 合并两个有序链表](https://onefly.top/zero2Leetcode/playground.html?id=21) | 6次 |
-| ⑥ | [LC 92. 反转链表 II](https://onefly.top/zero2Leetcode/playground.html?id=92) | 3次 |
+| ④ | [LC 19. 删除链表倒数第N个节点](https://onefly.top/zero2Leetcode/playground.html?id=19) | 9次 |
+| ⑤ | [LC 21. 合并两个有序链表](https://onefly.top/zero2Leetcode/playground.html?id=21) | 7次 |
+| ⑥ | [LC 2. 两数相加](https://onefly.top/zero2Leetcode/playground.html?id=2) | 6次 |
+| ⑦ | [LC 92. 反转链表 II](https://onefly.top/zero2Leetcode/playground.html?id=92) | 3次 |
 
 ### 二叉树（4 道）
 
 | # | 题目 | 频次 |
 |---|------|------|
 | ① | [LC 102. 二叉树的层序遍历](https://onefly.top/zero2Leetcode/playground.html?id=102) | **10次** |
-| ② | [LC 300. 最长递增子序列](https://onefly.top/zero2Leetcode/playground.html?id=300) | 8次 |
-| ② | [LC 93. 复原 IP 地址](https://onefly.top/zero2Leetcode/playground.html?id=93) | 8次 |
-| ③ | [LC 124. 二叉树中的最大路径和](https://onefly.top/zero2Leetcode/playground.html?id=124)（Hard） | 4次 |
+| ② | [LC 300. 最长递增子序列](https://onefly.top/zero2Leetcode/playground.html?id=300) | 9次 |
+| ③ | [LC 93. 复原 IP 地址](https://onefly.top/zero2Leetcode/playground.html?id=93) | 8次 |
+| ④ | [LC 124. 二叉树中的最大路径和](https://onefly.top/zero2Leetcode/playground.html?id=124)（Hard） | 5次 |
 
 ### 排序/二分（4 道）
 
@@ -164,12 +164,12 @@ permalink: /05_interview/coding/huawei/
 
 | 题目 | 频次 | 类别 |
 |------|------|------|
-| [LC 46. 全排列](https://onefly.top/zero2Leetcode/playground.html?id=46) | 9次 | 回溯 |
+| [LC 46. 全排列](https://onefly.top/zero2Leetcode/playground.html?id=46) | 10次 | 回溯 |
 | [LC 451. 根据字符出现频率排序](https://onefly.top/zero2Leetcode/playground.html?id=451) | 8次 | 哈希+排序 |
+| [LC 55. 跳跃游戏](https://onefly.top/zero2Leetcode/playground.html?id=55) | 8次 | 贪心 |
 | [LC 53. 最大子数组和](https://onefly.top/zero2Leetcode/playground.html?id=53) | 7次 | DP/贪心 |
-| [LC 55. 跳跃游戏](https://onefly.top/zero2Leetcode/playground.html?id=55) | 7次 | 贪心 |
+| [LC 70. 爬楼梯](https://onefly.top/zero2Leetcode/playground.html?id=70) | 7次 | DP |
 | [LC 64. 最小路径和](https://onefly.top/zero2Leetcode/playground.html?id=64) | 6次 | DP |
-| [LC 70. 爬楼梯](https://onefly.top/zero2Leetcode/playground.html?id=70) | 6次 | DP |
 | [LC 406. 根据身高重建队列](https://onefly.top/zero2Leetcode/playground.html?id=406) | 5次 | 排序+贪心 |
 | [LC 72. 编辑距离](https://onefly.top/zero2Leetcode/playground.html?id=72) | 5次 | DP |
 
@@ -180,7 +180,7 @@ permalink: /05_interview/coding/huawei/
 | 题目 | 频次 | 说明 |
 |------|------|------|
 | LC 451 根据字符出现频率排序 | 8次 | 哈希计数 + 桶排序 |
-| LC 300 最长递增子序列 | 8次 | DP / 贪心+二分 |
+| LC 300 最长递增子序列 | 9次 | DP / 贪心+二分 |
 | LC 93 复原 IP 地址 | 8次 | 回溯 + 剪枝 |
 | LC 406 根据身高重建队列 | 5次 | 排序 + 贪心插入 |
 | LC 92 反转链表 II | 3次 | 区间翻转 |
@@ -191,13 +191,13 @@ permalink: /05_interview/coding/huawei/
 
 | # | 题目 | 频次 |
 |---|------|------|
-| 1 | LC 3. 无重复字符的最长子串 | **30次** |
-| 2 | LC 200. 岛屿数量 | **29次** |
+| 1 | LC 3. 无重复字符的最长子串 | **32次** |
+| 2 | LC 200. 岛屿数量 | **31次** |
 | 3 | LC 20. 有效的括号 | **22次** |
 | 4 | LC 146. LRU 缓存 | **17次** |
 | 5 | LC 394. 字符串解码 | **15次** |
 | 6 | LC 56. 合并区间 | **14次** |
-| 7 | LC 206. 反转链表 | **12次** |
+| 7 | LC 206. 反转链表 | **14次** |
 
 ---
 
@@ -252,8 +252,8 @@ permalink: /05_interview/coding/huawei/
 | 维度 | 华为 | 腾讯 | 字节 |
 |------|------|------|------|
 | 面经数量 | 6139 篇 | 3784 篇 | — |
-| LC 手撕频次 | 629 次 | 1833 次 | — |
-| 第一高频题 | LC3（30次） | LRU（123次） | — |
+| LC 手撕频次 | 646 次（仅累加已有题目） | 1833 次 | — |
+| 第一高频题 | LC3（32次） | LRU（123次） | — |
 | 非 LC 题占比 | 约 12% | 25% | 7% |
 | 追问强度 | ★★★★★ | ★★★ | ★★ |
 | 整体难度 | Medium 为主 | Medium 为主 | Medium~Hard |
@@ -543,7 +543,7 @@ if __name__ == "__main__":
 
 ## 小结
 
-1. **Top 3 必刷**：无重复字符最长子串（30次）、岛屿数量（29次）、有效的括号（22次）— 断层高频
+1. **Top 3 必刷**：无重复字符最长子串（32次）、岛屿数量（31次）、有效的括号（22次）— 断层高频
 2. **每道高频题准备双解**：追问换解法是华为面试文化。岛屿数量（DFS+BFS）、接雨水（双指针+单调栈）、反转链表（递归+迭代）、数组第K大（堆+快速选择）尤其要备双解
 3. **Hot100 之外的补漏**：LC 451、LC 300、LC 93、LC 406 共 4 道题不在 Hot100，加上手写快排/单例 2 道原创题，需专门补一遍
 4. **LRU 必须手写数据结构**：17 次排第 4，面试时会明确禁用内置 LinkedHashMap/OrderedDict，双向链表+哈希表需完整手写
