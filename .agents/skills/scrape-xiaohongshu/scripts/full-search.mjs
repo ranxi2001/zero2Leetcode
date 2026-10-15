@@ -2,11 +2,13 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve, join, relative } from 'node:path';
 import { CDP, browser, navigate, clickNote, closeNote, extract, targetUrl } from './scrape.mjs';
+import { createPacer } from './pacing.mjs';
 import { catalog } from './catalog.mjs';
 import { exclusionReason } from './scope.mjs';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export async function fullSearch(o) {
+  const pace = createPacer(o.delay);
   const url = targetUrl(o);
   if (new URL(url).pathname !== '/search_result') throw Error('--all 只支持搜索页');
   const root = resolve(import.meta.dirname, '../output');
@@ -31,7 +33,7 @@ export async function fullSearch(o) {
   await cdp.connect(tab.webSocketDebuggerUrl);
   let stagnant = 0;
   try {
-    await navigate(cdp, url, o.delay);
+    await navigate(cdp, url, o.delay, pace);
     for (let batch = 0; batch < 200; batch++) {
       let page = await cdp.eval(extract);
       for (let w = 0; w < 10 && !page.blocked && !page.candidates.length; w++) { await sleep(1000); page = await cdp.eval(extract); }
@@ -51,33 +53,34 @@ export async function fullSearch(o) {
           continue;
         }
         try {
-          await clickNote(cdp, n.id); await sleep(o.delay);
+          await clickNote(cdp, n.id, pace); await sleep(o.delay);
           let d = await cdp.eval(extract);
           for (let w = 0; w < 10 && !d.blocked && !d.unavailable && (d.note.id !== n.id || (!d.note.text && !d.note.images.length)); w++) { await sleep(1000); d = await cdp.eval(extract); }
           if (d.blocked) { report.status = 'blocked'; report.stopReason = '详情页触发登录或验证'; throw Error(report.stopReason); }
           if (d.unavailable || d.note.id !== n.id || (!d.note.text && !d.note.images.length)) throw Error('详情不可用或未加载');
+          pace.success();
           const a = { ...d.note, title: d.note.title || n.title || '', url: n.url, file: `${n.id}.md`, openedBy: 'click', imageTextRead: false };
           if (exclusionReason(a)) { report.excluded.push({id:a.id,title:a.title,reason:exclusionReason(a)}); continue; }
           await writeFile(join(out, a.file), `# ${a.title || a.id}\n\n来源：${a.url}\n\n抓取时间：${new Date().toISOString()}\n\n发布时间（页面原始值）：${a.publishedAt ?? '未知'}\n\n${a.text || '（正文为空，未处理图片）'}\n`);
           report.articles.push(a); report.newNotes++;
           console.log(`新读 ${report.newNotes}：${a.title || a.id}（${a.text.length}字，${a.dateText}）`);
         } catch (e) {
+          if (report.status !== 'blocked' && pace.failure()) { report.status = 'partial'; report.stopReason = '连续3次详情失败，停止访问'; }
           report.failures.push({ id: n.id, title: n.title, error: e.message });
           console.log(`未读 ${n.id}：${e.message}`);
         } finally {
           await checkpoint();
           if (report.status !== 'blocked') { await closeNote(cdp); await sleep(600); }
         }
-        if (report.status === 'blocked') break;
+        if (report.status === 'blocked' || report.stopReason) break;
       }
       await checkpoint();
-      if (report.status === 'blocked') break;
+      if (report.status === 'blocked' || report.stopReason) break;
       stagnant = found.size === before ? stagnant + 1 : 0;
       const screen = await cdp.eval(`({height:document.body.scrollHeight,scrollY:scrollY,tail:document.body.innerText.slice(-600),url:location.href})`);
       report.loadChecks.push({ batch: report.batches, newCandidates: found.size - before, ...screen });
       if (stagnant >= 5) { report.stopReason = '连续5次滚动加载没有新增笔记（仅代表当前搜索可加载边界）'; break; }
-      await cdp.eval('window.scrollTo(0,Math.max(0,document.body.scrollHeight-innerHeight-200))');
-      await sleep(400);
+      await pace.before();
       await cdp.eval('window.scrollTo(0,document.body.scrollHeight)');
       await sleep(Math.max(o.delay, 4000));
     }

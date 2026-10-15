@@ -78,6 +78,4 @@ permalink: /05_interview/coding/huawei-2027/
 - **提出后换题或未确认编码**：环形链表、最小路径和、MHA、有效括号、饮料机状态机等，不计入上表。
 - **题意未披露完整**：重叠区间、压缩字符串、并查集、数组凑目标和、机器人走路等，不强配题号。
 
-[逐题证据与完整补充记录]({{ site.baseurl }}/assets/data/huawei-2027-evidence.json) · [历届华为题单与备考规划]({{ site.baseurl }}/05_interview/coding/huawei/)
-
 统计依据秋招笔记文字及华为云面试反馈，排除财经、机考、实习、往届和推广汇总；采集未全量完成，频次不等于出题概率。

@@ -6,10 +6,11 @@ import { homedir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { catalog } from './catalog.mjs';
+import { createPacer } from './pacing.mjs';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export function options(args) {
-  const o = { search: '华为面试', port: 9222, pages: 1, limit: 5, delay: 2500 };
+  const o = { search: '华为面试', port: 9222, pages: 1, limit: 5, delay: 10000 };
   for (let i = 0; i < args.length; i++) {
     const k = args[i].replace(/^--/, '');
     if (['login', 'help', 'all'].includes(k)) { o[k] = true; continue; }
@@ -17,7 +18,7 @@ export function options(args) {
     o[k] = ['port', 'pages', 'limit', 'delay'].includes(k) ? Number(args[++i]) : args[++i];
   }
   for (const k of ['port', 'pages', 'limit', 'delay']) if (!Number.isInteger(o[k]) || o[k] < 1) throw Error(`${k} 必须为正整数`);
-  if (o.port > 65535 || o.delay < 2000) throw Error('端口必须 <= 65535，delay 必须 >= 2000');
+  if (o.port > 65535 || o.delay < 5000) throw Error('端口必须 <= 65535，delay 必须 >= 5000');
   return o;
 }
 export function targetUrl(o) {
@@ -134,7 +135,8 @@ export const extract = String.raw`(() => {
   return { blocked, candidates, note: { id, title, text, images: [...new Set(images)], publishedAt: note.time || null, dateText: document.querySelector('.note-content .date, .bottom-container .date, .date')?.innerText || '', authorId: note.user?.userId || '', author: note.user?.nickname || '' }, unavailable: /当前笔记暂时无法浏览|笔记已被删除|内容不存在/.test(body) };
 })()`;
 
-export async function navigate(cdp, url, delay) {
+export async function navigate(cdp, url, delay, pace) {
+  await pace?.before();
   const r = await cdp.send('Page.navigate', { url });
   if (r.errorText) throw Error(r.errorText);
   await sleep(delay);
@@ -144,7 +146,8 @@ export async function navigate(cdp, url, delay) {
   }
 }
 
-export async function clickNote(cdp, id) {
+export async function clickNote(cdp, id, pace) {
+  await pace?.before();
   const locate = `(() => {
     const a = [...document.querySelectorAll('a[href]')].find(a => a.href.includes('/' + ${JSON.stringify(id)}) && a.href.includes('xsec_token'));
     if (!a) return null;
@@ -154,13 +157,15 @@ export async function clickNote(cdp, id) {
   })()`;
   let point = await cdp.eval(locate);
   if (!point) {
+    await pace?.before();
     await cdp.eval('window.scrollTo(0,0)'); await sleep(700);
     for (let i = 0; i < 15 && !point; i++) {
       point = await cdp.eval(locate);
-      if (!point) { await cdp.eval('window.scrollBy(0,innerHeight*0.75)'); await sleep(500); }
+      if (!point) { await pace?.before(); await cdp.eval('window.scrollBy(0,innerHeight*0.75)'); await sleep(500); }
     }
   }
   if (!point) throw Error('搜索列表中未找到可点击笔记');
+  await pace?.before();
   await cdp.send('Input.dispatchMouseEvent', {type:'mousePressed',button:'left',clickCount:1,...point});
   await cdp.send('Input.dispatchMouseEvent', {type:'mouseReleased',button:'left',clickCount:1,...point});
 }
@@ -175,13 +180,14 @@ export async function closeNote(cdp) {
 
 async function main() {
   const o = options(process.argv.slice(2));
+  if (o.help) { console.log('用法: node scrape.mjs [--login] [--all] [--search 关键词 | --url URL] [--pages 1] [--limit 5] [--port 9222] [--delay 10000] [--out 新目录]'); return; }
   if (o.all) { const { fullSearch } = await import('./full-search.mjs'); await fullSearch(o); return; }
-  if (o.help) { console.log('用法: node scrape.mjs [--login] [--search 关键词 | --url URL] [--pages 1] [--limit 5] [--port 9222] [--delay 2500] [--out 新目录]'); return; }
+  const pace = createPacer(o.delay);
   const url = o.login ? 'https://www.xiaohongshu.com/explore' : targetUrl(o);
   const tab = await browser(o.port), cdp = new CDP();
   await cdp.connect(tab.webSocketDebuggerUrl);
   try {
-    await navigate(cdp, url, o.delay);
+    await navigate(cdp, url, o.delay, pace);
     if (o.login) { console.log('已打开 CDP Chrome。请在该窗口登录小红书，完成后重新运行搜索命令。'); return; }
     const out = resolve(o.out || join(import.meta.dirname, '../output', new Date().toISOString().replace(/[:.]/g, '-')));
     await mkdir(out, { recursive: true });
@@ -195,7 +201,7 @@ async function main() {
     if (page.blocked) report.status = 'blocked';
     else if (new URL(url).pathname === '/search_result') {
       for (let i = 0; i < o.pages; i++) {
-        if (i) { await cdp.eval('window.scrollTo(0, document.body.scrollHeight)'); await sleep(o.delay); page = await cdp.eval(extract); }
+        if (i) { await pace.before(); await cdp.eval('window.scrollTo(0, document.body.scrollHeight)'); await sleep(o.delay); page = await cdp.eval(extract); }
         if (page.blocked) { report.status = 'blocked'; break; }
         report.batches++;
         const before = found.size;
@@ -211,17 +217,18 @@ async function main() {
     const searchMode = new URL(url).pathname === '/search_result';
     if (report.status !== 'blocked') for (const n of report.candidates.slice(0, o.limit)) {
       try {
-        if (searchMode) { await clickNote(cdp, n.id); await sleep(o.delay); }
-        else await navigate(cdp, n.url, o.delay);
+        if (searchMode) { await clickNote(cdp, n.id, pace); await sleep(o.delay); }
+        // Single-note URL was already opened above; do not navigate twice.
         let data = await cdp.eval(extract);
         for (let i = 0; i < 8 && !data.blocked && !data.unavailable && (data.note.id !== n.id || (!data.note.text && !data.note.images.length)); i++) { await sleep(1000); data = await cdp.eval(extract); }
         if (data.blocked) { report.status = 'blocked'; throw Error('需要登录或验证，已停止'); }
         if (data.unavailable || data.note.id !== n.id || (!data.note.text && !data.note.images.length)) throw Error('详情不可用或未加载正文/图片');
         const note = { ...data.note, url: n.url, file: `${n.id}.md`, imageTextRead: false, openedBy: searchMode ? 'click' : 'url' };
         const md = `# ${note.title || n.title || n.id}\n\n来源：${n.url}\n\n抓取时间：${report.fetchedAt}\n\n发布时间（页面原始值）：${note.publishedAt ?? '未知'}\n\n${note.text || '（图片笔记，未提取图片文字）'}\n\n${note.images.map((u, i) => `[图片 ${i + 1}](${u})`).join('\n\n')}\n`;
-        await writeFile(join(out, note.file), md, 'utf8'); report.articles.push(note);
+        await writeFile(join(out, note.file), md, 'utf8'); report.articles.push(note); pace.success();
         console.log(`已读 ${report.articles.length}：${note.title}（${note.text.length} 字，${note.images.length} 图，${note.dateText}）`);
-      } catch (e) { report.failures.push({ id: n.id, error: e.message }); if (report.status === 'blocked') break; }
+      } catch (e) { report.failures.push({ id: n.id, error: e.message }); if (report.status === 'blocked') break;
+        if (pace.failure()) { report.status = 'partial'; report.stopReason = '连续3次详情失败，停止访问'; break; } }
       finally {
         await writeFile(join(out, 'manifest.json'), JSON.stringify(report, null, 2));
         if (!o.out) await catalog();
@@ -234,7 +241,7 @@ async function main() {
     await writeFile(join(out, 'index.md'), `# 小红书面经抓取\n\n状态：${report.status}；候选 ${found.size}；成功 ${report.articles.length}；失败 ${report.failures.length}\n\n图片仅保留链接，未 OCR。\n\n${report.articles.map(n => `- [${(n.title || n.id).replace(/[\r\n]/g, ' ')}](${n.file})`).join('\n')}\n`);
     if (!o.out) await catalog();
     console.log(JSON.stringify({ status: report.status, candidates: found.size, saved: report.articles.length, failed: report.failures.length, out }, null, 2));
-    if (report.status === 'blocked') console.log('请在 CDP Chrome 完成登录/验证，然后重跑。');
+    if (report.status === 'blocked') console.log('已停止访问。若为频率限制，请停止本轮采集；若为登录/验证，请在 CDP Chrome 中自行处理后决定是否恢复。');
     if (report.status !== 'ok') process.exitCode = 2;
   } finally { cdp.ws.close(); }
 }
