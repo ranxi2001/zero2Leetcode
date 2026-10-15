@@ -53,6 +53,9 @@ Thumbs.db
 !.agents/skills/interview-article-writer/**
 !.agents/skills/frontend-dev/
 !.agents/skills/frontend-dev/**
+!.agents/skills/scrape-xiaohongshu/
+!.agents/skills/scrape-xiaohongshu/**
+.agents/skills/scrape-xiaohongshu/output/
 tmp/pdfs/
 output/pdf/
 华为AI机考一周速成题单&攻略.pdf

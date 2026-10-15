@@ -1,0 +1,544 @@
+{
+  "updatedAt": "2026-10-15",
+  "scope": "2027届秋招；仅笔记文字；排除财经、实习、往届、OD与社招等范围外记录",
+  "countUnit": "distinct note id + normalized question, plus separately attributed user interview reports",
+  "questionKinds": 44,
+  "occurrences": 50,
+  "sourceNotes": 33,
+  "records": [
+    {
+      "question": "0、1 数量相等的最长连续子数组",
+      "category": "普通算法",
+      "sourceId": "6ace6cfe000000001a02a7e1",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ace6cfe000000001a02a7e1",
+      "publishedAt": 1791913214000,
+      "evidence": "寻找0和1数量相等的最长连续子数组长度"
+    },
+    {
+      "question": "搜索插入位置（变体）",
+      "category": "普通算法",
+      "sourceId": "6aca0791000000001400047c",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6aca0791000000001400047c",
+      "publishedAt": 1791625105000,
+      "evidence": "搜索插入位置的一点点小变动"
+    },
+    {
+      "question": "Top N 元素的平均值",
+      "category": "普通算法",
+      "sourceId": "6aca0791000000001400047c",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6aca0791000000001400047c",
+      "publishedAt": 1791625105000,
+      "evidence": "返回top N元素的平均值"
+    },
+    {
+      "question": "LC63 不同路径 II（变体）",
+      "category": "普通算法",
+      "sourceId": "6aceebc9000000001303ff62",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6aceebc9000000001303ff62",
+      "publishedAt": 1791945673000,
+      "evidence": "类似于lc63那个题，改了一点"
+    },
+    {
+      "question": "法官信任问题",
+      "category": "普通算法",
+      "sourceId": "6abd1e39000000001403399c",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6abd1e39000000001403399c",
+      "publishedAt": 1790778937000,
+      "evidence": "法官信任问题"
+    },
+    {
+      "question": "删除一个坏灯笼后的最长连续亮灯",
+      "category": "普通算法",
+      "sourceId": "6ab2bf08000000001203b2c6",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab2bf08000000001203b2c6",
+      "publishedAt": 1790099209000,
+      "evidence": "摘掉一个坏灯笼之后，最多能有多少个亮着的灯笼连续排在一起"
+    },
+    {
+      "question": "全排列",
+      "category": "普通算法",
+      "sourceId": "6ab2bf08000000001203b2c6",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab2bf08000000001203b2c6",
+      "publishedAt": 1790099209000,
+      "evidence": "手撕 全排列"
+    },
+    {
+      "question": "岛屿数量",
+      "category": "普通算法",
+      "sourceId": "6acc47a40000000018004eac",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acc47a40000000018004eac",
+      "publishedAt": 1791772580000,
+      "evidence": "手撕岛屿数量"
+    },
+    {
+      "question": "两个正序数组的中位数",
+      "category": "普通算法",
+      "sourceId": "6acc47a40000000018004eac",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acc47a40000000018004eac",
+      "publishedAt": 1791772580000,
+      "evidence": "手撕两个正序数组的中位数"
+    },
+    {
+      "question": "三数之和",
+      "category": "普通算法",
+      "sourceId": "6accfd5f0000000015003dd7",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6accfd5f0000000015003dd7",
+      "publishedAt": 1791819103000,
+      "evidence": "手撕代码：三数之和"
+    },
+    {
+      "question": "打家劫舍",
+      "category": "普通算法",
+      "sourceId": "6accfd5f0000000015003dd7",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6accfd5f0000000015003dd7",
+      "publishedAt": 1791819103000,
+      "evidence": "手撕代码：打家劫舍，就是换了个场景"
+    },
+    {
+      "question": "打家劫舍",
+      "category": "普通算法",
+      "sourceId": "6acdc31f0000000012039ee9",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acdc31f0000000012039ee9",
+      "publishedAt": 1791869727000,
+      "evidence": "换了198打家劫舍"
+    },
+    {
+      "question": "最长递增子序列",
+      "category": "普通算法",
+      "sourceId": "6acde2420000000014001653",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acde2420000000014001653",
+      "publishedAt": 1791877698000,
+      "evidence": "手撕：最长递增子序列"
+    },
+    {
+      "question": "逻辑回归训练过程",
+      "category": "AI 专项",
+      "sourceId": "6acde2420000000014001653",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acde2420000000014001653",
+      "publishedAt": 1791877698000,
+      "evidence": "手撕：逻辑回归训练过程"
+    },
+    {
+      "question": "寻找重复数",
+      "category": "普通算法",
+      "sourceId": "6acdee20000000001500863e",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acdee20000000001500863e",
+      "publishedAt": 1791880736000,
+      "evidence": "手撕：寻找重复数"
+    },
+    {
+      "question": "最大升序子数组和",
+      "category": "普通算法",
+      "sourceId": "6ab3c885000000001a031e19",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3c885000000001a031e19",
+      "publishedAt": 1790167173000,
+      "evidence": "求最大升序子数组和"
+    },
+    {
+      "question": "除自身以外数组的乘积",
+      "category": "普通算法",
+      "sourceId": "6ab3c885000000001a031e19",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3c885000000001a031e19",
+      "publishedAt": 1790167173000,
+      "evidence": "除了自身以外数组的乘积"
+    },
+    {
+      "question": "可能的二分法（LC886）",
+      "category": "普通算法",
+      "sourceId": "6acdefc9000000000200edcd",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acdefc9000000000200edcd",
+      "publishedAt": 1791881161000,
+      "evidence": "LeetCode886"
+    },
+    {
+      "question": "删除链表倒数第 N 个节点",
+      "category": "普通算法",
+      "sourceId": "6acdefc9000000000200edcd",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acdefc9000000000200edcd",
+      "publishedAt": 1791881161000,
+      "evidence": "删除链表倒数第n个节点"
+    },
+    {
+      "question": "所有可能路径（LC797）",
+      "category": "普通算法",
+      "sourceId": "6ac89f5b000000000202adff",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ac89f5b000000000202adff",
+      "publishedAt": 1791532891000,
+      "evidence": "797.所有可能路径"
+    },
+    {
+      "question": "无重复字符的最长子串",
+      "category": "普通算法",
+      "sourceId": "6abe0a820000000015015a26",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6abe0a820000000015015a26",
+      "publishedAt": 1790839426000,
+      "evidence": "最长无重复子串"
+    },
+    {
+      "question": "最长公共前缀",
+      "category": "普通算法",
+      "sourceId": "6abe0a820000000015015a26",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6abe0a820000000015015a26",
+      "publishedAt": 1790839426000,
+      "evidence": "手撕：最长公共前缀"
+    },
+    {
+      "question": "判断回文串",
+      "category": "普通算法",
+      "sourceId": "6acde8fb0000000014003fbc",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acde8fb0000000014003fbc",
+      "publishedAt": 1791879419000,
+      "evidence": "一面手撕：判断回文串"
+    },
+    {
+      "question": "每日温度",
+      "category": "普通算法",
+      "sourceId": "6ad05a4c000000001b023dd3",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ad05a4c000000001b023dd3",
+      "publishedAt": 1792039500000,
+      "evidence": "手撕每日温度"
+    },
+    {
+      "question": "二分法求平方根",
+      "category": "普通算法",
+      "sourceId": "6acdc31f0000000012039ee9",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acdc31f0000000012039ee9",
+      "publishedAt": 1791869727000,
+      "evidence": "手撕二分法求sqrt（x）"
+    },
+    {
+      "question": "反转链表",
+      "category": "普通算法",
+      "sourceId": "6ab253540000000033025868",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab253540000000033025868",
+      "publishedAt": 1790071636000,
+      "evidence": "手撕:反转链表"
+    },
+    {
+      "question": "跳跃游戏",
+      "category": "普通算法",
+      "sourceId": "6ab253540000000033025868",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab253540000000033025868",
+      "publishedAt": 1790071636000,
+      "evidence": "手撕：跳跃游戏"
+    },
+    {
+      "question": "二叉树最大路径和（LC124）",
+      "category": "普通算法",
+      "sourceId": "6ac9ea30000000001500cb86",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ac9ea30000000001500cb86",
+      "publishedAt": 1791617584000,
+      "evidence": "124最大路径和"
+    },
+    {
+      "question": "环形石子合并（P1880）",
+      "category": "普通算法",
+      "sourceId": "6ac9ea30000000001500cb86",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ac9ea30000000001500cb86",
+      "publishedAt": 1791617584000,
+      "evidence": "洛谷 P1880石子合并"
+    },
+    {
+      "question": "两个数组的交集",
+      "category": "普通算法",
+      "sourceId": "6ad040cb000000000200f90b",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ad040cb000000000200f90b",
+      "publishedAt": 1792032971000,
+      "evidence": "手撕：两个数组的交集"
+    },
+    {
+      "question": "Attention 手写（版本未细分）",
+      "category": "AI 专项",
+      "sourceId": "6ab4b596000000001303f046",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab4b596000000001303f046",
+      "publishedAt": 1790227862000,
+      "evidence": "写一下Attention的基本公式以及一个简单的torch实现"
+    },
+    {
+      "question": "1011 重叠序列检测",
+      "category": "数字 IC",
+      "sourceId": "6ad049bc00000000180072ad",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ad049bc00000000180072ad",
+      "publishedAt": 1792035260000,
+      "evidence": "序列检测，检测1011，支持重叠检测"
+    },
+    {
+      "question": "最近的回文数",
+      "category": "普通算法",
+      "sourceId": "6ace454b000000001b01d0ca",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ace454b000000001b01d0ca",
+      "publishedAt": 1791903051000,
+      "evidence": "给一个整数n，输出最近的回文数"
+    },
+    {
+      "question": "不同路径",
+      "category": "普通算法",
+      "sourceId": "6ab6a4860000000014003aa8",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab6a4860000000014003aa8",
+      "publishedAt": 1790354566000,
+      "evidence": "二面手撕hot100的不同路径"
+    },
+    {
+      "question": "交错字符串",
+      "category": "普通算法",
+      "sourceId": "6ab6629c000000000a024c3d",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab6629c000000000a024c3d",
+      "publishedAt": 1790337692000,
+      "evidence": "三个字符串判断第三个能不能由前两个交错组成"
+    },
+    {
+      "question": "驼峰式匹配（LC1023）",
+      "category": "普通算法",
+      "sourceId": "6ab6629c000000000a024c3d",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab6629c000000000a024c3d",
+      "publishedAt": 1790337692000,
+      "evidence": "手撕驼峰式匹配，力扣1023原题"
+    },
+    {
+      "question": "行波进位加法器",
+      "category": "数字 IC",
+      "sourceId": "6ab3ee39000000000202a4cf",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3ee39000000000202a4cf",
+      "publishedAt": 1790176825000,
+      "evidence": "行波进位加法器"
+    },
+    {
+      "question": "LC1437：1 之间至少相隔 K 个元素",
+      "category": "普通算法",
+      "sourceId": "6ab4c942000000001b01c30e",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab4c942000000001b01c30e",
+      "publishedAt": 1790232898000,
+      "evidence": "手撕leetcode1437"
+    },
+    {
+      "question": "字符串表示的数字相乘",
+      "category": "普通算法",
+      "sourceId": "6ace454b000000001b01d0ca",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ace454b000000001b01d0ca",
+      "publishedAt": 1791903051000,
+      "evidence": "两个字符串数组表示的数字相乘，不能直接把整个字符串转成int"
+    },
+    {
+      "question": "字符串字符计数",
+      "category": "普通算法",
+      "sourceId": "6ab4d9d7000000001b0233fe",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab4d9d7000000001b0233fe",
+      "publishedAt": 1790237143000,
+      "evidence": "字符串字符计数的coding题目"
+    },
+    {
+      "question": "反转链表",
+      "category": "普通算法",
+      "sourceId": "6ad06a730000000018005d1f",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ad06a730000000018005d1f",
+      "publishedAt": 1792043635000,
+      "evidence": "hot100原题，反转链表"
+    },
+    {
+      "question": "最大池化（不调库）",
+      "category": "AI 专项",
+      "sourceId": "6ab371a3000000001a033481",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab371a3000000001a033481",
+      "publishedAt": 1790144931000,
+      "evidence": "不调库实现最大池化"
+    },
+    {
+      "question": "合并两个链表",
+      "category": "普通算法",
+      "sourceId": "6ab3b5500000000018029b19",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3b5500000000018029b19",
+      "publishedAt": 1790162256000,
+      "evidence": "合并链表，并且是合并两个链表"
+    },
+    {
+      "question": "和至少为 target 的最短正整数子数组",
+      "category": "普通算法",
+      "sourceId": "6ab3b5500000000018029b19",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3b5500000000018029b19",
+      "publishedAt": 1790162256000,
+      "evidence": "满足子数组的和大于等于target，找到最短子数组"
+    },
+    {
+      "question": "爬楼梯",
+      "category": "普通算法",
+      "sourceId": "6acf8119000000001403a6cf",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acf8119000000001403a6cf",
+      "publishedAt": 1791983897000,
+      "evidence": "手撕了爬楼梯"
+    },
+    {
+      "question": "移动零",
+      "category": "普通算法",
+      "sourceId": "6acf8119000000001403a6cf",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6acf8119000000001403a6cf",
+      "publishedAt": 1791983897000,
+      "evidence": "手撕移动0"
+    },
+    {
+      "question": "无重复字符的最长子串",
+      "category": "普通算法",
+      "sourceId": "6ab3a12600000000180125c1",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab3a12600000000180125c1",
+      "publishedAt": 1790157094000,
+      "evidence": "最长无重复字串"
+    },
+    {
+      "question": "Attention 手写（版本未细分）",
+      "category": "AI 专项",
+      "sourceId": "6ab498880000000002011d78",
+      "sourceUrl": "https://www.xiaohongshu.com/explore/6ab498880000000002011d78",
+      "publishedAt": 1790220424000,
+      "evidence": "二面手撕attention"
+    }
+  ],
+  "partial": [
+    [
+      "6ace6cfe000000001a02a7e1",
+      "重叠区间",
+      "未说明求合并结果、删除个数还是相交判定。"
+    ],
+    [
+      "6acdee20000000001500863e",
+      "最大连续数组",
+      "未明确是最大和、最大积还是长度，暂不归为 LC53。"
+    ],
+    [
+      "6ab6731100000000180137dd",
+      "频次异常元素",
+      "比较基准与多解规则不完整，保留题意待核对。"
+    ],
+    [
+      "6ab6731100000000180137dd",
+      "压缩字符串",
+      "没有披露压缩格式及是否原地，不能直接归到 LC443。"
+    ],
+    [
+      "6acb0207000000000b006072",
+      "字符串中字母排列数",
+      "未给重复字符规则及约束，不能与枚举全排列合并。"
+    ],
+    [
+      "6acde8fb0000000014003fbc",
+      "有互斥关系的子数组划分",
+      "未说明划分目标及连续性条件。"
+    ],
+    [
+      "6ad040cb000000000200f90b",
+      "字符串排列",
+      "只给题名，不确定是枚举排列还是子串匹配。"
+    ],
+    [
+      "6ab4b596000000001303f046",
+      "数组元素能否凑成目标和",
+      "未说明是否可重复选取、元素范围，不能强行归为某道背包原题。"
+    ],
+    [
+      "6acde67f0000000002013b48",
+      "数据结构加三个功能函数",
+      "未说明功能要求，无法恢复具体设计题。"
+    ],
+    [
+      "6acde67f0000000002013b48",
+      "堆加自定义比较函数",
+      "未给排序目标和操作集合。"
+    ],
+    [
+      "6ab3ee39000000000202a4cf",
+      "用 Verilog 表达多项式",
+      "多项式、位宽和时序要求未披露。"
+    ],
+    [
+      "6ab3ee39000000000202a4cf",
+      "计数上报跨异步再跨回来",
+      "时钟、位宽和一致性要求未披露。"
+    ],
+    [
+      "6ab6a4860000000014003aa8",
+      "判断均衡字符串",
+      "未说明均衡的定义与操作要求，不能指定题号。"
+    ],
+    [
+      "6ab62556000000001b01ef68",
+      "并查集",
+      "未给题意，无法判断是从零实现还是某道并查集应用题。"
+    ],
+    [
+      "6ab62556000000001b01ef68",
+      "回文字符串变形",
+      "未披露变动条件，暂不并入回文判断。"
+    ],
+    [
+      "6ad023a7000000001500d92c",
+      "最长单调增子序列（作者自述不确定）",
+      "作者使用问号并称忘记题名，暂不合并到已确定的 LIS 频次。"
+    ],
+    [
+      "6ad027c800000000180169c4",
+      "机器人走路",
+      "只说简单 DP 题，无法区分不同路径及带障碍版本。"
+    ],
+    [
+      "6ab371a3000000001a033481",
+      "SA（原帖缩写）",
+      "未展开全称，暂不与 Attention 主表合并。"
+    ]
+  ],
+  "proposedOrOral": [
+    [
+      "6abd1e39000000001403399c",
+      "环形链表",
+      "讲出快慢指针思路后未要求写代码，换成另一题。"
+    ],
+    [
+      "6ac89f5b000000000202adff",
+      "最小路径和",
+      "只给思路后换题；原帖写“99.最小路径和”，题号与题名冲突，不采用该题号。"
+    ],
+    [
+      "6acff770000000001b030f98",
+      "Multi-Head Attention",
+      "提出后因候选人使用 C++ 换题，未确认实际手写。"
+    ],
+    [
+      "6acdc31f0000000012039ee9",
+      "岛屿问题",
+      "因不会而换成打家劫舍；名称不足以确定是岛屿数量。"
+    ],
+    [
+      "6ab4b596000000001303f046",
+      "卷积参数公式与数值计算",
+      "明确不要求代码，提出后换成 Attention。"
+    ],
+    [
+      "6ad049bc00000000180072ad",
+      "饮料机状态机",
+      "只画状态转移图，明确未写代码。"
+    ],
+    [
+      "6ab3a050000000000202a2c8",
+      "有效的括号（LC20）",
+      "原帖标为面试算法题，但未明确是否现场手写，独立保留。"
+    ],
+    [
+      "6ab3a050000000000202a2c8",
+      "无重复字符的最长子串（LC3）",
+      "原帖标为二面算法题，但未明确是否现场手写，不并入主表。"
+    ]
+  ],
+  "userAdditions": [
+    {
+      "department": "华为云",
+      "question": "岛屿数量",
+      "source": "用户补充",
+      "interviewDate": null
+    },
+    {
+      "department": "华为云",
+      "question": "三数之和",
+      "source": "用户补充",
+      "interviewDate": null
+    }
+  ],
+  "noteOccurrences": 48,
+  "userOccurrences": 2
+}

@@ -526,6 +526,8 @@ modules:
             slug: "coding/tencent-202604"
           - title: "华为高频手撕与备考规划"
             slug: "coding/huawei"
+          - title: "2027届应届生华为手撕面试经验汇总"
+            slug: "coding/huawei-2027"
           - title: "阿里千问 VibeCoding 面试"
             slug: "coding/alibaba-qwen-vibecoding"
           - title: "Hot 100 真实考频与刷题路线"
