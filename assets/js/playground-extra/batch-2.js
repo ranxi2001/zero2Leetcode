@@ -206,9 +206,15 @@ def sort_list(head):
 <h3>23. 合并 K 个升序链表 <span class="difficulty-tag hard">Hard</span></h3>
 <p>给你一个链表数组，每个链表都已经按升序排列，请将所有链表合并到一个升序链表中。</p>
 <p>本地练习输入为二维数组，系统会自动转成链表数组。</p>
-<h4>示例</h4>
+<h4>示例 1</h4>
 <pre>输入：lists = [[1,4,5],[1,3,4],[2,6]]
-输出：[1,1,2,3,4,4,5,6]</pre>`,
+输出：[1,1,2,3,4,4,5,6]</pre>
+<h4>示例 2</h4>
+<pre>输入：lists = []
+输出：[]</pre>
+<h4>示例 3</h4>
+<pre>输入：lists = [[]]
+输出：[]</pre>`,
     template: `# Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
@@ -231,6 +237,7 @@ def _to_linked_lists(arrs):
     returnWrapper: '_to_array',
     testCases: [
       { input: [[[1, 4, 5], [1, 3, 4], [2, 6]]], expected: [1, 1, 2, 3, 4, 4, 5, 6] },
+      { input: [[]], expected: [] },
       { input: [[[]]], expected: [] },
       { input: [[[], [1]]], expected: [1] },
       { input: [[[2], [], [-1, 3]]], expected: [-1, 2, 3] },
