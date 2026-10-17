@@ -39,7 +39,19 @@ Zero2Leetcode 面向准备校招、社招及转码的学习者，将 Python 基�
 
 ## 视频介绍
 
-[在 Bilibili 查看项目演示](https://www.bilibili.com/video/BV129QmBGE3Q/)。视频介绍了浏览器内刷题、代码运行与调试，以及 AI 教练读取题目和代码的使用流程，无需登录或搭建本地环境。
+<div align="center">
+
+<a href="https://www.bilibili.com/video/BV129QmBGE3Q/" title="在 Bilibili 观看 Zero2Leetcode 项目演示">
+  <img src="assets/images/screenshots/project-video-preview.png" alt="Zero2Leetcode 项目演示：浏览器内刷题、代码运行与样例验证、AI 编程教练；点击封面前往 Bilibili 播放" width="880">
+</a>
+
+**从读题到调试，看一次完整刷题流程**
+
+无需登录或搭建本地环境，了解题目选择、代码运行、样例验证与 AI 辅助解题。
+
+[**在 Bilibili 观看完整演示 →**](https://www.bilibili.com/video/BV129QmBGE3Q/)
+
+</div>
 
 ---
 
