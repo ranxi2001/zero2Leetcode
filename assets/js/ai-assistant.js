@@ -3,8 +3,10 @@
 // =============================================
 
 const AI_STORAGE_KEY = 'z2l_ai_config';
-const AI_DEFAULT_MODEL = 'poolside/laguna-s-2.1:free';
+const AI_DEFAULT_BASE_URL = 'https://tosky.io/v1';
+const AI_DEFAULT_MODEL = 'gpt-6-luna';
 const AI_LEGACY_DYNAMIC_MODEL = 'openrouter/free';
+const AI_LEGACY_DEFAULT_MODEL = 'poolside/laguna-s-2.1:free';
 const AI_CONTEXT_LIMITS = Object.freeze({
     problem: 10000,
     code: 18000,
@@ -109,18 +111,70 @@ const QUICK_ACTIONS = Object.freeze({
     },
 });
 
-// Free 模型专用 key。它只用于默认体验，Base64 不是安全存储。
-const _k = [
-    'c2stb3ItdjEtMDk1',
-    'MGEzNDk1ODE1OGJh',
-    'M2E3MmNjZWMwNzEy',
-    'NDY2MjA5NWRjY2E0',
-    'ODI3YWJiM2E0NmQx',
-    'ZWZmZTdiMTUwZWNjMw==',
-];
+// 仅增加复制和逆向成本：解包材料在前端可见，最终请求头仍包含真实密钥。
+const AI_BUILTIN_KEY = 'z2l:builtin:v1';
+const AI_BUILTIN_PATH = '/zero2Leetcode/';
+const AI_LEGACY_KEY_FINGERPRINTS = Object.freeze(['73:ab9ebbd5', '67:98fa5f2a']);
+const AI_BUILTIN_ORIGINS = Object.freeze(['https://onefly.top', 'https://ranxi2001.github.io']);
+const AI_BUILTIN_ENVELOPES = Object.freeze({
+    'https://onefly.top': Object.freeze([
+        'n8Djo3gb1F3X3ZTiAA5ceZSv',
+        '9chIvwW6yaHL0nrWfALf2XfR',
+        'f2fCd/rAAUbx23H5yp91MZrU',
+        'tZpX0ptMYbybhtljcCKLxOCy',
+        '6waOEH4GPmGGbevZ53h1YGZx',
+        'Bj7p+jQ=',
+    ]),
+    'https://ranxi2001.github.io': Object.freeze([
+        '0U4DYPUeY06yOwlVwNvcSAvp',
+        'QBM8pnMf7ggmHOY3Q5vkw+Vm',
+        '4Yxesi1VjWt/6oUGXNONj12/',
+        '7nOTonKaZzWVxLa4wyBn1SbF',
+        'GjPqwGCDZEafUzrFtlHYWJZa',
+        '/j+6ThQ=',
+    ]),
+});
 
-function _dk() {
-    try { return atob(_k.join('')); } catch (error) { return ''; }
+function getBuiltinKeyMaterial(origin) {
+    return `zero2Leetcode|ai-coach|v1|${origin}|${AI_BUILTIN_PATH}|${AI_DEFAULT_BASE_URL}|${AI_DEFAULT_MODEL}`;
+}
+
+function isBuiltinService(config) {
+    return config.baseUrl.replace(/\/+$/, '') === AI_DEFAULT_BASE_URL && config.model === AI_DEFAULT_MODEL;
+}
+
+function isLegacyBuiltinKey(value) {
+    const key = String(value || '');
+    // 仅用指纹识别旧版本已保存的内置凭据，不用于安全校验。
+    let fingerprint = 2166136261;
+    for (let index = 0; index < key.length; index += 1) {
+        fingerprint = Math.imul(fingerprint ^ key.charCodeAt(index), 16777619) >>> 0;
+    }
+    return AI_LEGACY_KEY_FINGERPRINTS.includes(`${key.length}:${fingerprint.toString(16)}`);
+}
+
+async function resolveAIRequestKey(config) {
+    if (config.apiKey !== AI_BUILTIN_KEY) return config.apiKey;
+    // 校验目标地址，防止修改配置后把内置密钥发送给其他 API。
+    if (!isBuiltinService(config)) throw new Error('内置服务配置已更改，请填写自己的 API Key');
+    const location = getWindow()?.location;
+    const envelope = AI_BUILTIN_ORIGINS.includes(location?.origin)
+        && location.pathname.startsWith(AI_BUILTIN_PATH)
+        ? AI_BUILTIN_ENVELOPES[location.origin] : null;
+    if (!envelope) throw new Error('内置 AI 仅在项目官网可用，请在设置中填写自己的 API Key');
+    if (!globalThis.crypto?.subtle) throw new Error('内置 AI 需要支持 Web Crypto 的 HTTPS 浏览器，也可以填写自己的 API Key');
+    try {
+        const bytes = Uint8Array.from(atob(envelope.join('')), (character) => character.charCodeAt(0));
+        const material = new TextEncoder().encode(getBuiltinKeyMaterial(location.origin));
+        const digest = await crypto.subtle.digest('SHA-256', material);
+        const key = await crypto.subtle.importKey('raw', digest, 'AES-GCM', false, ['decrypt']);
+        const plaintext = await crypto.subtle.decrypt({
+            name: 'AES-GCM', iv: bytes.slice(0, 12), additionalData: material,
+        }, key, bytes.slice(12));
+        return new TextDecoder().decode(plaintext);
+    } catch (error) {
+        throw new Error('内置 AI 凭据无法加载，请刷新页面或填写自己的 API Key');
+    }
 }
 
 const AI_ICON_SVG = `
@@ -166,14 +220,14 @@ let sessionAIConfig = null;
 
 function normalizeConfiguredModel(model) {
     const value = String(model || '').trim();
-    return !value || value === AI_LEGACY_DYNAMIC_MODEL ? AI_DEFAULT_MODEL : value;
+    return value || AI_DEFAULT_MODEL;
 }
 
 function loadAIConfig() {
     if (sessionAIConfig) return { ...sessionAIConfig };
     const defaults = {
-        baseUrl: 'https://openrouter.ai/api/v1',
-        apiKey: _dk(),
+        baseUrl: AI_DEFAULT_BASE_URL,
+        apiKey: AI_BUILTIN_KEY,
         model: AI_DEFAULT_MODEL,
     };
     try {
@@ -181,14 +235,22 @@ function loadAIConfig() {
         const saved = storage?.getItem(AI_STORAGE_KEY);
         if (!saved) return defaults;
         const parsed = JSON.parse(saved);
+        // 升级旧的默认服务，避免浏览器已保存的配置继续访问 OpenRouter。
+        const savedBaseUrl = String(parsed.baseUrl || '').replace(/\/+$/, '');
+        const legacyDefault = isLegacyBuiltinKey(parsed.apiKey)
+            && ((savedBaseUrl === 'https://openrouter.ai/api/v1'
+                && [AI_LEGACY_DYNAMIC_MODEL, AI_LEGACY_DEFAULT_MODEL].includes(parsed.model))
+                || (savedBaseUrl === AI_DEFAULT_BASE_URL && parsed.model === AI_DEFAULT_MODEL));
+        if (legacyDefault) {
+            // 迁移时仅保存服务标记，不把解包后的内置密钥写入 localStorage。
+            try { storage.setItem(AI_STORAGE_KEY, JSON.stringify(defaults)); } catch (error) { /* defaults still work */ }
+            return defaults;
+        }
         const config = {
             baseUrl: String(parsed.baseUrl || defaults.baseUrl),
             apiKey: String(parsed.apiKey || ''),
             model: normalizeConfiguredModel(parsed.model),
         };
-        if (parsed.model === AI_LEGACY_DYNAMIC_MODEL) {
-            try { storage.setItem(AI_STORAGE_KEY, JSON.stringify(config)); } catch (error) { /* session config still works */ }
-        }
         return config;
     } catch (error) {
         return defaults;
@@ -200,6 +262,9 @@ function saveAIConfig(config) {
         ...config,
         model: normalizeConfiguredModel(config?.model),
     };
+    if (isBuiltinService(normalizedConfig) && isLegacyBuiltinKey(normalizedConfig.apiKey)) {
+        normalizedConfig.apiKey = AI_BUILTIN_KEY;
+    }
     sessionAIConfig = normalizedConfig;
     try {
         const storage = getStorage();
@@ -561,12 +626,13 @@ function isRetryableAIError(error) {
 }
 
 async function* streamChatCompletion(messages, config, signal) {
+    const apiKey = await resolveAIRequestKey(config);
     const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${config.apiKey}`,
+            'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
             model: config.model,
@@ -1017,7 +1083,9 @@ class AIAssistant {
         const config = loadAIConfig();
         const doc = getDocument();
         doc.getElementById('ai-cfg-base-url').value = config.baseUrl;
-        doc.getElementById('ai-cfg-api-key').value = config.apiKey;
+        const keyInput = doc.getElementById('ai-cfg-api-key');
+        keyInput.value = config.apiKey === AI_BUILTIN_KEY ? '' : config.apiKey;
+        keyInput.placeholder = config.apiKey === AI_BUILTIN_KEY ? '留空使用本站内置服务' : 'sk-...';
         doc.getElementById('ai-cfg-model').value = config.model;
         this.configReturnFocus = this.isOpen
             ? (this.configBtn || this.inputEl)
@@ -1047,10 +1115,11 @@ class AIAssistant {
     saveConfig() {
         const doc = getDocument();
         const config = {
-            baseUrl: doc.getElementById('ai-cfg-base-url').value.trim() || 'https://openrouter.ai/api/v1',
+            baseUrl: doc.getElementById('ai-cfg-base-url').value.trim() || AI_DEFAULT_BASE_URL,
             apiKey: doc.getElementById('ai-cfg-api-key').value.trim(),
             model: doc.getElementById('ai-cfg-model').value.trim() || AI_DEFAULT_MODEL,
         };
+        if (!config.apiKey && isBuiltinService(config)) config.apiKey = AI_BUILTIN_KEY;
         if (!config.apiKey) {
             doc.getElementById('ai-cfg-api-key').focus();
             return;
@@ -1493,6 +1562,8 @@ function initializeAIAssistant() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         AIAssistant,
+        AI_BUILTIN_KEY,
+        AI_BUILTIN_ORIGINS,
         AI_DEFAULT_MODEL,
         AI_LANGUAGE_META,
         QUICK_ACTIONS,
@@ -1504,12 +1575,14 @@ if (typeof module !== 'undefined' && module.exports) {
         copyTextToClipboard,
         decorateAssistantCodeBlocks,
         getQuickActionPrompt,
+        getBuiltinKeyMaterial,
         getGeneratedCodeLanguage,
         markdownCodeBlock,
         loadAIConfig,
         normalizeConfiguredModel,
         normalizeGeneratedCodeLanguage,
         resolveExpectedResponseLanguage,
+        resolveAIRequestKey,
         saveAIConfig,
         sanitizeMarkdownHtml,
         streamChatCompletion,

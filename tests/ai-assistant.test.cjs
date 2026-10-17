@@ -8,6 +8,7 @@ const assistantPath = path.join(root, 'assets/js/ai-assistant.js');
 const assistantSource = fs.readFileSync(assistantPath, 'utf8');
 const {
     AIAssistant,
+    AI_BUILTIN_KEY,
     AI_DEFAULT_MODEL,
     QUICK_ACTIONS,
     SYSTEM_PROMPT,
@@ -21,6 +22,7 @@ const {
     normalizeConfiguredModel,
     normalizeGeneratedCodeLanguage,
     resolveExpectedResponseLanguage,
+    resolveAIRequestKey,
     saveAIConfig,
     streamChatCompletion,
     validateAssistantResponse,
@@ -32,13 +34,20 @@ function withBrowserGlobals(values, callback) {
         previous[key] = globalThis[key];
         globalThis[key] = value;
     }
-    try {
-        return callback();
-    } finally {
+    const restore = () => {
         for (const key of Object.keys(values)) {
             if (previous[key] === undefined) delete globalThis[key];
             else globalThis[key] = previous[key];
         }
+    };
+    try {
+        const result = callback();
+        if (result && typeof result.then === 'function') return result.finally(restore);
+        restore();
+        return result;
+    } catch (error) {
+        restore();
+        throw error;
     }
 }
 
@@ -454,27 +463,114 @@ test('conversion response validation rejects safety classifiers and incomplete p
     );
 });
 
-test('legacy dynamic free router migrates to the verified code model', () => {
-    assert.equal(AI_DEFAULT_MODEL, 'poolside/laguna-s-2.1:free');
-    assert.equal(normalizeConfiguredModel('openrouter/free'), AI_DEFAULT_MODEL);
+test('saved built-in defaults migrate without changing user-provided OpenRouter credentials', async () => {
+    assert.equal(AI_DEFAULT_MODEL, 'gpt-6-luna');
+    assert.equal(normalizeConfiguredModel('openrouter/free'), 'openrouter/free');
     assert.equal(normalizeConfiguredModel('custom/model'), 'custom/model');
 
-    const writes = [];
-    const localStorage = {
-        getItem() {
-            return JSON.stringify({
-                baseUrl: 'https://openrouter.ai/api/v1',
-                apiKey: 'saved-key',
-                model: 'openrouter/free',
+    await withBrowserGlobals({ window: { location: new URL('https://onefly.top/zero2Leetcode/playground.html') } }, async () => {
+        const oldKey = await resolveAIRequestKey({
+            baseUrl: 'https://tosky.io/v1', model: AI_DEFAULT_MODEL, apiKey: AI_BUILTIN_KEY,
+        });
+        for (const model of ['openrouter/free', 'poolside/laguna-s-2.1:free', AI_DEFAULT_MODEL]) {
+            const writes = [];
+            const localStorage = {
+                getItem: () => JSON.stringify({
+                    baseUrl: model === AI_DEFAULT_MODEL ? 'https://tosky.io/v1' : 'https://openrouter.ai/api/v1',
+                    apiKey: oldKey, model,
+                }),
+                setItem(key, value) { writes.push([key, JSON.parse(value)]); },
+            };
+            withBrowserGlobals({ localStorage }, () => {
+                const config = loadAIConfig();
+                assert.equal(config.baseUrl, 'https://tosky.io/v1');
+                assert.equal(config.model, AI_DEFAULT_MODEL);
+                assert.ok(config.apiKey === AI_BUILTIN_KEY, 'migration must use the built-in marker');
+                assert.equal(writes.length, 1);
+                assert.ok(writes[0][1].apiKey === AI_BUILTIN_KEY, 'migration must not persist the unwrapped key');
             });
-        },
-        setItem(key, value) { writes.push([key, JSON.parse(value)]); },
-    };
-    withBrowserGlobals({ localStorage }, () => {
+        }
+    });
+
+    for (const model of ['custom/model', 'openrouter/free', 'poolside/laguna-s-2.1:free']) {
+        const custom = { baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'custom-key', model };
+        withBrowserGlobals({ localStorage: { getItem: () => JSON.stringify(custom) } }, () => {
+            assert.deepEqual(loadAIConfig(), custom);
+        });
+    }
+});
+
+test('built-in credential unwraps on official project pages and stays out of the config', async () => {
+    for (const origin of ['https://onefly.top', 'https://ranxi2001.github.io']) {
+        await withBrowserGlobals({ window: { location: new URL(`${origin}/zero2Leetcode/acm-playground.html`) } }, async () => {
+            const config = loadAIConfig();
+            assert.ok(config.apiKey === AI_BUILTIN_KEY);
+            const key = await resolveAIRequestKey(config);
+            assert.ok(/^sk-[a-zA-Z0-9-]+$/.test(key), 'the request must receive a valid unwrapped key');
+            assert.ok(config.apiKey === AI_BUILTIN_KEY, 'unwrapping must not mutate the config');
+        });
+    }
+});
+
+test('copied built-in config cannot send requests from another domain, protocol, or project path', async () => {
+    for (const href of [
+        'https://example.test/zero2Leetcode/playground.html',
+        'https://onefly.top/another-project/playground.html',
+        'https://onefly.top/zero2Leetcode-copy/playground.html',
+        'http://onefly.top/zero2Leetcode/playground.html',
+        'https://onefly.top:8443/zero2Leetcode/playground.html',
+    ]) {
+        let requested = false;
+        await withBrowserGlobals({
+            window: { location: new URL(href) },
+            fetch: async () => { requested = true; },
+        }, async () => {
+            await assert.rejects(async () => {
+                for await (const chunk of streamChatCompletion([], loadAIConfig())) void chunk;
+            }, /仅在项目官网可用/);
+            assert.equal(requested, false);
+        });
+    }
+});
+
+test('built-in marker cannot release the key to a changed API or model', async () => {
+    await withBrowserGlobals({ window: { location: new URL('https://onefly.top/zero2Leetcode/playground.html') } }, async () => {
         const config = loadAIConfig();
-        assert.equal(config.model, AI_DEFAULT_MODEL);
-        assert.equal(writes.length, 1);
-        assert.equal(writes[0][1].model, AI_DEFAULT_MODEL);
+        await assert.rejects(resolveAIRequestKey({ ...config, baseUrl: 'https://example.test/v1' }), /填写自己的 API Key/);
+        await assert.rejects(resolveAIRequestKey({ ...config, model: 'another-model' }), /填写自己的 API Key/);
+    });
+});
+
+test('user-provided API keys bypass built-in restrictions and Web Crypto', async () => {
+    await withBrowserGlobals({
+        window: { location: new URL('http://localhost:8000/playground.html') },
+        crypto: undefined,
+    }, async () => {
+        assert.equal(await resolveAIRequestKey({
+            baseUrl: 'https://tosky.io/v1', model: AI_DEFAULT_MODEL, apiKey: 'custom-key',
+        }), 'custom-key');
+        assert.equal(await resolveAIRequestKey({
+            baseUrl: 'https://example.test/v1', model: 'custom-model', apiKey: 'another-custom-key',
+        }), 'another-custom-key');
+    });
+});
+
+test('built-in streaming unwraps only for the request and sends the real authorization header', async () => {
+    let requested = false;
+    await withBrowserGlobals({
+        window: { location: new URL('https://onefly.top/zero2Leetcode/playground.html') },
+        fetch: async (url, options) => {
+            requested = true;
+            assert.equal(url, 'https://tosky.io/v1/chat/completions');
+            assert.ok(/^Bearer sk-/.test(options.headers.Authorization), 'request must use the unwrapped key');
+            assert.equal(JSON.parse(options.body).model, AI_DEFAULT_MODEL);
+            return new Response('data: [DONE]\n', { headers: { 'Content-Type': 'text/event-stream' } });
+        },
+    }, async () => {
+        const config = loadAIConfig();
+        for await (const chunk of streamChatCompletion([], config)) void chunk;
+        assert.ok(config.apiKey === AI_BUILTIN_KEY, 'the real key must not replace the marker');
+        assert.equal(requested, true);
     });
 });
 
@@ -639,6 +735,39 @@ test('stream parser reads a final SSE event without a trailing newline', async (
     } finally {
         globalThis.fetch = originalFetch;
     }
+});
+
+test('settings keep the built-in key empty, save only its marker, and accept custom credentials', () => {
+    const fields = {
+        'ai-cfg-base-url': { value: 'https://tosky.io/v1' },
+        'ai-cfg-api-key': { value: '' },
+        'ai-cfg-model': { value: AI_DEFAULT_MODEL },
+    };
+    let saved = null;
+    const assistant = Object.create(AIAssistant.prototype);
+    assistant.configModal = { classList: { add() {} }, setAttribute() {} };
+    assistant.closeConfig = () => {};
+    assistant.addSystemMessage = () => {};
+    assistant.syncBackgroundInert = () => {};
+    fields['ai-cfg-base-url'].focus = () => {};
+    withBrowserGlobals({
+        document: { getElementById: (id) => fields[id] },
+        localStorage: { setItem: (key, value) => { saved = JSON.parse(value); } },
+    }, () => {
+        assistant.saveConfig();
+        assert.ok(saved.apiKey === AI_BUILTIN_KEY, 'only the marker should be persisted');
+        assistant.openConfig();
+        assert.equal(fields['ai-cfg-api-key'].value, '');
+        assert.match(fields['ai-cfg-api-key'].placeholder, /内置服务/);
+
+        fields['ai-cfg-base-url'].value = 'https://example.test/v1';
+        fields['ai-cfg-model'].value = 'custom-model';
+        fields['ai-cfg-api-key'].value = 'custom-key';
+        assistant.saveConfig();
+        assert.deepEqual(saved, { baseUrl: 'https://example.test/v1', model: 'custom-model', apiKey: 'custom-key' });
+        assistant.openConfig();
+        assert.equal(fields['ai-cfg-api-key'].value, 'custom-key');
+    });
 });
 
 test('an unsaved custom API config remains active for the current page session', () => {
