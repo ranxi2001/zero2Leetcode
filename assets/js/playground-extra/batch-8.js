@@ -368,6 +368,47 @@ def is_subtree(root, sub_root):
     compareFunc: 'equal',
     solutionUrl: 'https://leetcode.cn/problems/max-area-of-island/solutions/',
   },
+  {
+    id: 93,
+    title: 'LC 93 - 复原 IP 地址',
+    difficulty: 'Medium',
+    tags: ['回溯', '字符串'],
+    description: `
+<h3>93. 复原 IP 地址 <span class="difficulty-tag medium">Medium</span></h3>
+<p>有效 IP 地址由恰好四个整数（每个整数位于 <code>0</code> 到 <code>255</code> 之间）组成，且整数之间用 <code>.</code> 分隔。给定一个只包含数字的字符串 <code>s</code>，返回所有可能的有效 IP 地址。</p>
+<p>有效地址中的每个整数都不能有前导零，除非该整数本身就是 <code>0</code>。答案可以按任意顺序返回。</p>
+<h4>示例 1</h4>
+<pre>输入：s = "25525511135"
+输出：["255.255.11.135","255.255.111.35"]</pre>
+<h4>示例 2</h4>
+<pre>输入：s = "0000"
+输出：["0.0.0.0"]</pre>
+<h4>示例 3</h4>
+<pre>输入：s = "101023"
+输出：["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]</pre>
+<h4>提示</h4>
+<ul>
+<li><code>1 &lt;= s.length &lt;= 20</code></li>
+<li><code>s</code> 仅由数字组成</li>
+</ul>`,
+    template: `def restore_ip_addresses(s):
+    """
+    :type s: str
+    :rtype: List[str]
+    """
+    # 在这里写你的代码
+    pass
+`,
+    functionName: 'restore_ip_addresses',
+    testCases: [
+      { input: ['25525511135'], expected: ['255.255.11.135', '255.255.111.35'] },
+      { input: ['0000'], expected: ['0.0.0.0'] },
+      { input: ['101023'], expected: ['1.0.10.23', '1.0.102.3', '10.1.0.23', '10.10.2.3', '101.0.2.3'] },
+    ],
+    compareFunc: 'sorted',
+    solutionUrl: 'https://leetcode.cn/problems/restore-ip-addresses/solutions/',
+    blogUrl: 'https://www.cnblogs.com/ranxi169/p/22228303.html',
+  },
 ]);
 
 if (typeof window.syncPlaygroundProblems === 'function' && document.readyState !== 'loading') {
