@@ -336,7 +336,7 @@
     <div id="ai-config-modal" class="ai-config-modal" role="dialog" aria-modal="true" aria-labelledby="ai-config-title" aria-hidden="true">
         <div class="ai-config-content">
             <h2 id="ai-config-title">AI 服务配置</h2>
-            <p class="ai-config-desc">发送消息时，当前代码和输入输出会提交给这里配置的 AI 服务。</p>
+            <p class="ai-config-desc">请配置 OpenAI Responses API 兼容端点（向 Base URL 下的 /responses 发送请求）。发送消息时，当前代码和输入输出会提交给该服务。</p>
             <div class="ai-config-field">
                 <label for="ai-cfg-base-url">API Base URL</label>
                 <input type="url" id="ai-cfg-base-url" placeholder="https://tosky.io/v1" autocomplete="url">
@@ -405,7 +405,7 @@
     <!-- ACM Playground Logic -->
     <script src="assets/js/acm-playground.js?v=20260819-1"></script>
     <!-- AI Coach -->
-    <script src="assets/js/ai-assistant.js?v=20261020"></script>
+    <script src="assets/js/ai-assistant.js?v=20261020-responses"></script>
     <!-- Theme toggle -->
     <script>
     (function () {

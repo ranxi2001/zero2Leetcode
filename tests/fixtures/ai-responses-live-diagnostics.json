@@ -1,0 +1,10 @@
+{
+  "provenance": "single real built-in-service Responses request",
+  "requestCount": 1,
+  "httpStatus": 200,
+  "eventTypes": [],
+  "responseBytes": null,
+  "assistantTextLength": 0,
+  "completionStatus": "unconfirmed",
+  "errorClassification": "response_body_timeout_before_inspection"
+}

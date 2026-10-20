@@ -24,7 +24,7 @@ const {
     resolveExpectedResponseLanguage,
     resolveAIRequestKey,
     saveAIConfig,
-    streamChatCompletion,
+    streamResponses,
     validateAssistantResponse,
 } = require(assistantPath);
 
@@ -525,7 +525,7 @@ test('copied built-in config cannot send requests from another domain, protocol,
             fetch: async () => { requested = true; },
         }, async () => {
             await assert.rejects(async () => {
-                for await (const chunk of streamChatCompletion([], loadAIConfig())) void chunk;
+                for await (const chunk of streamResponses([], loadAIConfig())) void chunk;
             }, /仅在项目官网可用/);
             assert.equal(requested, false);
         });
@@ -560,16 +560,16 @@ test('built-in streaming unwraps only for the request and sends the real authori
         window: { location: new URL('https://onefly.top/zero2Leetcode/playground.html') },
         fetch: async (url, options) => {
             requested = true;
-            assert.equal(url, 'https://tosky.io/v1/chat/completions');
+            assert.equal(url, 'https://tosky.io/v1/responses');
             assert.ok(/^Bearer sk-/.test(options.headers.Authorization), 'request must use the unwrapped key');
             assert.equal(JSON.parse(options.body).model, AI_DEFAULT_MODEL);
-            return new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n', {
+            return new Response(textDelta('ok') + completed('ok'), {
                 headers: { 'Content-Type': 'text/event-stream' },
             });
         },
     }, async () => {
         const config = loadAIConfig();
-        for await (const chunk of streamChatCompletion([], config)) void chunk;
+        for await (const chunk of streamResponses([], config)) void chunk;
         assert.ok(config.apiKey === AI_BUILTIN_KEY, 'the real key must not replace the marker');
         assert.equal(requested, true);
     });
@@ -679,10 +679,30 @@ test('history applies a hard limit even when the latest message is oversized', (
     assert.ok(result[0].content.length <= 60000);
 });
 
+// Synthetic Responses fixtures; the saved live diagnostic remains historical Chat evidence.
+function outputMessage(text, role = 'assistant') {
+    return { type: 'message', role, content: [{ type: 'output_text', text }] };
+}
+function responsePayload(text, overrides = {}) {
+    return { object: 'response', status: 'completed', output: [outputMessage(text)], ...overrides };
+}
+function sseEvent(type, data = {}) {
+    if (type === 'error' && data.type && data.type !== 'error' && !data.error) {
+        data = { ...data, code: data.code ?? data.type };
+    }
+    return `event: ${type}\ndata: ${JSON.stringify({ ...data, type })}\n\n`;
+}
+function textDelta(text, output_index = 0, content_index = 0) {
+    return sseEvent('response.output_text.delta', { delta: text, output_index, content_index });
+}
+function completed(text, overrides = {}) {
+    return sseEvent('response.completed', { response: responsePayload(text, overrides) });
+}
+
 async function readCompletion(response, signal) {
     return withBrowserGlobals({ fetch: async () => response }, async () => {
         const chunks = [];
-        for await (const chunk of streamChatCompletion([], {
+        for await (const chunk of streamResponses([], {
             baseUrl: 'https://example.test/v1', apiKey: 'test-key', model: 'test-model',
         }, signal)) chunks.push(chunk);
         return chunks;
@@ -737,10 +757,10 @@ test('failed LC93 hints do not leave consecutive user messages in the next reque
     const requests = [];
     await withAssistant(async (url, options) => {
         requests.push(JSON.parse(options.body));
-        if (requests.length === 1) return new Response(`data: ${JSON.stringify({ error: upstreamError })}\n\n`, {
+        if (requests.length === 1) return new Response(sseEvent('error', upstreamError), {
             headers: { 'Content-Type': 'text/event-stream' },
         });
-        return new Response('data: {"choices":[{"delta":{"content":"考虑每段的长度和前导零。"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n', {
+        return new Response(textDelta('考虑每段的长度和前导零。') + completed('考虑每段的长度和前导零。'), {
             headers: { 'Content-Type': 'text/event-stream' },
         });
     }, async ({ assistant, replies }) => {
@@ -748,7 +768,7 @@ test('failed LC93 hints do not leave consecutive user messages in the next reque
         await assistant.send({ context: hintContext });
         assistant.inputEl.value = getQuickActionPrompt('give-hint', hintContext);
         await assistant.send({ context: hintContext });
-        assert.deepEqual(requests[1].messages.map(message => message.role), ['system', 'user']);
+        assert.deepEqual(requests[1].input.map(message => message.role), ['system', 'user']);
         assert.equal(replies[1].innerHTML, '考虑每段的长度和前导零。');
         assert.equal(assistant.liveStatus.textContent, 'AI 回复已生成');
     });
@@ -758,8 +778,8 @@ test('a streamed service error can be retried without duplicating the user turn'
     const requests = [];
     await withAssistant(async (url, options) => {
         requests.push(JSON.parse(options.body));
-        if (requests.length === 1) return new Response(`data: ${JSON.stringify({ error: upstreamError })}\n\n`);
-        return Response.json({ choices: [{ message: { content: '先枚举第一段的长度。' }, finish_reason: 'stop' }] });
+        if (requests.length === 1) return new Response(sseEvent('error', upstreamError));
+        return Response.json(responsePayload('先枚举第一段的长度。'));
     }, async ({ assistant, replies, userMessages }) => {
         assistant.inputEl.value = getQuickActionPrompt('give-hint', hintContext);
         await assistant.send({ context: hintContext, visibleMessage: '给个提示' });
@@ -777,7 +797,7 @@ test('a streamed service error can be retried without duplicating the user turn'
         assert.equal(replies[1].innerHTML, '先枚举第一段的长度。');
         assistant.inputEl.value = '再解释一下';
         await assistant.send({ context: hintContext });
-        assert.deepEqual(requests[2].messages.map(message => message.role), ['system', 'user', 'assistant', 'user']);
+        assert.deepEqual(requests[2].input.map(message => message.role), ['system', 'user', 'assistant', 'user']);
     });
 });
 
@@ -785,11 +805,9 @@ test('mid-stream errors preserve partial text for display but never add it to hi
     const requests = [];
     await withAssistant(async (url, options) => {
         requests.push(JSON.parse(options.body));
-        if (requests.length === 2) return Response.json({
-            choices: [{ message: { content: '完整回复' }, finish_reason: 'stop' }],
-        });
-        return new Response('data: {"choices":[{"delta":{"content":"失败的部分回复"}}]}\n\n'
-            + `data: ${JSON.stringify({ error: upstreamError })}\n\n`);
+        if (requests.length === 2) return Response.json(responsePayload('完整回复'));
+        return new Response(textDelta('失败的部分回复')
+            + sseEvent('error', upstreamError));
     }, async ({ assistant, replies }) => {
         assistant.inputEl.value = '给个提示';
         await assistant.send({ context: hintContext });
@@ -799,12 +817,12 @@ test('mid-stream errors preserve partial text for display but never add it to hi
         assert.equal(replies[0].children[0].textContent, busyMessage);
         assistant.inputEl.value = '换个提示';
         await assistant.send({ context: hintContext });
-        assert.deepEqual(requests[1].messages.map(message => message.role), ['system', 'user']);
+        assert.deepEqual(requests[1].input.map(message => message.role), ['system', 'user']);
         assert.doesNotMatch(JSON.stringify(requests[1]), /失败的部分回复|给个提示/);
         assistant.inputEl.value = '继续';
         await assistant.send({ context: hintContext });
-        assert.deepEqual(requests[2].messages.map(message => message.role), ['system', 'user', 'assistant', 'user']);
-        assert.equal(requests[2].messages[2].content, '完整回复');
+        assert.deepEqual(requests[2].input.map(message => message.role), ['system', 'user', 'assistant', 'user']);
+        assert.equal(requests[2].input[2].content[0].text, '完整回复');
     });
 });
 
@@ -819,12 +837,15 @@ test('only temporary service failures offer explicit retry in SSE, JSON, and HTT
         [{ code: 400, message: 'PRIVATE_PARAMETER' }, false],
         [{ type: 'unknown_error', message: 'PRIVATE_DETAIL' }, false],
     ]) {
-        for (const format of ['sse', 'json']) {
+        for (const format of ['sse', 'json', 'failed-sse', 'failed-json']) {
             let requests = 0;
             await withAssistant(async () => {
                 requests += 1;
-                return format === 'json' ? Response.json({ error: detail })
-                    : new Response(`data: ${JSON.stringify({ error: detail })}\n\n`);
+                if (format === 'failed-json') return Response.json(responsePayload('', { status: 'failed', error: detail }));
+                if (format === 'failed-sse') return new Response(sseEvent('response.failed', {
+                    response: responsePayload('', { status: 'failed', error: detail }),
+                }));
+                return format === 'json' ? Response.json({ error: detail }) : new Response(sseEvent('error', detail));
             }, async ({ assistant, replies }) => {
                 assistant.inputEl.value = '给个提示';
                 await assistant.send({ context: hintContext });
@@ -851,72 +872,71 @@ test('only temporary service failures offer explicit retry in SSE, JSON, and HTT
     }
 });
 
-test('JSON completion preserves a plain text hint when a service does not stream', async () => {
+test('JSON Responses preserves a plain text hint when a service does not stream', async () => {
     const hint = '先考虑每一段最多可以取几位数字，再判断剩余长度。';
-    const chunks = await readCompletion(Response.json({
-        object: 'chat.completion',
-        choices: [{ message: { role: 'assistant', content: hint }, finish_reason: 'stop' }],
-    }));
-    assert.deepEqual(chunks, [hint]);
+    assert.deepEqual(await readCompletion(Response.json(responsePayload(hint))), [hint]);
 });
 
-test('HTTP 200 SSE error after the role event is reported instead of an empty reply', async () => {
-    // Live LC93 failure: one role chunk, one error, no content/finish_reason/[DONE].
+test('historical Chat overload classification also applies to a synthetic Responses error event', async () => {
     assert.deepEqual(upstreamError, {
         type: 'upstream_error', message: 'Our servers are currently overloaded. Please try again later.',
     });
-    const body = 'data: {"choices":[{"delta":{"role":"assistant"}}]}\n\n'
-        + `data: ${JSON.stringify({ error: upstreamError })}\n\n`;
+    const body = sseEvent('response.created', { response: { status: 'in_progress', output: [] } })
+        + sseEvent('error', { error: upstreamError });
     await assert.rejects(readCompletion(new Response(body, {
         headers: { 'Content-Type': 'text/event-stream' },
     })), { message: busyMessage });
 });
 
 test('HTTP 200 JSON service errors use a fixed safe Chinese message', async () => {
-    await assert.rejects(readCompletion(Response.json({
-        error: upstreamError,
-    })), { message: busyMessage });
+    await assert.rejects(readCompletion(Response.json({ error: upstreamError })), { message: busyMessage });
 });
 
-test('abnormal finish reasons report incomplete or unavailable answers in SSE and JSON', async () => {
-    for (const [reason, message] of [
-        ['length', /输出上限/], ['content_filter', /内容过滤/], ['tool_calls', /工具调用/],
+test('failed and incomplete Responses report errors in SSE and JSON', async () => {
+    for (const [status, detail, message] of [
+        ['failed', { error: upstreamError }, /上游服务繁忙/],
+        ['incomplete', { incomplete_details: { reason: 'max_output_tokens' } }, /输出上限/],
+        ['incomplete', { incomplete_details: { reason: 'content_filter' } }, /内容过滤/],
+        ['incomplete', { incomplete_details: { reason: 'unknown' } }, /不完整/],
     ]) {
         for (const json of [false, true]) {
-            const choice = { [json ? 'message' : 'delta']: { content: '部分回复' }, finish_reason: reason };
-            const response = json ? Response.json({ choices: [choice] }) : new Response(
-                `data: ${JSON.stringify({ choices: [choice] })}\n\ndata: [DONE]\n\n`
+            const payload = responsePayload('部分回复', { status, ...detail });
+            const response = json ? Response.json(payload) : new Response(
+                textDelta('部分回复') + sseEvent(`response.${status}`, { response: payload })
             );
-            await assert.rejects(readCompletion(response), message, `${reason}, JSON=${json}`);
+            await assert.rejects(readCompletion(response), message, `${status}, JSON=${json}`);
         }
     }
 });
 
-test('reasoning-only and empty completions fail without exposing reasoning as an answer', async () => {
-    for (const reasoning of ['', 'PRIVATE_REASONING_MUST_NOT_APPEAR']) {
+test('reasoning-only, tool-only, refusal-only and empty Responses never become answers', async () => {
+    for (const output of [[], [outputMessage(' ')],
+        [{ type: 'reasoning', summary: [{ type: 'summary_text', text: 'PRIVATE_REASONING' }] }],
+        [{ type: 'function_call', name: 'PRIVATE_TOOL', arguments: '{}' }],
+        [{ type: 'message', role: 'assistant', content: [{ type: 'refusal', refusal: 'PRIVATE_REFUSAL' }] }],
+        [outputMessage('PRIVATE_USER', 'user')],
+    ]) {
         for (const json of [false, true]) {
-            const choice = { [json ? 'message' : 'delta']: { content: ' ', reasoning_content: reasoning }, finish_reason: 'stop' };
-            const response = json ? Response.json({ choices: [choice] }) : new Response(
-                `data: ${JSON.stringify({ choices: [choice] })}\n\ndata: [DONE]\n\n`
-            );
+            const response = json ? Response.json(responsePayload('', { output }))
+                : new Response(sseEvent('response.reasoning_text.delta', { delta: 'PRIVATE_REASONING' })
+                    + completed('', { output }));
             await assert.rejects(readCompletion(response), error => {
                 assert.match(error.message, /未返回.*答案|没有生成.*答案/);
-                assert.doesNotMatch(error.message, /PRIVATE_REASONING/);
+                assert.doesNotMatch(error.message, /PRIVATE_/);
                 return true;
             });
         }
     }
 });
 
-test('SSE byte chunks preserve a hint and code while ignoring reasoning, usage, and data after DONE', async () => {
+test('SSE byte chunks preserve hint and code and ignore reasoning and events after completed', async () => {
     const hint = '每段枚举 1 到 3 位。';
     const code = '\n```python\ndef restore_ip_addresses(s):\n    return []\n```';
-    const body = ': keepalive\r\n\r\n'
-        + 'data: {"choices":[{"delta":{"role":"assistant","reasoning_content":"PRIVATE_REASONING"}}]}\r\n\r\n'
-        + `data: ${JSON.stringify({ choices: [{ delta: { content: hint } }] })}\r\n\r\n`
-        + `data: ${JSON.stringify({ choices: [{ delta: { content: code }, finish_reason: 'stop' }] })}\r\n\r\n`
-        + 'data: {"choices":[],"usage":{"completion_tokens":20}}\r\n\r\n'
-        + 'data: [DONE]\r\n\r\ndata: {"choices":[{"delta":{"content":"IGNORE"}}]}\r\n';
+    const body = (': keepalive\n\n'
+        + sseEvent('response.reasoning_text.delta', { delta: 'PRIVATE_REASONING' })
+        + textDelta(hint) + textDelta(code)
+        + sseEvent('response.output_text.done', { output_index: 0, content_index: 0, text: hint + code })
+        + completed(hint + code) + textDelta('IGNORE')).replaceAll('\n', '\r\n');
     const bytes = new TextEncoder().encode(body);
     const response = new Response(new ReadableStream({
         start(controller) {
@@ -928,17 +948,17 @@ test('SSE byte chunks preserve a hint and code while ignoring reasoning, usage, 
     assert.equal(response.body.locked, false);
 });
 
-test('JSON code replies preserve the original fenced code for LeetCode validation', async () => {
+test('JSON code replies preserve fenced code for LeetCode validation', async () => {
     const code = '```python\ndef restore_ip_addresses(s):\n    return []\n```';
-    const chunks = await readCompletion(Response.json({
-        choices: [{ message: { content: code, reasoning_content: 'PRIVATE_REASONING' }, finish_reason: 'stop' }],
-    }));
+    const chunks = await readCompletion(Response.json(responsePayload(code, {
+        output: [{ type: 'reasoning', text: 'PRIVATE_REASONING' }, outputMessage(code)],
+    })));
     assert.deepEqual(chunks, [code]);
     assert.equal(validateAssistantResponse(chunks.join(''), 'python', hintContext.template, 'leetcode').valid, true);
 });
 
 test('SSE tail errors release the reader and retain an actionable error', async () => {
-    const response = new Response(`data: ${JSON.stringify({ error: upstreamError })}`);
+    const response = new Response(sseEvent('error', upstreamError).trimEnd());
     await assert.rejects(readCompletion(response), { message: busyMessage });
     assert.equal(response.body.locked, false);
 });
@@ -958,12 +978,12 @@ test('ending consumption early cancels and unlocks the SSE reader', async () => 
     let cancelled = false;
     const response = new Response(new ReadableStream({
         start(controller) {
-            controller.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"提示"}}]}\n\n'));
+            controller.enqueue(new TextEncoder().encode(textDelta('提示')));
         },
         cancel() { cancelled = true; },
     }));
     await withBrowserGlobals({ fetch: async () => response }, async () => {
-        for await (const chunk of streamChatCompletion([], {
+        for await (const chunk of streamResponses([], {
             baseUrl: 'https://example.test/v1', apiKey: 'test-key', model: 'test-model',
         })) {
             assert.equal(chunk, '提示');
@@ -978,7 +998,7 @@ test('stopping a partial SSE reply preserves text and disables applying incomple
     let stopped = false;
     await withAssistant(async (url, options) => new Response(new ReadableStream({
         start(controller) {
-            controller.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"部分提示"}}]}\n\n'));
+            controller.enqueue(new TextEncoder().encode(textDelta('部分提示')));
             options.signal.addEventListener('abort', () => {
                 stopped = true;
                 controller.error(new DOMException('Stopped', 'AbortError'));
@@ -999,7 +1019,7 @@ test('stopping a partial SSE reply preserves text and disables applying incomple
 test('a length-limited code reply keeps the last delta but cannot be applied as complete code', async () => {
     const code = '```python\ndef restore_ip_addresses(s):\n';
     await withAssistant(async () => new Response(
-        `data: ${JSON.stringify({ choices: [{ delta: { content: code }, finish_reason: 'length' }] })}`
+        textDelta(code) + sseEvent('response.incomplete', { response: responsePayload(code, { status: 'incomplete', incomplete_details: { reason: 'max_output_tokens' } }) })
     ), async ({ assistant, replies }) => {
         assistant.inputEl.value = getQuickActionPrompt('give-code', hintContext);
         await assistant.send({ context: hintContext });
@@ -1014,9 +1034,9 @@ test('stream parser preserves split UTF-8 and cancels after the done event', asy
     const originalFetch = globalThis.fetch;
     const encoder = new TextEncoder();
     let cancelled = false;
-    const event = encoder.encode('data: {"choices":[{"delta":{"content":"你好"}}]}\n');
+    const event = encoder.encode(textDelta('你好'));
     const splitAt = event.indexOf(0xe5) + 1;
-    const done = encoder.encode('data: [DONE]\n');
+    const done = encoder.encode(completed('你好'));
     globalThis.fetch = async () => ({
         ok: true,
         body: new ReadableStream({
@@ -1031,7 +1051,7 @@ test('stream parser preserves split UTF-8 and cancels after the done event', asy
 
     try {
         const chunks = [];
-        for await (const chunk of streamChatCompletion([], {
+        for await (const chunk of streamResponses([], {
             baseUrl: 'https://example.test/v1',
             apiKey: 'key',
             model: 'model',
@@ -1050,7 +1070,7 @@ test('stream parser reads a final SSE event without a trailing newline', async (
         ok: true,
         body: new ReadableStream({
             start(controller) {
-                controller.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"tail"}}]}'));
+                controller.enqueue(encoder.encode(textDelta('tail') + completed('tail').trimEnd()));
                 controller.close();
             },
         }),
@@ -1058,7 +1078,7 @@ test('stream parser reads a final SSE event without a trailing newline', async (
 
     try {
         const chunks = [];
-        for await (const chunk of streamChatCompletion([], {
+        for await (const chunk of streamResponses([], {
             baseUrl: 'https://example.test/v1',
             apiKey: 'key',
             model: 'model',
@@ -1117,4 +1137,197 @@ test('an unsaved custom API config remains active for the current page session',
         assert.equal(saveAIConfig(custom), false);
         assert.deepEqual(loadAIConfig(), custom);
     });
+});
+
+test('Responses request uses typed input, stateless storage and the unchanged system/history', async () => {
+    const messages = [{ role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: '第一问' }, { role: 'assistant', content: '第一答' },
+        { role: 'user', content: '第二问' }];
+    await withBrowserGlobals({ fetch: async (url, options) => {
+        assert.equal(url, 'https://example.test/v1/responses');
+        assert.equal(options.method, 'POST');
+        assert.equal(options.headers.Authorization, 'Bearer custom');
+        const body = JSON.parse(options.body);
+        assert.deepEqual(Object.keys(body).sort(), ['input', 'model', 'store', 'stream']);
+        assert.equal(body.store, false);
+        assert.equal(body.stream, true);
+        assert.equal(body.model, 'existing-model');
+        assert.deepEqual(body.input, messages.map((message, index) => message.role === 'assistant'
+            ? { type: 'message', id: `msg_local_${index}`, status: 'completed', role: 'assistant',
+                content: [{ type: 'output_text', text: message.content, annotations: [] }] }
+            : { type: 'message', role: message.role, content: [{ type: 'input_text', text: message.content }] }));
+        return Response.json(responsePayload('第二答'));
+    } }, async () => {
+        const chunks = [];
+        for await (const chunk of streamResponses(messages, {
+            baseUrl: 'https://example.test/v1///', apiKey: 'custom', model: 'existing-model',
+        })) chunks.push(chunk);
+        assert.deepEqual(chunks, ['第二答']);
+    });
+});
+
+test('output_text.done and completed snapshots emit each text part exactly once', async () => {
+    const output = [outputMessage('甲'), outputMessage('乙')];
+    for (const body of [
+        textDelta('甲') + sseEvent('response.output_text.done', { output_index: 0, content_index: 0, text: '甲' })
+            + sseEvent('response.output_text.done', { output_index: 1, content_index: 0, text: '乙' })
+            + completed('', { output }),
+        completed('', { output }),
+        textDelta('甲') + sseEvent('response.output_text.done', { output_index: 0, content_index: 0, text: '甲乙' })
+            + completed('甲乙'),
+    ]) assert.equal((await readCompletion(new Response(body))).join(''), '甲乙');
+});
+
+test('SSE event name, multiline data and no trailing newline are supported', async () => {
+    const body = 'event: response.output_text.delta\r\ndata: {"output_index":0,\r\ndata: "content_index":0,"delta":"你好"}\r\n\r\n'
+        + 'event: response.completed\r\ndata: {"response":\r\ndata: {"status":"completed","output":[]}}';
+    assert.deepEqual(await readCompletion(new Response(body)), ['你好']);
+});
+
+test('EOF, DONE and output_text.done never substitute for a success terminal', async () => {
+    for (const tail of ['', 'data: [DONE]\n\n',
+        sseEvent('response.output_text.done', { output_index: 0, content_index: 0, text: '半截' }),
+        'event: response.completed\ndata: {"response":',
+    ]) {
+        const response = new Response(textDelta('半截') + tail);
+        await assert.rejects(readCompletion(response), /中断|不完整|截断/);
+        assert.equal(response.body.locked, false);
+    }
+    for (const status of [undefined, 'in_progress', 'queued', 'cancelled']) {
+        await assert.rejects(readCompletion(Response.json(responsePayload('半截', { status }))), /中断|不完整|截断/);
+    }
+});
+
+test('failed and incomplete terminals stop reading before later success events', async () => {
+    for (const type of ['response.failed', 'response.incomplete', 'error']) {
+        const detail = type === 'error' ? { code: 'server_error' }
+            : { response: responsePayload('', { status: type.split('.')[1], error: { code: 'server_error' } }) };
+        await assert.rejects(readCompletion(new Response(sseEvent(type, detail) + completed('IGNORE'))));
+    }
+});
+
+test('truncated, incomplete, failed, cancelled and locally limited replies never enter history', async () => {
+    const partial = '```python\ndef restore_ip_addresses(s):\n    return []\n```';
+    for (const mode of ['eof', 'failed', 'incomplete', 'abort', 'local-limit']) {
+        const requests = [];
+        await withAssistant(async (url, options) => {
+            requests.push(JSON.parse(options.body));
+            if (requests.length > 1) return Response.json(responsePayload('完整提示'));
+            if (mode === 'abort') return new Response(new ReadableStream({ start(controller) {
+                controller.enqueue(new TextEncoder().encode(textDelta(partial)));
+                options.signal.addEventListener('abort', () => controller.error(new DOMException('Stopped', 'AbortError')));
+            } }));
+            const text = mode === 'local-limit' ? partial + 'x'.repeat(60001) : partial;
+            const tail = mode === 'failed' ? sseEvent('response.failed', { response: { status: 'failed', error: upstreamError } })
+                : mode === 'incomplete' ? sseEvent('response.incomplete', { response: { status: 'incomplete', incomplete_details: { reason: 'max_output_tokens' } } })
+                    : mode === 'local-limit' ? completed(text) : '';
+            return new Response(textDelta(text) + tail);
+        }, async ({ assistant, replies }) => {
+            const render = assistant.renderMarkdown;
+            if (mode === 'abort') assistant.renderMarkdown = text => { assistant.stopStreaming(); return text; };
+            assistant.inputEl.value = '失败问题';
+            await assistant.send({ context: hintContext });
+            assert.equal(replies[0].codeOptions.allowApply, false, mode);
+            assistant.renderMarkdown = render;
+            assistant.inputEl.value = '下一问';
+            await assistant.send({ context: hintContext });
+            assert.deepEqual(requests[1].input.map(message => message.role), ['system', 'user'], mode);
+            assert.doesNotMatch(JSON.stringify(requests[1]), /失败问题|return \[\]/);
+            assistant.inputEl.value = '继续';
+            await assistant.send({ context: hintContext });
+            assert.deepEqual(requests[2].input.map(message => message.role), ['system', 'user', 'assistant', 'user']);
+            assert.equal(requests[2].input[0].content[0].text, SYSTEM_PROMPT);
+            assert.deepEqual(requests[2].input[2].content, [{ type: 'output_text', text: '完整提示', annotations: [] }]);
+        });
+    }
+});
+
+test('Responses config wording and cache version are present on both surfaces', () => {
+    for (const name of ['playground.html', 'acm-playground.html']) {
+        const html = fs.readFileSync(path.join(root, name), 'utf8');
+        assert.match(html, /OpenAI Responses.*兼容/);
+        assert.match(html, /ai-assistant\.js\?v=20261020-responses/);
+    }
+});
+
+test('equal text across different output/content parts is preserved without snapshot duplication', async () => {
+    const output = [outputMessage('同'), { type: 'message', role: 'assistant',
+        content: [{ type: 'output_text', text: '同' }, { type: 'output_text', text: '同' }] }];
+    const body = textDelta('同', 0, 0) + textDelta('同', 1, 0) + textDelta('同', 1, 1)
+        + completed('', { output });
+    assert.deepEqual(await readCompletion(new Response(body)), ['同', '同', '同']);
+});
+
+test('known non-assistant items and non-output_text events never yield answer text', async () => {
+    const body = sseEvent('response.output_item.added', { output_index: 0,
+        item: { type: 'message', role: 'user' } }) + textDelta('PRIVATE_USER')
+        + sseEvent('response.refusal.delta', { delta: 'PRIVATE_REFUSAL' })
+        + sseEvent('response.function_call_arguments.delta', { delta: 'PRIVATE_TOOL' })
+        + textDelta('答案', 1) + completed('', { output: [
+            outputMessage('PRIVATE_USER', 'user'), outputMessage('答案'),
+        ] });
+    assert.deepEqual(await readCompletion(new Response(body)), ['答案']);
+});
+
+test('aborting a pending read cancels and releases its reader even if fetch ignores the signal', async () => {
+    const controller = new AbortController();
+    let cancelled = false;
+    let started;
+    const waiting = new Promise(resolve => { started = resolve; });
+    const response = new Response(new ReadableStream({
+        pull() { started(); },
+        cancel() { cancelled = true; },
+    }));
+    await withBrowserGlobals({ fetch: async () => response }, async () => {
+        const iterator = streamResponses([], { baseUrl: 'https://example.test/v1', apiKey: 'custom', model: 'existing' }, controller.signal);
+        const pending = iterator.next();
+        await waiting;
+        controller.abort();
+        await assert.rejects(pending, { name: 'AbortError' });
+    });
+    assert.equal(cancelled, true);
+    assert.equal(response.body.locked, false);
+});
+
+test('aborting before a request sends nothing and aborting JSON reads remains an AbortError', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    let requests = 0;
+    await withBrowserGlobals({ fetch: async () => { requests += 1; } }, async () => {
+        await assert.rejects(async () => {
+            for await (const chunk of streamResponses([], {}, controller.signal)) void chunk;
+        }, { name: 'AbortError' });
+    });
+    assert.equal(requests, 0);
+    const reading = new AbortController();
+    await assert.rejects(readCompletion({ ok: true, headers: new Headers({ 'Content-Type': 'application/json' }),
+        json: async () => { reading.abort(); throw new DOMException('Aborted', 'AbortError'); },
+    }, reading.signal), { name: 'AbortError' });
+});
+
+test('data-only typed SSE events work and snapshot conflicts fail safely', async () => {
+    const delta = { type: 'response.output_text.delta', output_index: 0, content_index: 0, delta: '哈' };
+    const terminal = { type: 'response.completed', response: responsePayload('哈哈') };
+    const body = `data: ${JSON.stringify(delta)}\n\ndata: ${JSON.stringify(delta)}\n\ndata: ${JSON.stringify(terminal)}`;
+    assert.deepEqual(await readCompletion(new Response(body)), ['哈', '哈']);
+    await assert.rejects(readCompletion(new Response(textDelta('前文') + completed('PRIVATE_DIFFERENT_TEXT'))), error => {
+        assert.match(error.message, /不完整/);
+        assert.doesNotMatch(error.message, /PRIVATE_/);
+        return true;
+    });
+});
+
+test('malformed SSE and JSON payloads fail without leaking body contents', async () => {
+    for (const response of [
+        new Response('event: response.completed\ndata: PRIVATE_BODY\n\n'),
+        new Response('PRIVATE_BODY', { headers: { 'Content-Type': 'application/json' } }),
+        Response.json(responsePayload('', { output: 'PRIVATE_BODY' })),
+        Response.json(responsePayload('', { output: [null] })),
+    ]) {
+        await assert.rejects(readCompletion(response), error => {
+            assert.match(error.message, /不完整|未返回.*答案/);
+            assert.doesNotMatch(error.message, /PRIVATE_/);
+            return true;
+        });
+    }
 });
