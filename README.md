@@ -71,7 +71,7 @@ Zero2Leetcode 面向准备校招、社招及转码的学习者，将 Python 基�
 
 ## AI 编程教练
 
-默认接入 Tosky `gpt-6-luna`，无需登录。也可以在设置中使用支持浏览器 CORS 和流式 `/chat/completions` 的 OpenAI 兼容 API。
+默认服务与模型仍为 Tosky `gpt-6-luna`，AI 传输层使用 Responses API：请求 `/responses`，设置 `stream:true`、`store:false`，由客户端携带对话历史。自定义服务必须支持 Responses API、浏览器 CORS 和 SSE 流式响应；不会自动回退到 `/chat/completions`。本次内置服务单次兼容性探针收到 HTTP 200，但读取响应体超时，尚未确认有效输出与成功终止事件，不代表端到端验证通过。
 
 AI 教练同时用于两个编程页面：在 LeetCode 练习场读取当前题目、语言、核心代码模板与草稿，给出当前语言的提示、诊断或实现；在 ACM 模拟 IDE 读取当前语言、代码、stdin、stdout、期望输出和运行状态，并生成完整的 Java 17 或 Go ACM 程序。
 

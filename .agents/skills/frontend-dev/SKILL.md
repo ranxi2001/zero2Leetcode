@@ -33,7 +33,7 @@ description: Zero2Leetcode 前端开发技能 — 快速理解项目技术栈、
 | **Go 运行时** | 官方 Go Playground（远程编译执行） |
 | **Java 运行时** | CheerpJ 4.3 + ECJ 3.42.0（浏览器端 Java 17） |
 | **Markdown 渲染** | Marked.js |
-| **AI 集成** | OpenRouter API（SSE 流式） |
+| **AI 集成** | Responses API（`/responses`、SSE 流式、`store:false`；客户端管理历史） |
 | **部署** | GitHub Pages + GitHub Actions |
 | **样式方案** | 纯 CSS + CSS 自定义属性（无 Tailwind/预处理器） |
 | **状态存储** | localStorage + 全局 window 变量 |
