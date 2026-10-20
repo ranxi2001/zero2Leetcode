@@ -258,6 +258,79 @@ permalink: /05_interview/coding/huawei/
 | 19 | LC 21 | 合并两个有序链表 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=21) |
 | 20 | LC 46 | 全排列 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=46) |
 
+---
+
+<a id="sept-oct-supplement"></a>
+
+## 9.1-10.12「49 场面试手撕汇总」补充（用户转录，独立口径）
+
+来源为**用户提供的转录**，原文链接未提供；未经独立核验「49 场」面试次数。以下按题目或主题去重整理为三组，共 14 / 8 / 8 项；这是题目清单，**无原始统计频次，不参与 TOP20 排序**，表中先后也不代表面试频率。并查集的局部次数描述见组3，不能据此推算其他题目的次数。
+
+**三来源统计边界**：历史 **6139 篇 / 累计 646 次**（已含此前 2027 届已有题目的增量）、附件 TOP20 的 **1148 篇 / 639 次记录**与本次「49 场」转录分别保留。三来源样本是否重叠未知，频次**不相加、不覆盖**，本次不调整原 38 题分类频次、TOP20 排名或附件频次。
+
+收录到本文不代表已有本地练习。下表的「练习」仅指当前页面已注册且有测试用例的题目；其余 LC 题使用「官方题页」。题号题名错配时同时保留原文与官方对照，候选题不视为已确认原题。
+
+### 组1：常见 LC 补漏（14 项）
+
+| LC 题号 | 题目 | 备考要点 | 入口 |
+|---------|------|----------|------|
+| LC 141 | 环形链表 | 快慢指针；判断是否有环，与 LC142 寻找入环点区分 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=141) |
+| LC 104 | 二叉树的最大深度 | DFS；递归返回子树深度 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=104) |
+| LC 101 | 对称二叉树 | 成对比较镜像位置；注意空节点 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=101) |
+| LC 124 | 二叉树中的最大路径和 | 偏难；区分向父节点返回的单侧贡献与经过当前节点的路径和 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=124) |
+| LC 64 | 最小路径和 | DP；状态转移与首行、首列初始化 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=64) |
+| LC 62 | 不同路径 | DP；计数状态与边界 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=62) |
+| LC 32 | 最长有效括号 | DP / 栈；有效区间衔接与下标边界 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=32) |
+| LC 560 | 和为 K 的子数组 | 前缀和 + 哈希计数；求子数组个数，与组2的「最长」描述区分 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=560) |
+| LC 55 | 跳跃游戏 | 贪心；维护最远可达位置 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=55) |
+| LC 238 | 除自身以外数组的乘积 | 前后缀乘积；注意零元素 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=238) |
+| LC 35 | 搜索插入位置 | 二分；寻找第一个不小于目标的位置 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=35) |
+| LC 153 | 寻找旋转排序数组中的最小值 | 二分；判断最小值所在区间 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=153) |
+| LC 4 | 寻找两个正序数组的中位数 | 难；二分划分，处理空侧与奇偶总长度 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=4) |
+| LC 295 | 数据流的中位数 | 双堆；维护两侧大小及堆顶顺序 | [官方题页](https://leetcode.cn/problems/find-median-from-data-stream/) |
+
+### 组2：扩展 LC 题与原文疑点（8 项）
+
+题号和题名按用户转录保留，尤其不能将下面两处错配静默改成另一道题。
+
+| 原文题号 | 原文题名 | 备考要点 / 对照说明 | 入口 |
+|----------|----------|--------------------|------|
+| 原文 LC 135 | 分发糖果 | 贪心；分别满足左右相邻约束 | [官方题页](https://leetcode.cn/problems/candy/) |
+| 原文 LC 997 | 小镇法官 | 图的入度 / 出度，或哈希计数 | [官方题页](https://leetcode.cn/problems/find-the-town-judge/) |
+| 原文 LC 673 | 最长递增子序列个数 | DP；同时维护以当前位置结尾的最长长度和方案数 | [官方题页](https://leetcode.cn/problems/number-of-longest-increasing-subsequence/) |
+| 原文 LC 443 | 压缩字符串 | 双指针；读写位置与连续字符计数 | [官方题页](https://leetcode.cn/problems/string-compression/) |
+| 原文 LC 209 | 长度最小子数组 | 滑动窗口；官方题目中的数组元素为正整数 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=209) |
+| 原文 LC 1004 | 删掉一个元素后全为1最长子数组 | **题号题名错配**：按题名对应官方 LC1493「删掉一个元素以后全为 1 的最长子数组」，要求删除一个元素；官方 LC1004 是「最大连续1个数III」，允许至多翻转 k 个零。按实际题意准备滑动窗口，保留原文记录 | [官方 LC1493 题页](https://leetcode.cn/problems/longest-subarray-of-1s-after-deleting-one-element/)；[官方 LC1004 对照](https://leetcode.cn/problems/max-consecutive-ones-iii/) |
+| 原文 LC 930 | 和为K最长子数组 | **题号题名错配**：官方 LC930 是「和相同的二元子数组」（求个数），并非求最长长度；「最长和等于 k」更接近 LC325，**仅为候选，待原题确认**，不能擅自确定。若确为一般数组的最长长度问题，可准备前缀和 + 哈希记录最早下标 | [官方 LC930 题页](https://leetcode.cn/problems/binary-subarrays-with-sum/description)；[官方 LC325 候选题页](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/) |
+| 原文 LC 315 | 计算右侧小于当前元素个数 | 树状数组 / 归并排序计数。保留原文备注「斐波那契 O(logn)」：此备注与题意无关，不作为本题算法结论 | [官方题页](https://leetcode.cn/problems/count-of-smaller-numbers-after-self/) |
+
+### 组3：非 LC / 基础算法主题（8 项）
+
+这些转录条目缺少完整题面，不分配 LC 题号；下表仅给复习方向，具体模型和输入输出以原题为准。
+
+| 原文主题 | 复习方向 / 待确认信息 |
+|----------|----------------------|
+| 环形石子合并 | 区间 DP；考虑断环成链，合并代价与求最小还是最大待原题确认 |
+| 整数拆分方案数 | DP；约束未明，需先确认可用整数、是否计顺序、是否允许重复及是否取模，不据题名虚构题意 |
+| 相同字母排列数 | 组合数学；约束待确认，先核对重复字母计数规则、排列限制及是否取模 |
+| 命令行参数解析 | 字符串模拟；空格、引号和转义规则需按原题确认 |
+| 找质因数 | 数论；试除分解方向，确认输入范围及输出是否保留重复因子 |
+| Top N 元素平均值 | 堆；N 的范围待确认，先确认取最大还是最小 N 个、重复元素计数及输出精度 |
+| 子集和能否凑出目标 | 回溯 / DP；根据数值范围、负数与元素能否重复使用选择模型 |
+| 并查集 | 路径压缩 + 按秩或按大小合并；用户转录称「Agent 一面 3 次」，仅为局部原文描述，不转成全局频次，也不加入 TOP20 |
+
+### 如何安排补漏
+
+**TOP20 前 5 题优先**：岛屿数量、无重复字符的最长子串、手写快速排序、有效的括号、LRU 缓存，顺序沿用附件排名。完成后再按薄弱点选择本补充区的题目。
+
+**LC215 准备快速选择 + 堆双解**，能说明是否修改输入、复杂度与流式场景，见[已有双解讲解](#lc215-two-methods)。同时练习 **ACM 模式 I/O**，自己完成读入、调用与输出，可使用[ACM 模拟 IDE]({{ site.baseurl }}/acm-playground.html)。补上**并查集的路径压缩与按大小合并**，会解释连通性查询和集合合并；这些是复习建议，不由局部次数推导全局排名。
+
+<!-- huawei-sept-oct:end -->
+
+---
+
+## 附件题目讲解
+
 <a id="handwritten-quicksort"></a>
 
 ### 手写快速排序：随机枢轴 + 原地三路划分
