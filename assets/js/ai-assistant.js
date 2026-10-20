@@ -606,23 +606,69 @@ function getQuickActionPrompt(action, contextOverride = null) {
         .replaceAll('{sourceFence}', AI_LANGUAGE_META[context.language].fence);
 }
 
+function createAIServiceError(detail = {}, status = 0) {
+    const type = `${detail.type || ''} ${detail.code || ''}`;
+    const code = status || Number(detail.code);
+    let message = 'AI 服务请求失败，请检查配置后重试。';
+    let retryable = false;
+    if ([401, 403].includes(code) || /authentication|authorization|invalid_api_key|permission_denied/i.test(type)) {
+        message = 'AI 服务鉴权失败，请检查 API 密钥和访问权限。';
+    } else if ((code >= 400 && code < 500 && ![408, 429].includes(code)) || /invalid_request|invalid_parameter|bad_request|not_found/i.test(type)) {
+        message = 'AI 服务请求参数有误，请检查服务地址和模型配置。';
+    } else if (/upstream_error|overloaded/i.test(type) || /overloaded/i.test(String(detail.message || ''))) {
+        message = '上游服务繁忙，请稍后重新生成。';
+        retryable = true;
+    } else if ([408, 429].includes(code) || code >= 500 || /server_error|service_unavailable|rate_limit|timeout/i.test(type)) {
+        message = 'AI 服务暂时不可用，请稍后重新生成。';
+        retryable = true;
+    }
+    const error = new Error(status ? `API 请求失败 (${status})：${message}` : message);
+    error.retryable = retryable;
+    return error;
+}
+
+function parseCompletionPayload(parsed) {
+    if (parsed.error) throw createAIServiceError(parsed.error);
+    const choice = parsed.choices?.[0];
+    const content = choice?.delta?.content ?? choice?.message?.content;
+    return {
+        done: false,
+        delta: typeof content === 'string' ? content : '',
+        finishReason: choice?.finish_reason,
+    };
+}
+
+function* readCompletionEvent(event, state) {
+    if (event?.delta) {
+        state.hasContent ||= Boolean(event.delta.trim());
+        yield event.delta;
+    }
+    const reason = event?.finishReason;
+    if (!reason || reason === 'stop') return;
+    if (reason === 'length') throw new Error('AI 回复达到服务输出上限，内容可能不完整，请重新生成。');
+    if (reason === 'content_filter') throw new Error('AI 服务因内容过滤停止了回复，请调整问题后重试。');
+    throw new Error('AI 服务返回了工具调用或不支持的结束原因，未生成完整答案，请重试。');
+}
+
+function requireCompletionContent(state) {
+    if (!state.hasContent) throw new Error('AI 服务未返回可显示的答案，请重新生成。');
+}
+
 function parseSseLine(line) {
     const trimmed = line.trim();
     if (!trimmed.startsWith('data:')) return null;
     const data = trimmed.slice(5).trim();
     if (!data) return null;
     if (data === '[DONE]') return { done: true, delta: '' };
-    try {
-        const parsed = JSON.parse(data);
-        return { done: false, delta: parsed.choices?.[0]?.delta?.content || '' };
-    } catch (error) {
-        return null;
-    }
+    let parsed;
+    try { parsed = JSON.parse(data); } catch (error) { return null; }
+    return parseCompletionPayload(parsed);
 }
 
 function isRetryableAIError(error) {
+    if (typeof error?.retryable === 'boolean') return error.retryable;
     const message = String(error?.message || '');
-    return /API 请求失败 \((?:408|429|5\d\d)\)|Failed to fetch|NetworkError|网络/i.test(message);
+    return /AI 服务未返回|服务输出上限|API 请求失败 \((?:408|429|5\d\d)\)|Failed to fetch|NetworkError|网络/i.test(message);
 }
 
 async function* streamChatCompletion(messages, config, signal) {
@@ -643,8 +689,16 @@ async function* streamChatCompletion(messages, config, signal) {
     });
 
     if (!response.ok) {
-        const errorText = clipText(await response.text(), 2000);
-        throw new Error(`API 请求失败 (${response.status}): ${errorText}`);
+        let detail;
+        try { detail = (await response.json())?.error; } catch (error) { /* non-JSON error body */ }
+        throw createAIServiceError(detail || {}, response.status);
+    }
+    const state = { hasContent: false };
+    if (/\bjson\b/i.test(response.headers?.get('Content-Type') || '')) {
+        const event = parseCompletionPayload(await response.json());
+        yield* readCompletionEvent(event, state);
+        requireCompletionContent(state);
+        return;
     }
     if (!response.body) throw new Error('AI 服务未返回可读取的响应流');
 
@@ -663,17 +717,24 @@ async function* streamChatCompletion(messages, config, signal) {
 
             for (const line of lines) {
                 const event = parseSseLine(line);
-                if (event?.done) return;
-                if (event?.delta) yield event.delta;
+                if (event?.done) {
+                    requireCompletionContent(state);
+                    return;
+                }
+                yield* readCompletionEvent(event, state);
             }
         }
 
         buffer += decoder.decode();
         for (const line of buffer.split('\n')) {
             const event = parseSseLine(line);
-            if (event?.done) return;
-            if (event?.delta) yield event.delta;
+            if (event?.done) {
+                requireCompletionContent(state);
+                return;
+            }
+            yield* readCompletionEvent(event, state);
         }
+        requireCompletionContent(state);
     } finally {
         try { await reader.cancel(); } catch (error) { /* already closed or aborted */ }
         try { reader.releaseLock(); } catch (error) { /* already released */ }
@@ -1331,10 +1392,10 @@ class AIAssistant {
         const context = options.context || collectAssistantContext();
         const contextMessage = options.contextMessage || buildContextMessage(userMessage, context);
         const expectedLanguage = options.expectedLanguage || resolveExpectedResponseLanguage(userMessage, context);
-        if (!isRetry) chatHistory.push({ role: 'user', content: contextMessage });
+        const userTurn = { role: 'user', content: contextMessage };
         const apiMessages = options.apiMessages || [
             { role: 'system', content: SYSTEM_PROMPT },
-            ...boundedHistory(chatHistory),
+            ...boundedHistory([...chatHistory, userTurn]),
         ];
 
         this.abortController = new AbortController();
@@ -1390,7 +1451,7 @@ class AIAssistant {
                 } else {
                     renderResponse();
                     this.decorateCodeBlocks(contentElement, { allowApply: !responseTruncated });
-                    chatHistory.push({ role: 'assistant', content: fullContent });
+                    chatHistory.push(userTurn, { role: 'assistant', content: fullContent });
                     completionAnnouncement = responseTruncated ? 'AI 回复过长，已截断' : 'AI 回复已生成';
                 }
                 if (responseTruncated && validation.valid) {
@@ -1404,7 +1465,7 @@ class AIAssistant {
             assistantMessage.classList.remove('ai-msg-loading');
             if (error.name === 'AbortError') {
                 if (fullContent.trim() && !this.discardCurrentResponse) {
-                    chatHistory.push({ role: 'assistant', content: fullContent });
+                    chatHistory.push(userTurn, { role: 'assistant', content: fullContent });
                     contentElement.innerHTML = this.renderMarkdown(fullContent);
                     this.decorateCodeBlocks(contentElement, { allowApply: false });
                     completionAnnouncement = '已停止生成，保留当前回复';
@@ -1414,7 +1475,6 @@ class AIAssistant {
                 }
             } else {
                 if (fullContent.trim() && !this.discardCurrentResponse) {
-                    chatHistory.push({ role: 'assistant', content: fullContent });
                     contentElement.innerHTML = this.renderMarkdown(fullContent);
                     this.decorateCodeBlocks(contentElement, { allowApply: false });
                 } else if (!this.discardCurrentResponse) {

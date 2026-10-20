@@ -324,7 +324,6 @@ test('failed AI requests render a retry button and retry without duplicating the
     assert.match(assistantSource, /retryButton\.textContent = '重新生成'/);
     assert.match(assistantSource, /retry: true/);
     assert.match(assistantSource, /if \(!isRetry\) \{/);
-    assert.match(assistantSource, /if \(!isRetry\) chatHistory\.push/);
 });
 
 test('shared assistant keeps the LeetCode problem and Python editor context', () => {
@@ -564,7 +563,9 @@ test('built-in streaming unwraps only for the request and sends the real authori
             assert.equal(url, 'https://tosky.io/v1/chat/completions');
             assert.ok(/^Bearer sk-/.test(options.headers.Authorization), 'request must use the unwrapped key');
             assert.equal(JSON.parse(options.body).model, AI_DEFAULT_MODEL);
-            return new Response('data: [DONE]\n', { headers: { 'Content-Type': 'text/event-stream' } });
+            return new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n', {
+                headers: { 'Content-Type': 'text/event-stream' },
+            });
         },
     }, async () => {
         const config = loadAIConfig();
@@ -676,6 +677,337 @@ test('history applies a hard limit even when the latest message is oversized', (
     ]);
     assert.equal(result.length, 1);
     assert.ok(result[0].content.length <= 60000);
+});
+
+async function readCompletion(response, signal) {
+    return withBrowserGlobals({ fetch: async () => response }, async () => {
+        const chunks = [];
+        for await (const chunk of streamChatCompletion([], {
+            baseUrl: 'https://example.test/v1', apiKey: 'test-key', model: 'test-model',
+        }, signal)) chunks.push(chunk);
+        return chunks;
+    });
+}
+
+function withAssistant(fetch, callback) {
+    const createElement = () => ({
+        children: [], textContent: '', innerHTML: '', classList: { remove() {} },
+        appendChild(child) { this.children.push(child); },
+        setAttribute() {},
+        addEventListener(type, callback) { this[type] = callback; },
+    });
+    const assistant = Object.create(AIAssistant.prototype);
+    const replies = [];
+    const userMessages = [];
+    assistant.inputEl = { value: '', style: {} };
+    assistant.messagesEl = { querySelector: () => null };
+    assistant.liveStatus = { textContent: '' };
+    assistant.showWelcome = () => {};
+    assistant.updateContextSummary = () => {};
+    assistant.scrollMessageToStart = () => {};
+    assistant.setStreamingState = (active) => { assistant.isStreaming = active; };
+    assistant.renderMarkdown = (text) => text;
+    assistant.decorateCodeBlocks = (element, options) => { element.codeOptions = options; };
+    assistant.addMessage = (role, text) => {
+        if (role === 'user') userMessages.push(text);
+        const content = createElement();
+        if (role === 'assistant') replies.push(content);
+        return { classList: { remove() {} }, querySelector: () => content, remove() {} };
+    };
+    assistant.clearChat();
+    return withBrowserGlobals({
+        fetch,
+        document: { createElement },
+        localStorage: { getItem: () => JSON.stringify({
+            baseUrl: 'https://example.test/v1', apiKey: 'test-key', model: 'test-model',
+        }) },
+    }, () => callback({ assistant, replies, userMessages }));
+}
+
+const hintContext = { surface: 'leetcode', language: 'python',
+    problemTitle: 'LC 93 - 复原 IP 地址', problem: '把数字字符串分为四段有效 IP 地址。',
+    template: 'def restore_ip_addresses(s):\n    pass\n', code: '' };
+
+const liveDiagnostics = JSON.parse(fs.readFileSync(path.join(root, 'tests/fixtures/ai-hint-live-diagnostics.json'), 'utf8'));
+const { type: upstreamType, message: upstreamMessage } = liveDiagnostics.reports.find(report => report.errors)?.errors[0];
+const upstreamError = { type: upstreamType, message: upstreamMessage };
+const busyMessage = '上游服务繁忙，请稍后重新生成。';
+
+test('failed LC93 hints do not leave consecutive user messages in the next request', async () => {
+    const requests = [];
+    await withAssistant(async (url, options) => {
+        requests.push(JSON.parse(options.body));
+        if (requests.length === 1) return new Response(`data: ${JSON.stringify({ error: upstreamError })}\n\n`, {
+            headers: { 'Content-Type': 'text/event-stream' },
+        });
+        return new Response('data: {"choices":[{"delta":{"content":"考虑每段的长度和前导零。"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n', {
+            headers: { 'Content-Type': 'text/event-stream' },
+        });
+    }, async ({ assistant, replies }) => {
+        assistant.inputEl.value = getQuickActionPrompt('give-hint', hintContext);
+        await assistant.send({ context: hintContext });
+        assistant.inputEl.value = getQuickActionPrompt('give-hint', hintContext);
+        await assistant.send({ context: hintContext });
+        assert.deepEqual(requests[1].messages.map(message => message.role), ['system', 'user']);
+        assert.equal(replies[1].innerHTML, '考虑每段的长度和前导零。');
+        assert.equal(assistant.liveStatus.textContent, 'AI 回复已生成');
+    });
+});
+
+test('a streamed service error can be retried without duplicating the user turn', async () => {
+    const requests = [];
+    await withAssistant(async (url, options) => {
+        requests.push(JSON.parse(options.body));
+        if (requests.length === 1) return new Response(`data: ${JSON.stringify({ error: upstreamError })}\n\n`);
+        return Response.json({ choices: [{ message: { content: '先枚举第一段的长度。' }, finish_reason: 'stop' }] });
+    }, async ({ assistant, replies, userMessages }) => {
+        assistant.inputEl.value = getQuickActionPrompt('give-hint', hintContext);
+        await assistant.send({ context: hintContext, visibleMessage: '给个提示' });
+        assert.equal(requests.length, 1, 'service failures must not retry automatically');
+        assert.equal(replies[0].children[0].textContent, busyMessage);
+        const retry = replies[0].children.find(element => element.textContent === '重新生成');
+        assert.ok(retry, 'the failed reply must offer a retry');
+        const send = assistant.send.bind(assistant);
+        let pending;
+        assistant.send = options => (pending = send(options));
+        retry.click();
+        await pending;
+        assert.deepEqual(requests[1], requests[0]);
+        assert.deepEqual(userMessages, ['给个提示']);
+        assert.equal(replies[1].innerHTML, '先枚举第一段的长度。');
+        assistant.inputEl.value = '再解释一下';
+        await assistant.send({ context: hintContext });
+        assert.deepEqual(requests[2].messages.map(message => message.role), ['system', 'user', 'assistant', 'user']);
+    });
+});
+
+test('mid-stream errors preserve partial text for display but never add it to history', async () => {
+    const requests = [];
+    await withAssistant(async (url, options) => {
+        requests.push(JSON.parse(options.body));
+        if (requests.length === 2) return Response.json({
+            choices: [{ message: { content: '完整回复' }, finish_reason: 'stop' }],
+        });
+        return new Response('data: {"choices":[{"delta":{"content":"失败的部分回复"}}]}\n\n'
+            + `data: ${JSON.stringify({ error: upstreamError })}\n\n`);
+    }, async ({ assistant, replies }) => {
+        assistant.inputEl.value = '给个提示';
+        await assistant.send({ context: hintContext });
+        assert.equal(requests.length, 1);
+        assert.equal(replies[0].innerHTML, '失败的部分回复');
+        assert.equal(replies[0].codeOptions.allowApply, false);
+        assert.equal(replies[0].children[0].textContent, busyMessage);
+        assistant.inputEl.value = '换个提示';
+        await assistant.send({ context: hintContext });
+        assert.deepEqual(requests[1].messages.map(message => message.role), ['system', 'user']);
+        assert.doesNotMatch(JSON.stringify(requests[1]), /失败的部分回复|给个提示/);
+        assistant.inputEl.value = '继续';
+        await assistant.send({ context: hintContext });
+        assert.deepEqual(requests[2].messages.map(message => message.role), ['system', 'user', 'assistant', 'user']);
+        assert.equal(requests[2].messages[2].content, '完整回复');
+    });
+});
+
+test('only temporary service failures offer explicit retry in SSE, JSON, and HTTP errors', async () => {
+    for (const [detail, retryable] of [
+        [upstreamError, true],
+        [{ type: 'overloaded', message: 'PRIVATE_DETAIL' }, true],
+        [{ type: 'server_error', message: 'PRIVATE_DETAIL' }, true],
+        [{ type: 'authentication_error', message: 'overloaded PRIVATE_KEY' }, false],
+        [{ code: 'invalid_api_key', message: 'PRIVATE_KEY' }, false],
+        [{ type: 'invalid_request_error', message: 'PRIVATE_PARAMETER' }, false],
+        [{ code: 400, message: 'PRIVATE_PARAMETER' }, false],
+        [{ type: 'unknown_error', message: 'PRIVATE_DETAIL' }, false],
+    ]) {
+        for (const format of ['sse', 'json']) {
+            let requests = 0;
+            await withAssistant(async () => {
+                requests += 1;
+                return format === 'json' ? Response.json({ error: detail })
+                    : new Response(`data: ${JSON.stringify({ error: detail })}\n\n`);
+            }, async ({ assistant, replies }) => {
+                assistant.inputEl.value = '给个提示';
+                await assistant.send({ context: hintContext });
+                assert.equal(requests, 1, 'never retry automatically');
+                assert.doesNotMatch(replies[0].children[0].textContent, /PRIVATE_|Our servers/);
+                assert.equal(replies[0].children.some(element => element.textContent === '重新生成'), retryable,
+                    `${JSON.stringify(detail)}, ${format}`);
+            });
+        }
+    }
+    for (const status of [400, 401, 403, 408, 429, 500, 503]) {
+        let requests = 0;
+        await withAssistant(async () => {
+            requests += 1;
+            return new Response('PRIVATE_DETAIL', { status });
+        }, async ({ assistant, replies }) => {
+            assistant.inputEl.value = '给个提示';
+            await assistant.send({ context: hintContext });
+            assert.equal(requests, 1);
+            assert.doesNotMatch(replies[0].children[0].textContent, /PRIVATE_/);
+            assert.equal(replies[0].children.some(element => element.textContent === '重新生成'),
+                [408, 429, 500, 503].includes(status), `HTTP ${status}`);
+        });
+    }
+});
+
+test('JSON completion preserves a plain text hint when a service does not stream', async () => {
+    const hint = '先考虑每一段最多可以取几位数字，再判断剩余长度。';
+    const chunks = await readCompletion(Response.json({
+        object: 'chat.completion',
+        choices: [{ message: { role: 'assistant', content: hint }, finish_reason: 'stop' }],
+    }));
+    assert.deepEqual(chunks, [hint]);
+});
+
+test('HTTP 200 SSE error after the role event is reported instead of an empty reply', async () => {
+    // Live LC93 failure: one role chunk, one error, no content/finish_reason/[DONE].
+    assert.deepEqual(upstreamError, {
+        type: 'upstream_error', message: 'Our servers are currently overloaded. Please try again later.',
+    });
+    const body = 'data: {"choices":[{"delta":{"role":"assistant"}}]}\n\n'
+        + `data: ${JSON.stringify({ error: upstreamError })}\n\n`;
+    await assert.rejects(readCompletion(new Response(body, {
+        headers: { 'Content-Type': 'text/event-stream' },
+    })), { message: busyMessage });
+});
+
+test('HTTP 200 JSON service errors use a fixed safe Chinese message', async () => {
+    await assert.rejects(readCompletion(Response.json({
+        error: upstreamError,
+    })), { message: busyMessage });
+});
+
+test('abnormal finish reasons report incomplete or unavailable answers in SSE and JSON', async () => {
+    for (const [reason, message] of [
+        ['length', /输出上限/], ['content_filter', /内容过滤/], ['tool_calls', /工具调用/],
+    ]) {
+        for (const json of [false, true]) {
+            const choice = { [json ? 'message' : 'delta']: { content: '部分回复' }, finish_reason: reason };
+            const response = json ? Response.json({ choices: [choice] }) : new Response(
+                `data: ${JSON.stringify({ choices: [choice] })}\n\ndata: [DONE]\n\n`
+            );
+            await assert.rejects(readCompletion(response), message, `${reason}, JSON=${json}`);
+        }
+    }
+});
+
+test('reasoning-only and empty completions fail without exposing reasoning as an answer', async () => {
+    for (const reasoning of ['', 'PRIVATE_REASONING_MUST_NOT_APPEAR']) {
+        for (const json of [false, true]) {
+            const choice = { [json ? 'message' : 'delta']: { content: ' ', reasoning_content: reasoning }, finish_reason: 'stop' };
+            const response = json ? Response.json({ choices: [choice] }) : new Response(
+                `data: ${JSON.stringify({ choices: [choice] })}\n\ndata: [DONE]\n\n`
+            );
+            await assert.rejects(readCompletion(response), error => {
+                assert.match(error.message, /未返回.*答案|没有生成.*答案/);
+                assert.doesNotMatch(error.message, /PRIVATE_REASONING/);
+                return true;
+            });
+        }
+    }
+});
+
+test('SSE byte chunks preserve a hint and code while ignoring reasoning, usage, and data after DONE', async () => {
+    const hint = '每段枚举 1 到 3 位。';
+    const code = '\n```python\ndef restore_ip_addresses(s):\n    return []\n```';
+    const body = ': keepalive\r\n\r\n'
+        + 'data: {"choices":[{"delta":{"role":"assistant","reasoning_content":"PRIVATE_REASONING"}}]}\r\n\r\n'
+        + `data: ${JSON.stringify({ choices: [{ delta: { content: hint } }] })}\r\n\r\n`
+        + `data: ${JSON.stringify({ choices: [{ delta: { content: code }, finish_reason: 'stop' }] })}\r\n\r\n`
+        + 'data: {"choices":[],"usage":{"completion_tokens":20}}\r\n\r\n'
+        + 'data: [DONE]\r\n\r\ndata: {"choices":[{"delta":{"content":"IGNORE"}}]}\r\n';
+    const bytes = new TextEncoder().encode(body);
+    const response = new Response(new ReadableStream({
+        start(controller) {
+            for (const byte of bytes) controller.enqueue(Uint8Array.of(byte));
+            controller.close();
+        },
+    }), { headers: { 'Content-Type': 'text/event-stream' } });
+    assert.deepEqual(await readCompletion(response), [hint, code]);
+    assert.equal(response.body.locked, false);
+});
+
+test('JSON code replies preserve the original fenced code for LeetCode validation', async () => {
+    const code = '```python\ndef restore_ip_addresses(s):\n    return []\n```';
+    const chunks = await readCompletion(Response.json({
+        choices: [{ message: { content: code, reasoning_content: 'PRIVATE_REASONING' }, finish_reason: 'stop' }],
+    }));
+    assert.deepEqual(chunks, [code]);
+    assert.equal(validateAssistantResponse(chunks.join(''), 'python', hintContext.template, 'leetcode').valid, true);
+});
+
+test('SSE tail errors release the reader and retain an actionable error', async () => {
+    const response = new Response(`data: ${JSON.stringify({ error: upstreamError })}`);
+    await assert.rejects(readCompletion(response), { message: busyMessage });
+    assert.equal(response.body.locked, false);
+});
+
+test('HTTP errors keep their status without exposing service details', async () => {
+    for (const status of [401, 429, 500]) {
+        await assert.rejects(readCompletion(Response.json({ error: { message: 'Request failed' } }, { status })),
+            error => {
+                assert.match(error.message, new RegExp(`API 请求失败 \\(${status}\\)`));
+                assert.doesNotMatch(error.message, /Request failed/);
+                return true;
+            });
+    }
+});
+
+test('ending consumption early cancels and unlocks the SSE reader', async () => {
+    let cancelled = false;
+    const response = new Response(new ReadableStream({
+        start(controller) {
+            controller.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"提示"}}]}\n\n'));
+        },
+        cancel() { cancelled = true; },
+    }));
+    await withBrowserGlobals({ fetch: async () => response }, async () => {
+        for await (const chunk of streamChatCompletion([], {
+            baseUrl: 'https://example.test/v1', apiKey: 'test-key', model: 'test-model',
+        })) {
+            assert.equal(chunk, '提示');
+            break;
+        }
+    });
+    assert.equal(cancelled, true);
+    assert.equal(response.body.locked, false);
+});
+
+test('stopping a partial SSE reply preserves text and disables applying incomplete code', async () => {
+    let stopped = false;
+    await withAssistant(async (url, options) => new Response(new ReadableStream({
+        start(controller) {
+            controller.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"部分提示"}}]}\n\n'));
+            options.signal.addEventListener('abort', () => {
+                stopped = true;
+                controller.error(new DOMException('Stopped', 'AbortError'));
+            });
+        },
+    })), async ({ assistant, replies }) => {
+        assistant.renderMarkdown = text => { assistant.stopStreaming(); return text; };
+        assistant.inputEl.value = '给个提示';
+        await assistant.send({ context: hintContext });
+        assert.equal(stopped, true);
+        assert.equal(replies[0].innerHTML, '部分提示');
+        assert.equal(replies[0].codeOptions.allowApply, false);
+        assert.equal(assistant.liveStatus.textContent, '已停止生成，保留当前回复');
+        assert.equal(assistant.isStreaming, false);
+    });
+});
+
+test('a length-limited code reply keeps the last delta but cannot be applied as complete code', async () => {
+    const code = '```python\ndef restore_ip_addresses(s):\n';
+    await withAssistant(async () => new Response(
+        `data: ${JSON.stringify({ choices: [{ delta: { content: code }, finish_reason: 'length' }] })}`
+    ), async ({ assistant, replies }) => {
+        assistant.inputEl.value = getQuickActionPrompt('give-code', hintContext);
+        await assistant.send({ context: hintContext });
+        assert.equal(replies[0].innerHTML, code);
+        assert.equal(replies[0].codeOptions.allowApply, false);
+        assert.match(replies[0].children[0].textContent, /输出上限/);
+        assert.equal(assistant.liveStatus.textContent, 'AI 请求失败，可重新生成');
+    });
 });
 
 test('stream parser preserves split UTF-8 and cancels after the done event', async () => {

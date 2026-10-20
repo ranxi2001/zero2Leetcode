@@ -1,0 +1,170 @@
+{
+  "sourceRevision": "34a0592",
+  "observedAt": "2026-10-20T07:35:40.110Z",
+  "context": "LC93 Python starter, fresh history per action",
+  "reports": [
+    {
+      "action": "give-hint",
+      "model": "gpt-6-luna",
+      "requestProtocol": "chat.completions",
+      "stream": true,
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 61709,
+      "eventTypes": {
+        "chat.completion.chunk": 256
+      },
+      "answerFields": [
+        "role",
+        "content"
+      ],
+      "finishReasons": [
+        "stop"
+      ],
+      "contentBytes": 905,
+      "reasoningBytes": 0,
+      "doneEvents": 1,
+      "parseErrors": 0,
+      "parsedContentBytes": 905,
+      "valid": true
+    },
+    {
+      "action": "explain-code",
+      "model": "gpt-6-luna",
+      "requestProtocol": "chat.completions",
+      "stream": true,
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 185473,
+      "eventTypes": {
+        "chat.completion.chunk": 769
+      },
+      "answerFields": [
+        "role",
+        "content"
+      ],
+      "finishReasons": [
+        "stop"
+      ],
+      "contentBytes": 2967,
+      "reasoningBytes": 0,
+      "doneEvents": 1,
+      "parseErrors": 0,
+      "parsedContentBytes": 2967,
+      "valid": true
+    },
+    {
+      "action": "give-code",
+      "model": "gpt-6-luna",
+      "requestProtocol": "chat.completions",
+      "stream": true,
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 168958,
+      "eventTypes": {
+        "chat.completion.chunk": 701
+      },
+      "answerFields": [
+        "role",
+        "content"
+      ],
+      "finishReasons": [
+        "stop"
+      ],
+      "contentBytes": 2601,
+      "reasoningBytes": 0,
+      "doneEvents": 1,
+      "parseErrors": 0,
+      "parsedContentBytes": 2601,
+      "valid": true
+    },
+    {
+      "scenario": "repeated-user-only-hints",
+      "model": "gpt-6-luna",
+      "stream": true,
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 360,
+      "eventTypes": {
+        "chat.completion.chunk": 1,
+        "error": 1
+      },
+      "answerFields": [
+        "role"
+      ],
+      "finishReasons": [],
+      "contentBytes": 0,
+      "reasoningBytes": 0,
+      "doneEvents": 0,
+      "parsedContentBytes": 0,
+      "valid": false
+    },
+    {
+      "scenario": "literal-hint",
+      "model": "gpt-6-luna",
+      "stream": true,
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 69627,
+      "eventTypes": {
+        "chat.completion.chunk": 289
+      },
+      "answerFields": [
+        "role",
+        "content"
+      ],
+      "finishReasons": [
+        "stop"
+      ],
+      "contentBytes": 997,
+      "reasoningBytes": 0,
+      "doneEvents": 1,
+      "parsedContentBytes": 997,
+      "valid": true
+    },
+    {
+      "scenario": "repeated-user-only-hints-confirmation",
+      "userTurns": 2,
+      "model": "gpt-6-luna",
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 360,
+      "contentBytes": 0,
+      "eventTypes": {
+        "chat.completion.chunk": 1,
+        "error": 1
+      },
+      "finishReasons": [],
+      "errors": [
+        {
+          "type": "upstream_error",
+          "message": "Our servers are currently overloaded. Please try again later.",
+          "messageBytes": 61,
+          "category": "upstream_service"
+        }
+      ]
+    },
+    {
+      "scenario": "repeated-user-only-hints-confirmation",
+      "userTurns": 3,
+      "model": "gpt-6-luna",
+      "status": 200,
+      "contentType": "text/event-stream",
+      "responseBytes": 360,
+      "contentBytes": 0,
+      "eventTypes": {
+        "chat.completion.chunk": 1,
+        "error": 1
+      },
+      "finishReasons": [],
+      "errors": [
+        {
+          "type": "upstream_error",
+          "message": "Our servers are currently overloaded. Please try again later.",
+          "messageBytes": 61,
+          "category": "upstream_service"
+        }
+      ]
+    }
+  ]
+}
