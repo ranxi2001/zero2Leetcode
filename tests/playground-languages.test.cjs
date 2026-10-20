@@ -118,7 +118,7 @@ test('all locally executable problems produce Java and Go core templates', () =>
     const support = context.window.LEETCODE_LANGUAGE_SUPPORT;
     const executable = getProblems(context).filter((problem) => problem.testCases?.length);
 
-    assert.equal(executable.length, 118);
+    assert.equal(executable.length, 121);
     for (const problem of executable) {
         const signature = support.parseProblemSignature(problem);
         assert.ok(signature, `LC ${problem.id} should expose a typed core signature`);

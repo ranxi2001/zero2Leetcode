@@ -227,6 +227,203 @@ permalink: /05_interview/coding/huawei/
 
 ---
 
+<a id="attachment-top20"></a>
+
+## 附件 TOP20 对照（独立统计）
+
+来源：用户提供的《华为手撕题TOP20.xlsx》，工作表标题为“华为正式岗面试手撕算法题 TOP20（基于1148篇面经统计）”。附件基于 **1148 篇面经**，剔除 **OD、机考、笔试**，仅统计面试现场手撕；共 **89 道题、639 次记录**，以下 TOP20 合计 **323 次**。
+
+这份附件与上文 **6139 篇 / 累计 646 次**是独立口径，样本是否重叠未知，频次**不相加、不覆盖**。原 38 题分类表、原频次和历史快排 5 次记录保持原口径。附件中 18 道 LC 题已有练习入口；本次补充 LC179 和无 LC 题号的手写快速排序讲解，不受原 38 题范围限制。
+
+| 排名 | LC 题号 | 题目 | 附件频次 | 练习 / 讲解入口 |
+|------|---------|------|----------|-----------------|
+| 1 | LC 200 | 岛屿数量 | 36次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=200) |
+| 2 | LC 3 | 无重复字符的最长子串 | 34次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=3) |
+| 3 | — | 手写快速排序 | 27次 | [原地三路快排讲解](#handwritten-quicksort)，无 LC 题号 |
+| 4 | LC 20 | 有效的括号 | 25次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=20) |
+| 5 | LC 146 | LRU 缓存 | 20次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=146) |
+| 6 | LC 56 | 合并区间 | 18次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=56) |
+| 7 | LC 42 | 接雨水 | 15次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=42) |
+| 8 | LC 15 | 三数之和 | 14次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=15) |
+| 9 | LC 215 | 数组中的第 K 个最大元素 | 13次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=215)；[快速选择 + 堆双解](#lc215-two-methods) |
+| 10 | LC 102 | 二叉树的层序遍历 | 13次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=102) |
+| 11 | LC 70 | 爬楼梯 | 13次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=70) |
+| 12 | LC 394 | 字符串解码 | 12次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=394) |
+| 13 | LC 1 | 两数之和 | 11次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=1) |
+| 14 | LC 739 | 每日温度 | 11次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=739) |
+| 15 | LC 206 | 反转链表 | 11次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=206) |
+| 16 | LC 11 | 盛最多水的容器 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=11) |
+| 17 | LC 179 | 最大数 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=179)；[拼接比较题解](#lc179-largest-number) |
+| 18 | LC 53 | 最大子数组和 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=53) |
+| 19 | LC 21 | 合并两个有序链表 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=21) |
+| 20 | LC 46 | 全排列 | 10次 | [练习](https://onefly.top/zero2Leetcode/playground.html?id=46) |
+
+<a id="handwritten-quicksort"></a>
+
+### 手写快速排序：随机枢轴 + 原地三路划分
+
+任务是将数组按非降序排列。例如 `[3,1,3,2]` 排序后为 `[1,2,3,3]`。这是基础算法手撕，没有 LC 题号。面试时应能解释划分过程、递归边界、重复值和最坏复杂度。
+
+每轮随机选择枢轴，将当前区间划为小于、等于、大于枢轴三段。扫描时维护 `[left, lt)` 小于枢轴、`[lt, i)` 等于枢轴、`(gt, right]` 大于枢轴；`[i, gt]` 待处理。从右侧换来的元素尚未判断，必须保留 `i` 继续检查。等值段无需再排序，全相等输入也只需一次扫描。
+
+下面只递归较短的一侧，较长一侧用循环处理，避免有序大数组触发线性深度的递归栈。
+
+```python
+from random import randint
+
+
+def quick_sort(nums):
+    def sort(left, right):
+        while left < right:
+            pivot = nums[randint(left, right)]
+            lt = i = left
+            gt = right
+            while i <= gt:
+                if nums[i] < pivot:
+                    nums[lt], nums[i] = nums[i], nums[lt]
+                    lt += 1
+                    i += 1
+                elif nums[i] > pivot:
+                    nums[i], nums[gt] = nums[gt], nums[i]
+                    gt -= 1
+                else:
+                    i += 1
+            if lt - left < right - gt:
+                sort(left, lt - 1)
+                left = gt + 1
+            else:
+                sort(gt + 1, right)
+                right = lt - 1
+
+    sort(0, len(nums) - 1)
+```
+
+期望时间 **O(n log n)**，最坏仍为 **O(n²)**；每层只递归短区间，辅助栈空间上界 **O(log n)**。算法原地修改数组，不稳定；空数组、单元素、负数与重复值都适用。随机化降低退化概率，不能宣称消除了最坏情况。
+
+<a id="lc215-two-methods"></a>
+
+### LC215：快速选择和堆都要准备
+
+[练习入口](https://onefly.top/zero2Leetcode/playground.html?id=215)。第 K 大按排序位置计数，不去重，例如 `[3,2,3,1]` 中第 2 大仍是 `3`，且 `1 <= k <= len(nums)`。
+
+**快速选择**：目标是升序下标 `len(nums)-k`。三路划分后，若目标落在等值段就返回，否则只保留目标所在的一侧。这一步与完整快排的区别在于只处理一个子区间。
+
+```python
+from random import randint
+
+
+def find_kth_largest_quickselect(nums, k):
+    target = len(nums) - k
+    left, right = 0, len(nums) - 1
+    while left <= right:
+        pivot = nums[randint(left, right)]
+        lt = i = left
+        gt = right
+        while i <= gt:
+            if nums[i] < pivot:
+                nums[lt], nums[i] = nums[i], nums[lt]
+                lt += 1
+                i += 1
+            elif nums[i] > pivot:
+                nums[i], nums[gt] = nums[gt], nums[i]
+                gt -= 1
+            else:
+                i += 1
+        if target < lt:
+            right = lt - 1
+        elif target > gt:
+            left = gt + 1
+        else:
+            return nums[target]
+```
+
+期望时间 **O(n)**，最坏 **O(n²)**，额外空间 **O(1)**，会修改输入数组。
+
+**大小为 K 的最小堆**：堆中始终保留已扫描元素中最大的 K 个，堆顶就是它们中最小的数。新元素比堆顶大时才替换，扫描结束后堆顶为全局第 K 大。
+
+```python
+import heapq
+
+
+def find_kth_largest_heap(nums, k):
+    heap = nums[:k]
+    heapq.heapify(heap)
+    for i in range(k, len(nums)):
+        if nums[i] > heap[0]:
+            heapq.heapreplace(heap, nums[i])
+    return heap[0]
+```
+
+建堆 **O(k)**，后续维护 **O((n-k) log k)**，整体可写作 **O(n log(k+1))**，额外空间 **O(k)**；不修改输入，也适合流式数据。要点是最小堆保留最大 K 个，不能把堆的方向写反。
+
+<a id="lc179-largest-number"></a>
+
+### LC179 最大数：比较拼接后的顺序
+
+[本地练习](https://onefly.top/zero2Leetcode/playground.html?id=179) · [原题与约束](https://leetcode.com/problems/largest-number/description/)
+
+给定非负整数数组，调整排列使拼接出的数字最大，返回字符串。例如 `[10,2]` 得到 `"210"`，`[3,30,34,5,9]` 得到 `"9534330"`。约束：`1 <= nums.length <= 100`，`0 <= nums[i] <= 10^9`。
+
+不能按整数大小或单个字符串的字典序排序。对于字符串 `a`、`b`，比较 `a+b` 和 `b+a`；若前者大，`a` 就应排在前面。例如 `"3"+"30" > "30"+"3"`，所以 `3` 在 `30` 前面。相邻交换不会改变其他位置的拼接，按这个比较器排列即可得到最大结果。比较结果相等时两种顺序等价。
+
+```python
+from functools import cmp_to_key
+
+
+def largest_number(nums):
+    def compare(a, b):
+        ab, ba = a + b, b + a
+        return (ba > ab) - (ba < ab)
+
+    parts = sorted(map(str, nums), key=cmp_to_key(compare))
+    return "0" if parts[0] == "0" else "".join(parts)
+```
+
+全零输入必须返回 `"0"`，不能返回 `"00"`。设元素最大位数为 L，时间 **O(n log n · L)**，空间 **O(nL)**，结果始终保留为字符串。
+
+<a id="lc451-frequency-sort"></a>
+
+### LC451 根据字符出现频率排序（原统计 8 次）
+
+[本地练习](https://onefly.top/zero2Leetcode/playground.html?id=451) · [原题与约束](https://leetcode.com/problems/sort-characters-by-frequency/description/)
+
+将字符串按字符出现频率从高到低重排，同一字符必须连续，同频字符可任意排列，大小写视为不同字符。例如 `"tree"` 可返回 `"eert"` 或 `"eetr"`；`"cccaaa"` 可返回 `"cccaaa"` 或 `"aaaccc"`，但 `"cacaca"` 不合法；`"Aabb"` 可返回 `"bbAa"`。约束：`1 <= s.length <= 5*10^5`，仅含大小写英文字母和数字。
+
+先用哈希表计数，再按频率排序不同字符，最后一次性拼接各字符块。不要逐字符反复拼接不可变字符串。
+
+```python
+from collections import Counter
+
+
+def frequency_sort(s):
+    counts = Counter(s)
+    return "".join(c * counts[c] for c in sorted(counts, key=counts.get, reverse=True))
+```
+
+设长度为 n、不同字符数为 m，时间 **O(n + m log m)**，包含返回字符串的空间为 **O(n + m)**。也可按频率建桶，将排序部分降为线性扫描。本地判题验证原字符多重集、同字符分组连续、组频率非升序，不固定比较某一个答案字符串。
+
+<a id="lc406-reconstruct-queue"></a>
+
+### LC406 根据身高重建队列（原统计 5 次）
+
+[本地练习](https://onefly.top/zero2Leetcode/playground.html?id=406) · [原题与约束](https://leetcode.com/problems/queue-reconstruction-by-height/description/)
+
+每个人用 `[h,k]` 表示，`h` 为身高，`k` 是队列前方身高**大于等于 h**的人数。给定打乱顺序的人员数组，返回符合条件的队列。例如 `[[7,0],[4,4],[7,1],[5,0],[6,1],[5,2]]` 可还原为 `[[5,0],[7,0],[5,2],[6,1],[4,4],[7,1]]`；`[[6,0],[5,0],[4,0],[3,2],[2,2],[1,4]]` 可还原为 `[[4,0],[5,0],[2,2],[3,2],[1,4],[6,0]]`。约束：`1 <= people.length <= 2000`，每项恰有两个整数，`0 <= h <= 10^6`，`0 <= k < people.length`，保证存在解。
+
+按身高降序，同身高按 k 升序处理。插入当前人时，已处理的人都不矮于他，因此在下标 k 插入，前方恰有 k 个满足条件的人。同高者须按 k 升序，否则可能在队列还不够长时插入，破坏计数。后来插入的矮个子不会影响已放置高个子的约束。
+
+```python
+def reconstruct_queue(people):
+    queue = []
+    for person in sorted(people, key=lambda p: (-p[0], p[1])):
+        queue.insert(person[1], person)
+    return queue
+```
+
+排序 **O(n log n)**，列表插入累计 **O(n²)**，整体时间 **O(n²)**，空间 **O(n)**。本地判题先核对输出与输入的人员多重集，再逐人计算前方身高大于等于其身高的人数；不会通过忽略顺序的排序比较来验收。
+
+---
+
 ## 华为特色：追问文化
 
 华为面试与字节、腾讯最大的差异在于**追问**。字节通常是一道题写完再出第二道，华为面试官喜欢在同一道题上反复追问：

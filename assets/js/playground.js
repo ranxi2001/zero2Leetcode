@@ -2377,7 +2377,7 @@ function renderTestResult(problem, testCase, index, actual, error = '', elapsed 
         return { element: div, passed: false };
     }
 
-    const passed = compareResults(actual, testCase.expected, problem.compareFunc);
+    const passed = compareResults(actual, testCase.expected, problem.compareFunc, testCase.input);
     const time = elapsed ? `<span class="test-time">${elapsed} ms</span>` : '';
     div.className = `test-case ${passed ? 'pass' : 'fail'}`;
     div.innerHTML = `
@@ -2416,7 +2416,50 @@ function toJS(pyVal) {
     return pyVal;
 }
 
-function compareResults(actual, expected, mode) {
+function compareResults(actual, expected, mode, inputs = []) {
+    // Judge against the original inputs: example outputs are only illustrative
+    // for problems that accept more than one valid result, in every language.
+    if (mode === 'frequency_sort') {
+        const source = inputs[0];
+        if (typeof actual !== 'string' || typeof source !== 'string' || actual.length !== source.length) return false;
+        const counts = new Map();
+        for (const character of source) counts.set(character, (counts.get(character) || 0) + 1);
+        const seen = new Set();
+        let previousFrequency = Infinity;
+        for (let i = 0; i < actual.length;) {
+            const character = actual[i];
+            if (!counts.has(character) || seen.has(character)) return false;
+            let end = i + 1;
+            while (end < actual.length && actual[end] === character) end++;
+            const frequency = end - i;
+            if (frequency !== counts.get(character) || frequency > previousFrequency) return false;
+            seen.add(character);
+            previousFrequency = frequency;
+            i = end;
+        }
+        return seen.size === counts.size;
+    }
+    if (mode === 'reconstruct_queue') {
+        const people = inputs[0];
+        const isPerson = person => Array.isArray(person) && person.length === 2 && person.every(Number.isInteger);
+        if (!Array.isArray(actual) || !Array.isArray(people) || actual.length !== people.length
+            || !actual.every(isPerson) || !people.every(isPerson)) return false;
+        const remaining = new Map();
+        for (const person of people) {
+            const key = JSON.stringify(person);
+            remaining.set(key, (remaining.get(key) || 0) + 1);
+        }
+        for (let i = 0; i < actual.length; i++) {
+            const [height, ahead] = actual[i];
+            const key = JSON.stringify(actual[i]);
+            if (!remaining.get(key)) return false;
+            remaining.set(key, remaining.get(key) - 1);
+            let count = 0;
+            for (let j = 0; j < i; j++) if (actual[j][0] >= height) count++;
+            if (count !== ahead) return false;
+        }
+        return true;
+    }
     if (mode === 'sorted') {
         if (!Array.isArray(actual) || !Array.isArray(expected)) return false;
         return JSON.stringify([...actual].sort()) === JSON.stringify([...expected].sort());

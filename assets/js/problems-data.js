@@ -8,6 +8,7 @@ const PROBLEMS_DATA = [
     { id: 1, title: "两数之和", difficulty: "easy", category: "hash", url: "https://leetcode.cn/problems/two-sum/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19718436" },
     { id: 49, title: "字母异位词分组", difficulty: "medium", category: "hash", url: "https://leetcode.cn/problems/group-anagrams/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19766917" },
     { id: 128, title: "最长连续序列", difficulty: "medium", category: "hash", url: "https://leetcode.cn/problems/longest-consecutive-sequence/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19766918" },
+    { id: 451, title: "根据字符出现频率排序", difficulty: "medium", category: "hash", url: "https://leetcode.cn/problems/sort-characters-by-frequency/", blogUrl: "./05_interview/coding/huawei/#lc451-frequency-sort" },
 
     // 双指针
     { id: 283, title: "移动零", difficulty: "easy", category: "two-pointers", url: "https://leetcode.cn/problems/move-zeroes/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19736398" },
@@ -115,6 +116,8 @@ const PROBLEMS_DATA = [
     { id: 72, title: "编辑距离", difficulty: "medium", category: "dp", url: "https://leetcode.cn/problems/edit-distance/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19778836.html" },
 
     // 贪心
+    { id: 406, title: "根据身高重建队列", difficulty: "medium", category: "greedy", url: "https://leetcode.cn/problems/queue-reconstruction-by-height/", blogUrl: "./05_interview/coding/huawei/#lc406-reconstruct-queue" },
+    { id: 179, title: "最大数", difficulty: "medium", category: "greedy", url: "https://leetcode.cn/problems/largest-number/", blogUrl: "./05_interview/coding/huawei/#lc179-largest-number" },
     { id: 121, title: "买卖股票的最佳时机", difficulty: "easy", category: "greedy", url: "https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19727110" },
     { id: 122, title: "买卖股票的最佳时机 II", difficulty: "medium", category: "greedy", url: "https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/" },
     { id: 55, title: "跳跃游戏", difficulty: "medium", category: "greedy", url: "https://leetcode.cn/problems/jump-game/", blogUrl: "https://www.cnblogs.com/ranxi169/p/19778837.html" },
