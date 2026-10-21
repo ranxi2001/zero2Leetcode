@@ -134,3 +134,29 @@ The answers updated from the October 7–13 interview review were independently 
 - [OAuth 2.0 安全最佳实践](https://www.rfc-editor.org/rfc/rfc9700)
 
 No upstream prose, code, diagrams, or datasets are reproduced. Interview links establish question provenance; the linked specifications, papers, and official implementations establish answer facts. Architecture, testing, deployment, and evaluation recommendations are independent engineering analysis.
+
+
+## Interview Answer References (2026-10-22)
+
+The October 13–22 question-bank update independently explains mechanisms and engineering tradeoffs using these primary references:
+
+- [NIST ABAC 指南](https://csrc.nist.gov/pubs/sp/800/162/upd2/final)
+- [MySQL 文档](https://dev.mysql.com/doc/refman/8.4/en/explain-output.html)
+- [JLS 对象创建过程](https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5)
+- [Java 方法调用规范](https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12)
+- [Spring Boot 启动跟踪文档](https://docs.spring.io/spring-boot/reference/features/spring-application.html#features.spring-application.startup-tracking)
+- [FastAPI ASGI Server 文档](https://fastapi.tiangolo.com/deployment/manually/)
+- [Google Benchmark 指南](https://github.com/google/benchmark/blob/main/docs/user_guide.md)
+- [React Hooks 当前实现](https://github.com/react/react/blob/main/packages/react-reconciler/src/ReactFiberHooks.js)
+- [HTML Shared Workers 规范](https://html.spec.whatwg.org/multipage/workers.html#shared-workers-introduction)
+- [C++ Core Guidelines RAII](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rr-raii)
+- [Linux wait/waitpid 手册](https://man7.org/linux/man-pages/man2/waitpid.2.html)
+- [Playwright 自动等待](https://playwright.dev/docs/actionability)
+- [React Hooks 调用规则](https://react.dev/reference/eslint-plugin-react-hooks/lints/rules-of-hooks)
+- [Redis EXPIRE 文档](https://redis.io/docs/latest/commands/expire/)
+- [Uvicorn 部署文档](https://uvicorn.dev/deployment/)
+- [Chromium 多进程架构](https://www.chromium.org/developers/design-documents/multi-process-architecture/)
+- [Electron Process Model](https://www.electronjs.org/docs/latest/tutorial/process-model)
+- [UDP RFC 768](https://www.rfc-editor.org/info/rfc768/)
+
+Interview links in the articles establish question provenance. These references establish specific answer facts; deployment, evaluation, and testing recommendations are independent engineering analysis. No upstream article, source code, figure, or dataset is reproduced.
