@@ -208,3 +208,18 @@ The October 22–November 7 question-bank update independently explains mechanis
 - [TCP关闭连接规范](https://www.rfc-editor.org/rfc/rfc9293.html#section-3.6)
 
 Interview links in the articles establish question provenance. These references establish specific answer facts; deployment, evaluation, and testing recommendations are independent engineering analysis. No upstream article, source code, figure, or dataset is reproduced.
+
+## Interview Answer References (2026-11-15)
+
+The 2026-11-07 to 2026-11-15 interview update uses these primary references for independently written explanations:
+
+- [Python str 文档](https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str)
+- [官方文档](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+- [Redis 官方说明](https://redis.io/docs/latest/develop/pubsub/keyspace-notifications/)
+- [refresh](https://www.elastic.co/docs/manage-data/data-store/near-real-time-search)
+- [Translog Settings](https://www.elastic.co/docs/reference/elasticsearch/index-settings/translog)
+- [Search with Elasticsearch](https://www.elastic.co/docs/solutions/search)
+- [内核文档](https://www.kernel.org/doc/html/latest/admin-guide/mm/numa_memory_policy.html)
+- [RabbitMQ Publisher Confirms](https://www.rabbitmq.com/docs/publishers)
+
+Interview links establish question provenance. Official references support specific technical mechanisms; deployment, evaluation and failure-handling recommendations are engineering analysis. No upstream article, figure or dataset is reproduced.
